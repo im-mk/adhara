@@ -1,0 +1,86 @@
+name: adhara-stack
+services:
+  api:
+    container_name: api
+    image: api
+    build:
+      context: .
+      dockerfile: api/Adhara.Api/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "8080:80"
+    networks:
+      - network1
+    depends_on:
+      db:
+        condition: service_healthy
+      liquibase:
+        condition: service_completed_successfully
+
+  db:
+    container_name: db
+    image: postgres
+    volumes:
+      # - db:/data/postgres # enable this line to persist data
+      - ./database/init:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGDATA: /data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - network1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  liquibase:
+    container_name: liquibase
+    image: liquibase/liquibase
+    # contexts: dev to seed data in dev environment
+    command: --defaultsFile=liquibase.properties --contexts=dev update
+    volumes:
+      - ./database/liquibase.properties:/liquibase/liquibase.properties
+      - ./database/changelog.yaml:/liquibase/changelog/changelog.yaml
+      - ./database/sql:/liquibase/changelog/sql
+      - ./database/seed:/liquibase/changelog/seed
+    environment:
+      - LIQUIBASE_COMMAND_URL=jdbc:postgresql://db:5432/${POSTGRES_DATABASE:-appdb}
+      - LIQUIBASE_COMMAND_USERNAME=${POSTGRES_USER:-postgres}
+      - LIQUIBASE_COMMAND_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    networks:
+      - network1
+    depends_on:
+      db:
+        condition: service_healthy
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-pgadmin}
+      PGADMIN_CONFIG_SERVER_MODE: "False" # required to mount the servers.json file
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False" # Avoid master password prompt
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - network1
+    restart: unless-stopped
+
+networks:
+  network1:
+    driver: bridge
+
+volumes:
+  db:
+  pgadmin:
