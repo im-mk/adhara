@@ -1,5 +1,7 @@
 export const getOrderName = async (orderId: number): Promise<string> => {
-    const response = await fetch(`http://localhost:8080/orders/${orderId}`);
+  const apiUrl = process.env.REACT_APP_API_URL;
+  
+  const response = await fetch(`${apiUrl}/orders/${orderId}`);
   
     if (!response.ok) {
       throw new Error("Failed to fetch order");

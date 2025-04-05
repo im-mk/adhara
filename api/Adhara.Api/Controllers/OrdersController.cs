@@ -21,4 +21,11 @@ public class OrdersController : ControllerBase
         var result = await _ordersRepository.Get(orderId);
         return result != null ? Ok(result) : NotFound();
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll(DateOnly orderDate)
+    {
+        var result = await _ordersRepository.GetAll(orderDate);
+        return Ok(result);
+    }
 }

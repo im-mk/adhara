@@ -17,4 +17,16 @@ public class OrdersRepository : IOrdersRepository
     {
         return await _dbConnection.QuerySingleOrDefaultAsync<string>("SELECT order_number FROM public.orders WHERE id = @orderId", new { orderId });
     }
+
+    public async Task<IEnumerable<string>> GetAll(DateOnly orderDate)
+    {
+        var start = orderDate.ToDateTime(TimeOnly.MinValue);
+        var end = orderDate.AddDays(1).ToDateTime(TimeOnly.MinValue);
+
+        return await _dbConnection.QueryAsync<string>(
+        @"SELECT order_number 
+          FROM public.orders 
+          WHERE order_date >= @start AND order_date < @end",
+        new { start, end });
+    }
 }

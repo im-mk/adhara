@@ -1,11 +1,13 @@
-test:
+.PHONY: test-api build-api start stop
+
+build-api:
+	cd api && dotnet build
+
+test-api: build-api
 	cd api && dotnet test
 
-build:
-	cd api && dotnet build && dotnet test
-
-start:
-	make test && docker compose up -d --build
+start: test-api
+	docker compose up -d --build
 
 stop:	
 	docker compose stop

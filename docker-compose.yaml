@@ -19,6 +19,14 @@ services:
       liquibase:
         condition: service_completed_successfully
 
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    ports:
+      - "3000:80"
+
   db:
     container_name: db
     image: postgres
