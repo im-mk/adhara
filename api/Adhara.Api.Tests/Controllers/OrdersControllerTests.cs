@@ -4,6 +4,7 @@ using Adhara.Api.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 using System.Threading.Tasks;
+using Adhara.Api.Entities;
 
 namespace Adhara.Api.Tests.Controllers;
 
@@ -26,7 +27,7 @@ public class OrdersControllerTests
     {
         // Arrange
         var orderId = 1;
-        var expectedOrder = "OrderName";
+        var expectedOrder = new Order();
         _mockOrdersRepository
             .Setup(repo => repo.Get(orderId))
             .ReturnsAsync(expectedOrder);
@@ -46,7 +47,7 @@ public class OrdersControllerTests
         var orderId = 1;
         _mockOrdersRepository
             .Setup(repo => repo.Get(orderId))
-            .ReturnsAsync((string?)null);
+            .ReturnsAsync((Order?)null);
 
         // Act
         var result = await _controller.Get(orderId);

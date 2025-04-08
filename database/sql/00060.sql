@@ -8,8 +8,6 @@ CREATE TABLE IF NOT EXISTS public.customer_addresses
     customer_id INT NOT NULL,
     address_id INT NOT NULL,
     address_type VARCHAR(50) NOT NULL, -- e.g., 'Billing', 'Shipping'
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_customer_addresses_id PRIMARY KEY (id),
     CONSTRAINT fk_customer_addresses_customer_id FOREIGN KEY (customer_id)
         REFERENCES public.customers (id),

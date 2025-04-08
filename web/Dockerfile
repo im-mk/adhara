@@ -1,10 +1,10 @@
 # build
 FROM node:22-alpine AS build
 WORKDIR /app
-COPY ./web/package*.json ./
+COPY ./package*.json ./
 RUN npm install
 
-COPY ./web .
+COPY . .
 RUN npm run build
 
 # production

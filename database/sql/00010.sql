@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS public.order_statuses
     id SERIAL NOT NULL,
     status_name VARCHAR(50) NOT NULL,
     status_description VARCHAR(255),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_order_statuses_id PRIMARY KEY (id)
 );
 

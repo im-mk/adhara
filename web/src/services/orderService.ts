@@ -7,6 +7,6 @@ export const getOrderName = async (orderId: number): Promise<string> => {
       throw new Error("Failed to fetch order");
     }
   
-    const data = await response.text();
-    return data;
+    const data = await response.json();
+    return data.orderNumber;
   };

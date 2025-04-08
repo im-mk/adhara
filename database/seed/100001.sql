@@ -4,38 +4,43 @@
 --comment: insert data into order statues table
 
 INSERT INTO order_statuses
-    (status_name, status_description)
+    (id, status_name, status_description)
 VALUES
-    ('Pending', 'Order has been placed but not yet processed.'),
-    ('Processing', 'Order is currently being processed.'),
-    ('Shipped', 'Order has been shipped to the customer.'),
-    ('Delivered', 'Order has been delivered to the customer.'),
-    ('Cancelled', 'Order has been cancelled.'),
-    ('Returned', 'Order has been returned by the customer.');
+    (1, 'Pending', 'Order has been placed but not yet processed.'),
+    (2, 'Processing', 'Order is currently being processed.'),
+    (3, 'Shipped', 'Order has been shipped to the customer.'),
+    (4, 'Delivered', 'Order has been delivered to the customer.'),
+    (5, 'Cancelled', 'Order has been cancelled.'),
+    (6, 'Returned', 'Order has been returned by the customer.');
 
 -- Insert sample products
 INSERT INTO products
-    (product_name, product_description, category_id, price, stock_quantity)
+    (id, product_name, product_description)
 VALUES
-    ('Wireless Mouse', 'Ergonomic wireless mouse with a sleek design', 1, 29.99, 150),
-    ('Bluetooth Headphones', 'Over-ear Bluetooth headphones with noise cancellation', 2, 99.99, 80),
-    ('Smartphone Case', 'Slim-fit protective case for smartphones', 3, 14.99, 200),
-    ('Laptop Sleeve', 'Padded sleeve to protect your laptop from scratches and bumps', 3, 19.99, 120),
-    ('Mechanical Keyboard', 'RGB backlit mechanical keyboard with custom switches', 1, 129.99, 50);
+    (1, 'Wireless Mouse', 'Ergonomic wireless mouse with a sleek design'),
+    (2, 'Bluetooth Headphones', 'Over-ear Bluetooth headphones with noise cancellation'),
+    (3, 'Smartphone Case', 'Slim-fit protective case for smartphones'),
+    (4, 'Laptop Sleeve', 'Padded sleeve to protect your laptop from scratches and bumps'),
+    (5, 'Mechanical Keyboard', 'RGB backlit mechanical keyboard with custom switches');
 
 
 -- Insert sample customers
 INSERT INTO customers
-    (first_name, last_name)
+    (id, first_name, last_name)
 VALUES
-    ('John', 'Doe'),
-    ('Jane', 'Smith'),
-    ('Alice', 'Johnson'),
-    ('Bob', 'Brown'),
-    ('Charlie', 'Davis');
+    (1, 'John', 'Doe'),
+    (2, 'Jane', 'Smith'),
+    (3, 'Alice', 'Johnson'),
+    (4, 'Bob', 'Brown'),
+    (5, 'Charlie', 'Davis');
 
 INSERT INTO orders
     (
-    order_number, order_date, order_status_id, total_amount, currency, customer_id, payment_id, shipping_id, item_count, created_at, updated_at)
+    order_number, order_date, order_status_id, total_amount, customer_id)
 VALUES
-    ('A00001', NOW(), 1, 1.23, 'GBP', 1, 1, 1, 1, NOW(), NOW());
+    ('A00001', NOW(), 1, 1.23, 1),
+    ('A00002', NOW(), 2, 2.34, 2),
+    ('A00003', NOW(), 3, 3.45, 3),
+    ('A00004', NOW(), 4, 4.56, 4),
+    ('A00005', NOW(), 5, 5.67, 5);
+    

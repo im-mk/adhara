@@ -4,11 +4,12 @@ services:
     container_name: api
     image: api
     build:
-      context: .
-      dockerfile: api/Adhara.Api/Dockerfile
+      context: ./api
+      dockerfile: Adhara.Api/Dockerfile
     environment:
       - ASPNETCORE_URLS=http://+:80
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=appdb;Username=postgres;Password=postgres
     ports:
       - "8080:80"
     networks:
@@ -22,10 +23,12 @@ services:
   web:
     container_name: web
     build:
-      context: .
-      dockerfile: web/Dockerfile
+      context: ./web
+      dockerfile: Dockerfile
     ports:
       - "3000:80"
+    networks:
+      - network1
 
   db:
     container_name: db

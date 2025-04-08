@@ -1,6 +1,8 @@
 using System.Data;
 using Npgsql;
 using Adhara.Api.Repositories;
+using Dapper.FluentMap;
+using Adhara.Api.Entities.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +37,11 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
+});
+
+FluentMapper.Initialize(config =>
+{
+    config.AddMap(new OrderMap());
 });
 
 var app = builder.Build();
