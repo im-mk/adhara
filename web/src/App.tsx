@@ -1,9 +1,11 @@
 import React from 'react';
 import './App.css';
-import OrderDetails from './pages/OrderDetails';
+import OrderList from './pages/OrderList';
 
 function App() {
-  return <OrderDetails orderId={1} />;
+  return <div>
+    <OrderList />
+  </div>;
 }
 
 export default App;

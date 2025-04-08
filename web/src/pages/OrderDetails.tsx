@@ -1,7 +1,7 @@
 // src/pages/OrderDetails.tsx
 
 import React, { useEffect, useState } from "react";
-import { getOrderName } from "../services/orderService";
+import { getOrder } from "../services/orderService";
 
 const OrderDetails: React.FC<{ orderId: number }> = ({ orderId }) => {
     const [orderName, setOrderName] = useState<string | null>(null);
@@ -10,8 +10,8 @@ const OrderDetails: React.FC<{ orderId: number }> = ({ orderId }) => {
     useEffect(() => {
         const fetchOrder = async () => {
             try {
-                const name = await getOrderName(orderId);
-                setOrderName(name);
+                const name = await getOrder(orderId);
+                setOrderName(name.orderNumber);
             } catch (err) {
                 setError("Could not fetch order");
             }

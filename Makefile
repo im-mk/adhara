@@ -12,5 +12,8 @@ start: test-api
 start-db:
 	docker compose up -d --build db pgadmin liquibase
 
+start-api: test-api
+	docker compose up -d --build db pgadmin liquibase api
+
 stop:	
 	docker compose stop
