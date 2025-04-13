@@ -1,7 +1,8 @@
 // src/pages/OrderDetails.tsx
 
 import React, { useEffect, useState } from "react";
-import { getAllOrders, Order } from "../services/orderService";
+import { OrderApi } from "../api/OrderApi";
+import { Order } from "../api/Models/Order";
 import { Table, Modal, Button } from "antd";
 // import { useNavigate } from "react-router-dom";  // Updated to useNavigate
 import OrderDetails from "./OrderDetails"; // Make sure this is properly imported
@@ -11,30 +12,25 @@ const OrderList: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-    // const navigate = useNavigate();  // Using useNavigate instead of useHistory
 
     useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const ordersResponse = await getAllOrders("2025-04-07");
-                setOrders(ordersResponse);
-            } catch (err) {
-                setError("Could not fetch orders.");
-                console.error(err);  // Log the actual error for debugging
-            }
-        };
+        const orderApi = new OrderApi();
 
-        fetchOrders();
+        orderApi.getAllOrders(
+            "2025-04-07",
+            (orders) => {
+                setOrders(orders);
+            },
+            () => {
+                setError("Could not fetch order");
+            });
+
     }, []);
 
     if (error) return <div>{error}</div>;
     if (orders.length === 0) return <div>Loading...</div>;
 
     const handleOrderClick = (orderId: number) => {
-        // Navigate to the order details page
-        //navigate(`/order-details/${orderId}`);  // Use navigate to programmatically route
-
-        // Or, if you want to open it in a modal:
         setSelectedOrderId(orderId);
         setIsModalVisible(true);
     };
@@ -49,7 +45,7 @@ const OrderList: React.FC = () => {
             title: 'Order ID',  // Changed column title to 'Order ID'
             dataIndex: 'id',    // Using `id` as the dataIndex here
             key: 'id',
-            render: (id: number) => <a onClick={() => handleOrderClick(id)}>{id}</a>, // Passing id here
+            render: (id: number) => <Button type="link" onClick={() => handleOrderClick(id)}>{id}</Button>,
         },
         {
             title: 'Order Number',
@@ -72,10 +68,9 @@ const OrderList: React.FC = () => {
         <div>
             <Table dataSource={orders} columns={columns} rowKey="orderNumber" />
 
-            {/* Modal to display OrderDetails */}
             <Modal
                 title={`Order Details for Order #${selectedOrderId}`}
-                visible={isModalVisible}
+                open={isModalVisible}
                 onCancel={handleModalClose}
                 footer={[
                     <Button key="close" onClick={handleModalClose}>
@@ -83,7 +78,7 @@ const OrderList: React.FC = () => {
                     </Button>,
                 ]}
             >
-                {/* Assuming OrderDetails accepts orderId as a prop */}
+
                 {selectedOrderId && <OrderDetails orderId={selectedOrderId} />}
             </Modal>
         </div>

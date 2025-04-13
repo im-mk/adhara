@@ -2,8 +2,6 @@ using Moq;
 using Adhara.Api.Controllers;
 using Adhara.Api.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Xunit;
-using System.Threading.Tasks;
 using Adhara.Api.Entities;
 
 namespace Adhara.Api.Tests.Controllers;
@@ -36,7 +34,7 @@ public class OrdersControllerTests
         var result = await _controller.Get(orderId);
 
         // Assert
-        var actionResult = Assert.IsType<OkObjectResult>(result);
+        var actionResult = Assert.IsType<OkObjectResult>(result.Result);
         Assert.Equal(expectedOrder, actionResult.Value);
     }
 
@@ -47,12 +45,12 @@ public class OrdersControllerTests
         var orderId = 1;
         _mockOrdersRepository
             .Setup(repo => repo.Get(orderId))
-            .ReturnsAsync((Order?)null);
+            .ReturnsAsync(default(Order?));
 
         // Act
         var result = await _controller.Get(orderId);
 
         // Assert
-        Assert.IsType<NotFoundResult>(result);
+        Assert.IsType<NotFoundResult>(result.Result);
     }
 }

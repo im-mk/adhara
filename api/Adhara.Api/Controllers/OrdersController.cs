@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Adhara.Api.Repositories;
+using Adhara.Api.Entities;
 
 namespace Adhara.Api.Controllers;
 
@@ -16,14 +17,16 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("{orderId}")]
-    public async Task<IActionResult> Get(int orderId)
+    [EndpointName("GetOrderById")]
+    public async Task<ActionResult<Order>> Get(int orderId)
     {
         var result = await _ordersRepository.Get(orderId);
         return result != null ? Ok(result) : NotFound();
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(DateOnly orderDate)
+    [EndpointName("GetAllOrdersByDate")]
+    public async Task<ActionResult<IEnumerable<Order>>> GetAll(DateOnly orderDate)
     {
         var result = await _ordersRepository.GetAll(orderDate);
         return Ok(result);
