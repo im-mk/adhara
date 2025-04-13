@@ -6,7 +6,7 @@ export abstract class ApiClient {
 
   constructor() {
     // Read the API URL from the environment variable
-    this.apiUrl = process.env.REACT_APP_API_URL || '';
+    this.apiUrl = import.meta.env.VITE_API_URL || '';
   }
 
   /**
@@ -21,7 +21,7 @@ export abstract class ApiClient {
     endpoint: string,
     config: AxiosRequestConfig = {},
     onSuccess: (data: T) => void,
-    onError: (error: any) => void
+    onError: (error: unknown) => void
   ): Promise<void> {
     try {
       // Create the full URL and merge the config options
@@ -47,7 +47,7 @@ export abstract class ApiClient {
   public async get<T>(
     endpoint: string,
     onSuccess: (data: T) => void,
-    onError: (error: any) => void
+    onError: (error: unknown) => void
   ): Promise<void> {
     await this.request<T>(
       endpoint,
@@ -67,9 +67,9 @@ export abstract class ApiClient {
    */
   public async put<T>(
     endpoint: string,
-    data: any,
+    data: unknown,
     onSuccess: (data: T) => void,
-    onError: (error: any) => void
+    onError: (error: unknown) => void
   ): Promise<void> {
     await this.request<T>(
       endpoint,
@@ -89,9 +89,9 @@ export abstract class ApiClient {
    */
   public async update<T>(
     endpoint: string,
-    data: any,
+    data: unknown,
     onSuccess: (data: T) => void,
-    onError: (error: any) => void
+    onError: (error: unknown) => void
   ): Promise<void> {
     await this.request<T>(
       endpoint,
@@ -111,7 +111,7 @@ export abstract class ApiClient {
   public async delete<T>(
     endpoint: string,
     onSuccess: (data: T) => void,
-    onError: (error: any) => void
+    onError: (error: unknown) => void
   ): Promise<void> {
     await this.request<T>(
       endpoint,

@@ -1,11 +1,14 @@
-import React from 'react';
-import './App.css';
-import OrderList from './pages/OrderList';
+import './App.css'
+import OrderList from './pages/OrderList'
 
 function App() {
-  return <div>
+
+  return (
+
+
     <OrderList />
-  </div>;
+
+  )
 }
 
-export default App;
+export default App
