@@ -13,10 +13,7 @@ public class OrdersControllerTests
 
     public OrdersControllerTests()
     {
-        // Initialize the mock repository
         _mockOrdersRepository = new Mock<IOrdersRepository>();
-
-        // Initialize the controller with the mock repository
         _controller = new OrdersController(_mockOrdersRepository.Object);
     }
 
