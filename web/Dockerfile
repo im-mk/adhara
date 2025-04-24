@@ -1,5 +1,5 @@
 # build
-FROM node:22-alpine AS build
+FROM node:23-slim AS build
 WORKDIR /app
 COPY ./package*.json ./
 RUN npm install
