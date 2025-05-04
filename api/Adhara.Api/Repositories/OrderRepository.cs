@@ -20,10 +20,10 @@ public class OrdersRepository : IOrdersRepository
             "SELECT * FROM orders WHERE id = @orderId", new { orderId });
     }
 
-    public async Task<IEnumerable<Order>> GetAll(DateOnly orderDate)
+    public async Task<IEnumerable<Order>> GetAll(DateOnly startDate, DateOnly endDate)    
     {
-        var start = orderDate.ToDateTime(TimeOnly.MinValue);
-        var end = orderDate.AddDays(1).ToDateTime(TimeOnly.MinValue);
+        var start = startDate.ToDateTime(TimeOnly.MinValue);
+        var end = endDate.AddDays(1).ToDateTime(TimeOnly.MinValue);
 
         return await _dbConnection.QueryAsync<Order>(
         @"SELECT *

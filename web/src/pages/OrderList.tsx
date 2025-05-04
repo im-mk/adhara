@@ -1,11 +1,9 @@
-// src/pages/OrderDetails.tsx
-
 import React, { useEffect, useState } from "react";
-import { OrderApi } from "../api/OrderApi";
-import { Order } from "../api/Models/Order";
+
 import { Table, Modal, Button } from "antd";
-// import { useNavigate } from "react-router-dom";  // Updated to useNavigate
-import OrderDetails from "./OrderDetails"; // Make sure this is properly imported
+import OrderDetails from "./OrderDetails";
+import { Order, OrdersService } from "../api";
+
 
 const OrderList: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -13,22 +11,19 @@ const OrderList: React.FC = () => {
     const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
+    const fetchOrders = async () => {
+        try {
+            const orders = await OrdersService.getAll('2023-01-01', '2030-01-01');
+            setOrders(orders);
+        } catch {
+            setError("Could not fetch orders");
+        }
+    };
+
     useEffect(() => {
-        const orderApi = new OrderApi();
-
-        orderApi.getAllOrders(
-            "2025-04-07",
-            (orders) => {
-                setOrders(orders);
-            },
-            () => {
-                setError("Could not fetch order");
-            });
-
+        fetchOrders();
     }, []);
 
-    if (error) return <div>{error}</div>;
-    if (orders.length === 0) return <div>Loading...</div>;
 
     const handleOrderClick = (orderId: number) => {
         setSelectedOrderId(orderId);
@@ -66,6 +61,8 @@ const OrderList: React.FC = () => {
 
     return (
         <div>
+
+            {error && <div style={{ color: 'red' }}>{error}</div>}
             <Table dataSource={orders} columns={columns} rowKey="orderNumber" />
 
             <Modal

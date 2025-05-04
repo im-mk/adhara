@@ -25,10 +25,10 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    [EndpointName("GetAllOrdersByDate")]
-    public async Task<ActionResult<IEnumerable<Order>>> GetAll(DateOnly orderDate)
+    [EndpointName("GetAll")]
+    public async Task<ActionResult<IEnumerable<Order>>> GetAll([FromQuery]DateOnly startDate, [FromQuery]DateOnly endDate)    
     {
-        var result = await _ordersRepository.GetAll(orderDate);
+        var result = await _ordersRepository.GetAll(startDate, endDate);
         return Ok(result);
     }
 }
