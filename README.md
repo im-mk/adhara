@@ -4,9 +4,10 @@ React app with dotnet api and postgres database controller by liquibase.
 
 ## Required Software
 
-Visual Studio/Visual Studio Code
+IDE like Visual Studio Code
 Docker
 Dotnet sdk
+Node
 Make
 
 ## Run
