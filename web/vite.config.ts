@@ -11,6 +11,6 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, 'e2e/**'],
   },
   server: {
-    port: 3000
+    port: 8090
   },
 })

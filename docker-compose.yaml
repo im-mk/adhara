@@ -27,7 +27,7 @@ services:
       context: ./web
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "8090:80"
     networks:
       - network1
     restart: unless-stopped
@@ -43,7 +43,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       PGDATA: /data/postgres
     ports:
-      - "5432:5432"
+      - "5434:5432"
     networks:
       - network1
     restart: unless-stopped
