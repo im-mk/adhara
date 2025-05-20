@@ -1,7 +1,7 @@
 name: adhara-stack
 services:
   api:
-    container_name: api
+    container_name: adhara-api
     image: api
     build:
       context: ./api
@@ -9,7 +9,7 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:80
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=appdb;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=adhara-db;Port=5432;Database=appdb;Username=postgres;Password=postgres
     ports:
       - "8080:80"
     networks:
@@ -22,7 +22,7 @@ services:
         condition: service_completed_successfully
 
   web:
-    container_name: web
+    container_name: adhara-web
     build:
       context: ./web
       dockerfile: Dockerfile
@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
 
   db:
-    container_name: db
+    container_name: adhara-db
     image: postgres
     volumes:
       # - db:/data/postgres # enable this line to persist data
@@ -54,7 +54,7 @@ services:
       retries: 3
 
   liquibase:
-    container_name: liquibase
+    container_name: adhara-liquibase
     image: liquibase/liquibase
     # contexts: dev to seed data in dev environment
     command: --defaultsFile=liquibase.properties --contexts=dev update
@@ -64,7 +64,7 @@ services:
       - ./database/sql:/liquibase/changelog/sql
       - ./database/seed:/liquibase/changelog/seed
     environment:
-      - LIQUIBASE_COMMAND_URL=jdbc:postgresql://db:5432/${POSTGRES_DATABASE:-appdb}
+      - LIQUIBASE_COMMAND_URL=jdbc:postgresql://adhara-db:5432/${POSTGRES_DATABASE:-appdb}
       - LIQUIBASE_COMMAND_USERNAME=${POSTGRES_USER:-postgres}
       - LIQUIBASE_COMMAND_PASSWORD=${POSTGRES_PASSWORD:-postgres}
     networks:
@@ -74,7 +74,7 @@ services:
         condition: service_healthy
 
   pgadmin:
-    container_name: pgadmin
+    container_name: adhara-pgadmin
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin@pgadmin.org}
