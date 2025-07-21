@@ -16,7 +16,7 @@ const OrderDetails: React.FC<{ orderId: number }> = ({ orderId }) => {
             }
         };
 
-        if (orderId) {
+        if (orderId > 0) {
             fetchOrder();
         }
     }, [orderId]);
