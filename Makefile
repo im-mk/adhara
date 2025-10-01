@@ -1,25 +1,24 @@
-.PHONY: test-api build-api test-api start-db start-api build-web test-web start stop
-
-build-api:
-	cd api && dotnet build
-
-test-api: build-api
-	cd api && dotnet test
+.PHONY: start-db build-api test-api build-web test-web start stop
 
 start-db:
 	docker compose up -d --build db pgadmin liquibase
 
-start-api: test-api
-	docker compose up -d --build db pgadmin liquibase api
+build-api:
+	docker build -f api/Adhara.Api/Dockerfile --target build -t adhara-api-build ./api
+
+test-api:
+	docker build -f api/Adhara.Api/Dockerfile --target test -t adhara-api-test ./api
+	docker run --rm adhara-api-test
 
 build-web:
-	cd web && npm install && npm run build
+	docker build -f web/Dockerfile --target build -t adhara-web-build ./web
 
-test-web: build-web
-	cd web && npm run test
+test-web:
+	docker build -f web/Dockerfile --target test -t adhara-web-test ./web
+	docker run --rm adhara-web-test
 
-start: test-api test-web
+start: start-db test-web test-api build-web build-api
 	docker compose up -d --build
 
-stop:	
+stop:
 	docker compose stop

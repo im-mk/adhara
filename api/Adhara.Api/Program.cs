@@ -28,7 +28,7 @@ builder.Services.AddSingleton<IDbConnection>((sp) =>
 );
 
 builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
-
+builder.Services.AddHealthChecks();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -55,6 +55,7 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
     });
 }
+app.MapHealthChecks("/health");
 
 // app.UseHttpsRedirection();
 

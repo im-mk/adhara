@@ -1,3 +1,25 @@
+# Containerized Build & Test
+
+You can build and test the API entirely in containers (no .NET SDK required locally):
+
+Build the API in a container:
+
+```sh
+make api-build-container
+```
+
+Run API tests in a container:
+
+```sh
+make api-test-container
+```
+
+You can still use local commands for faster development if you have the .NET SDK installed:
+
+```sh
+cd api && dotnet build
+cd api && dotnet test
+```
 # Adhara Api
 
 Dotnet api and postgres database controller by liquibase.

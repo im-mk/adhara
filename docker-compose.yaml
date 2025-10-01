@@ -2,24 +2,28 @@ name: adhara-stack
 services:
   api:
     container_name: adhara-api
-    image: api
     build:
       context: ./api
       dockerfile: Adhara.Api/Dockerfile
     environment:
-      - ASPNETCORE_URLS=http://+:80
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=adhara-db;Port=5432;Database=appdb;Username=postgres;Password=postgres
     ports:
       - "8080:80"
-    networks:
-      - network1
-    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
       liquibase:
         condition: service_completed_successfully
+    networks:
+      - network1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://api:80/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
 
   web:
     container_name: adhara-web
@@ -31,6 +35,9 @@ services:
     networks:
       - network1
     restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
 
   db:
     container_name: adhara-db
