@@ -19,11 +19,10 @@ services:
       - network1
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://api:80/health || exit 1"]
-      interval: 10s
+      test: ["CMD-SHELL", "curl -f http://localhost:80/health || exit 1"]
+      interval: 5s
       timeout: 3s
       retries: 5
-
 
   web:
     container_name: adhara-web
