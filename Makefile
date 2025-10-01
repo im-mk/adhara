@@ -1,4 +1,4 @@
-.PHONY: test-api build-api build-web test-web start stop
+.PHONY: test-api build-api test-api start-db start-api build-web test-web start stop
 
 build-api:
 	cd api && dotnet build
