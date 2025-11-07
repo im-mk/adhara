@@ -14,11 +14,16 @@ builder.Services.AddOpenApi(options =>
     {
         document.Info = new()
         {
-            Title = "Order Service",
+            Title = "Adhara Service",
             Version = "v1",
-            Description = "API to manage orders.",
+            Description = "Adhara API - Manage orders.",
         };
         document.Servers.Clear();
+        document.Servers.Add(new Microsoft.OpenApi.Models.OpenApiServer
+        {
+            Url = "http://localhost:8080",
+            Description = "Adhara API- Localhost"
+        });
         return Task.CompletedTask;
     });
 });

@@ -1,4 +1,4 @@
-.PHONY: start-db build-api test-api build-web test-web start stop
+.PHONY: start-db build-api test-api start-api newman-test build-web test-web start stop
 
 start-db:
 	docker compose up -d --build db pgadmin liquibase
@@ -9,6 +9,12 @@ build-api:
 test-api:
 	docker build -f api/Adhara.Api/Dockerfile --target test -t adhara-api-test ./api
 	docker run --rm adhara-api-test
+
+start-api: test-api build-api
+	docker compose up -d --build db pgadmin liquibase api
+
+newman-test:
+	docker compose run --rm newman
 
 build-web:
 	docker build -f web/Dockerfile --target build -t adhara-web-build ./web

@@ -11,3 +11,4 @@ start: test
 
 stop:
 	@echo "Stop the local API with Ctrl+C. To stop containerized services, run 'make stop' at the repo root."
+

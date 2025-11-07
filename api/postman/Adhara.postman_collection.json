@@ -1,0 +1,170 @@
+{
+	"info": {
+		"_postman_id": "9a6f104b-99d6-43f2-9afa-3a60b253d77b",
+		"name": "Adhara Service",
+		"description": "Adhara API - Manage orders.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7983917"
+	},
+	"item": [
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "{orderId}",
+					"item": [
+						{
+							"name": "Get Order By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "text/plain"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/Orders/:orderId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"Orders",
+										":orderId"
+									],
+									"variable": [
+										{
+											"key": "orderId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "text/plain"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/Orders/:orderId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"Orders",
+												":orderId"
+											],
+											"variable": [
+												{
+													"key": "orderId"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"id\": 6325,\n  \"orderNumber\": \"string\",\n  \"orderDate\": \"1969-04-11T10:17:14.712Z\",\n  \"orderStatusId\": 454,\n  \"totalAmount\": 2815.0386601600517,\n  \"customerId\": 7063\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Get All",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/Orders?startDate=1975-10-11&endDate=2025-12-02",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"Orders"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "1975-10-11"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-12-02"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "text/plain"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/Orders?startDate=1975-10-11&endDate=1975-10-11",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"Orders"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "1975-10-11"
+										},
+										{
+											"key": "endDate",
+											"value": "1975-10-11"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"id\": 8003,\n    \"orderNumber\": \"string\",\n    \"orderDate\": \"1982-12-28T01:08:16.035Z\",\n    \"orderStatusId\": 6196,\n    \"totalAmount\": 493.7996600702754,\n    \"customerId\": 7963\n  },\n  {\n    \"id\": 7584,\n    \"orderNumber\": \"string\",\n    \"orderDate\": \"1996-06-17T12:39:14.166Z\",\n    \"orderStatusId\": 94,\n    \"totalAmount\": 363.41492444991854,\n    \"customerId\": 9580\n  }\n]"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "/"
+		}
+	]
+}

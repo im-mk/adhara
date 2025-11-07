@@ -96,6 +96,22 @@ services:
       - network1
     restart: unless-stopped
 
+  newman:
+    container_name: adhara-newman
+    image: postman/newman:alpine
+    volumes:
+      - ./api/postman:/etc/newman
+    networks:
+      - network1
+    depends_on:
+      api:
+        condition: service_healthy
+    command: >
+      run /etc/newman/Adhara.postman_collection.json
+      --environment /etc/newman/Adhara.postman_environment.json
+      --reporters cli
+      --delay-request 500
+
 networks:
   network1:
     driver: bridge
