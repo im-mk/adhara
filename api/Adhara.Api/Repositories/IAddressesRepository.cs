@@ -1,0 +1,10 @@
+using Adhara.Api.Entities;
+
+namespace Adhara.Api.Repositories;
+
+public interface IAddressesRepository
+{
+    Task<int?> Insert(Address address, System.Data.IDbTransaction? transaction = null);
+    Task<int> DeleteByIds(IEnumerable<int> ids, System.Data.IDbTransaction? transaction = null);
+    // Potentially add Get/Update/Delete as needed later
+}

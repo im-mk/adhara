@@ -13,6 +13,8 @@ VALUES
     (5, 'Cancelled', 'Order has been cancelled.'),
     (6, 'Returned', 'Order has been returned by the customer.');
 
+SELECT setval(pg_get_serial_sequence('public.order_statuses','id'), COALESCE((SELECT MAX(id) FROM public.order_statuses), 1), true);
+
 -- Insert sample products
 INSERT INTO products
     (id, product_name, product_description)
@@ -23,6 +25,7 @@ VALUES
     (4, 'Laptop Sleeve', 'Padded sleeve to protect your laptop from scratches and bumps'),
     (5, 'Mechanical Keyboard', 'RGB backlit mechanical keyboard with custom switches');
 
+SELECT setval(pg_get_serial_sequence('public.products','id'), COALESCE((SELECT MAX(id) FROM public.products), 1), true);
 
 -- Insert sample customers
 INSERT INTO customers
@@ -33,7 +36,9 @@ VALUES
     (3, 'Alice', 'Johnson'),
     (4, 'Bob', 'Brown'),
     (5, 'Charlie', 'Davis');
+SELECT setval(pg_get_serial_sequence('public.customers','id'), COALESCE((SELECT MAX(id) FROM public.customers), 1), true);
 
+-- Insert sample orders
 INSERT INTO orders
     (
     order_number, order_date, order_status_id, total_amount, customer_id)

@@ -1,0 +1,38 @@
+using Adhara.Api.Entities;
+using Dapper;
+using System.Data;
+
+namespace Adhara.Api.Repositories;
+
+public class AddressesRepository(
+    IDbConnection dbConnection) : IAddressesRepository
+{
+    private readonly IDbConnection _dbConnection = dbConnection;
+
+    public Task<int?> Insert(Address address, System.Data.IDbTransaction? transaction = null)
+    {
+        const string sql = @"
+            INSERT INTO public.addresses (address_line1, address_line2, address_line3, address_line4, postcode, country)
+            VALUES (@AddressLine1, @AddressLine2, @AddressLine3, @AddressLine4, @Postcode, @Country)
+            RETURNING id;";
+
+        return _dbConnection.QuerySingleAsync<int?>(sql, new
+        {
+            address.AddressLine1,
+            address.AddressLine2,
+            address.AddressLine3,
+            address.AddressLine4,
+            address.Postcode,
+            address.Country
+        }, transaction);
+    }
+
+    public Task<int> DeleteByIds(IEnumerable<int> ids, System.Data.IDbTransaction? transaction = null)
+    {
+        const string sql = @"
+            DELETE FROM public.addresses
+            WHERE id = ANY(@Ids);";
+
+        return _dbConnection.ExecuteAsync(sql, new { Ids = ids }, transaction);
+    }
+}

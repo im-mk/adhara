@@ -28,11 +28,8 @@ builder.Services.AddOpenApi(options =>
     });
 });
 
-builder.Services.AddSingleton<IDbConnection>((sp) =>
-    new NpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+AddDependencies(builder);
 
-builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
 builder.Services.AddHealthChecks();
 builder.Services.AddCors(options =>
 {
@@ -47,6 +44,12 @@ builder.Services.AddCors(options =>
 FluentMapper.Initialize(config =>
 {
     config.AddMap(new OrderMap());
+    config.AddMap(new CustomerMap());
+    config.AddMap(new AddressMap());
+    config.AddMap(new OrderLineMap());
+    config.AddMap(new OrderStatusMap());
+    config.AddMap(new ProductMap());
+    config.AddMap(new CustomerAddressMap());
 });
 
 var app = builder.Build();
@@ -71,3 +74,19 @@ app.UseCors();
 app.MapControllers();
 
 app.Run();
+
+static void AddDependencies(WebApplicationBuilder builder)
+{
+    builder.Services.AddScoped<IDbConnection>(sp =>
+    {
+        var conn = new NpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection"));
+        conn.Open();
+        return conn;
+    });
+
+    builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
+    builder.Services.AddScoped<ICustomersRepository, CustomersRepository>();
+    builder.Services.AddScoped<IAddressesRepository, AddressesRepository>();
+    builder.Services.AddScoped<ICustomerAddressesRepository, CustomerAddressesRepository>();
+    builder.Services.AddScoped<Adhara.Api.Services.ICustomerService, Adhara.Api.Services.CustomerService>();
+}

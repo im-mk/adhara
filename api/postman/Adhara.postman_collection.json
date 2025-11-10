@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9a6f104b-99d6-43f2-9afa-3a60b253d77b",
+		"_postman_id": "83f23c49-64f7-41db-b0a8-6841d79b3a6b",
 		"name": "Adhara Service",
 		"description": "Adhara API - Manage orders.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -8,14 +8,684 @@
 	},
 	"item": [
 		{
+			"name": "Customers",
+			"item": [
+				{
+					"name": "Create Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json();",
+									"pm.collectionVariables.set(\"customerId\", response.id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"s\",\n  \"billingAddress\": {\n    \"addressLine1\": \"string\",\n    \"postcode\": \"bl1 1aa\",\n    \"country\": \"st\",\n    \"addressLine2\": \"string\",\n    \"addressLine3\": \"string\",\n    \"addressLine4\": \"string\"\n  },\n  \"shippingAddress\": {\n    \"addressLine1\": \"string\",\n    \"postcode\": \"s\",\n    \"country\": \"st\",\n    \"addressLine2\": \"string\",\n    \"addressLine3\": \"string\",\n    \"addressLine4\": \"string\"\n  }\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"Customers"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "text/plain"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"s\",\n  \"billingAddress\": {\n    \"addressLine1\": \"string\",\n    \"postcode\": \"\",\n    \"country\": \"st\",\n    \"addressLine2\": \"string\",\n    \"addressLine3\": \"string\",\n    \"addressLine4\": \"string\"\n  },\n  \"shippingAddress\": {\n    \"addressLine1\": \"string\",\n    \"postcode\": \"s\",\n    \"country\": \"st\",\n    \"addressLine2\": \"string\",\n    \"addressLine3\": \"string\",\n    \"addressLine4\": \"string\"\n  }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/Customers",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"Customers"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": 8704,\n  \"firstName\": \"string\",\n  \"lastName\": \"string\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get All Customers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/Customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"Customers"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "text/plain"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/Customers",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"Customers"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"id\": 4304,\n    \"firstName\": \"string\",\n    \"lastName\": \"string\"\n  },\n  {\n    \"id\": 372,\n    \"firstName\": \"string\",\n    \"lastName\": \"string\"\n  }\n]"
+						}
+					]
+				},
+				{
+					"name": "Get Customer By Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/Customers/{{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"Customers",
+								"{{customerId}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "text/plain"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/Customers/:customerId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"Customers",
+										":customerId"
+									],
+									"variable": [
+										{
+											"key": "customerId"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": 8704,\n  \"firstName\": \"string\",\n  \"lastName\": \"string\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Customer",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Customers/{{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"Customers",
+								"{{customerId}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/Customers/:customerId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"Customers",
+										":customerId"
+									],
+									"variable": [
+										{
+											"key": "customerId"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Update Customer",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"name\",\n  \"lastName\": \"lastname\"\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Customers/{{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"Customers",
+								"{{customerId}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/Customers/:customerId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"Customers",
+										":customerId"
+									],
+									"variable": [
+										{
+											"key": "customerId"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "Orders",
 			"item": [
 				{
-					"name": "{orderId}",
-					"item": [
+					"name": "Create Order",
+					"event": [
 						{
-							"name": "Get Order By Id",
-							"request": {
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json();",
+									"pm.collectionVariables.set(\"orderId\", response.id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const randomOrderNumber = \"A\" + Math.floor(10000 + Math.random() * 90000);",
+									"pm.collectionVariables.set(\"orderNumber\", randomOrderNumber);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderNumber\": \"{{orderNumber}}\",\n  \"orderDate\": \"2010-02-14T16:31:43.574Z\",\n  \"orderStatusId\": 1,\n  \"totalAmount\": 1987.43,\n  \"customerId\": 1\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"Orders"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "text/plain"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"orderNumber\": \"string\",\n  \"orderDate\": \"2010-02-14T16:31:43.574Z\",\n  \"orderStatusId\": 9513,\n  \"totalAmount\": 1987.4331725054194,\n  \"customerId\": 6706\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/Orders",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"Orders"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": 3722,\n  \"orderNumber\": \"string\",\n  \"orderDate\": \"1970-06-26T20:16:23.148Z\",\n  \"orderStatusId\": 6730,\n  \"totalAmount\": 905.7933173529009,\n  \"customerId\": 6028\n}"
+						}
+					]
+				},
+				{
+					"name": "Get All",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/Orders?startDate=2022-01-07&endDate=2099-01-07",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"Orders"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2022-01-07"
+								},
+								{
+									"key": "endDate",
+									"value": "2099-01-07"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "text/plain"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/Orders?startDate=2022-01-07&endDate=2022-01-07",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"Orders"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-01-07"
+										},
+										{
+											"key": "endDate",
+											"value": "2022-01-07"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"id\": 8645,\n    \"orderNumber\": \"string\",\n    \"orderDate\": \"2019-06-11T13:00:08.325Z\",\n    \"orderStatusId\": 275,\n    \"totalAmount\": 7696.973643028488,\n    \"customerId\": 3101\n  },\n  {\n    \"id\": 1092,\n    \"orderNumber\": \"string\",\n    \"orderDate\": \"1948-03-23T01:05:17.457Z\",\n    \"orderStatusId\": 8735,\n    \"totalAmount\": 3192.0627074851905,\n    \"customerId\": 7405\n  }\n]"
+						}
+					]
+				},
+				{
+					"name": "Delete Order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Orders/{{orderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"Orders",
+								"{{orderId}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/Orders/:orderId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"Orders",
+										":orderId"
+									],
+									"variable": [
+										{
+											"key": "orderId"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Update Order",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderStatusId\": 1,\n  \"totalAmount\": 5958.85\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Orders/{{orderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"Orders",
+								"{{orderId}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"orderStatusId\": 1792,\n  \"totalAmount\": 5958.850843425254\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/Orders/:orderId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"Orders",
+										":orderId"
+									],
+									"variable": [
+										{
+											"key": "orderId"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Get Order By Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/Orders/{{orderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"Orders",
+								"{{orderId}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
 								"method": "GET",
 								"header": [
 									{
@@ -34,112 +704,7 @@
 									],
 									"variable": [
 										{
-											"key": "orderId",
-											"value": "1"
-										}
-									]
-								}
-							},
-							"response": [
-								{
-									"name": "OK",
-									"originalRequest": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "Accept",
-												"value": "text/plain"
-											}
-										],
-										"url": {
-											"raw": "{{baseUrl}}/Orders/:orderId",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"Orders",
-												":orderId"
-											],
-											"variable": [
-												{
-													"key": "orderId"
-												}
-											]
-										}
-									},
-									"status": "OK",
-									"code": 200,
-									"_postman_previewlanguage": "json",
-									"header": [
-										{
-											"key": "Content-Type",
-											"value": "application/json"
-										}
-									],
-									"cookie": [],
-									"body": "{\n  \"id\": 6325,\n  \"orderNumber\": \"string\",\n  \"orderDate\": \"1969-04-11T10:17:14.712Z\",\n  \"orderStatusId\": 454,\n  \"totalAmount\": 2815.0386601600517,\n  \"customerId\": 7063\n}"
-								}
-							]
-						}
-					]
-				},
-				{
-					"name": "Get All",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "text/plain"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/Orders?startDate=1975-10-11&endDate=2025-12-02",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"Orders"
-							],
-							"query": [
-								{
-									"key": "startDate",
-									"value": "1975-10-11"
-								},
-								{
-									"key": "endDate",
-									"value": "2025-12-02"
-								}
-							]
-						}
-					},
-					"response": [
-						{
-							"name": "OK",
-							"originalRequest": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "text/plain"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/Orders?startDate=1975-10-11&endDate=1975-10-11",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"Orders"
-									],
-									"query": [
-										{
-											"key": "startDate",
-											"value": "1975-10-11"
-										},
-										{
-											"key": "endDate",
-											"value": "1975-10-11"
+											"key": "orderId"
 										}
 									]
 								}
@@ -154,7 +719,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "[\n  {\n    \"id\": 8003,\n    \"orderNumber\": \"string\",\n    \"orderDate\": \"1982-12-28T01:08:16.035Z\",\n    \"orderStatusId\": 6196,\n    \"totalAmount\": 493.7996600702754,\n    \"customerId\": 7963\n  },\n  {\n    \"id\": 7584,\n    \"orderNumber\": \"string\",\n    \"orderDate\": \"1996-06-17T12:39:14.166Z\",\n    \"orderStatusId\": 94,\n    \"totalAmount\": 363.41492444991854,\n    \"customerId\": 9580\n  }\n]"
+							"body": "{\n  \"id\": 3722,\n  \"orderNumber\": \"string\",\n  \"orderDate\": \"1970-06-26T20:16:23.148Z\",\n  \"orderStatusId\": 6730,\n  \"totalAmount\": 905.7933173529009,\n  \"customerId\": 6028\n}"
 						}
 					]
 				}
@@ -164,7 +729,19 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "/"
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "orderId",
+			"value": ""
+		},
+		{
+			"key": "customerId",
+			"value": ""
+		},
+		{
+			"key": "orderNumber",
+			"value": ""
 		}
 	]
 }
