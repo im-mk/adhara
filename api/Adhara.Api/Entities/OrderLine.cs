@@ -1,3 +1,5 @@
+namespace Adhara.Api.Entities;
+
 public class OrderLine
 {
     public int Id { get; set; }

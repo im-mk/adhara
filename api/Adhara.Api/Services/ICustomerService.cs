@@ -1,4 +1,3 @@
-using Adhara.Api.Entities;
 using Adhara.Api.Models;
 
 namespace Adhara.Api.Services;
@@ -6,4 +5,8 @@ namespace Adhara.Api.Services;
 public interface ICustomerService
 {
     Task<Customer> CreateCustomerAsync(CreateCustomerRequest request);
+    Task<bool> DeleteCustomerAsync(int customerId);
+    Task<bool> UpdateCustomerAsync(int customerId, Adhara.Api.Models.UpdateCustomerRequest request);
+    Task<Customer?> GetCustomerAsync(int customerId);
+    Task<IEnumerable<Customer>> GetAllCustomersAsync();
 }

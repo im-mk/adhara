@@ -8,13 +8,14 @@ namespace Adhara.Api.Tests.Controllers;
 
 public class OrdersControllerTests
 {
-    private readonly Mock<IOrdersRepository> _mockOrdersRepository;
+    private readonly Mock<Adhara.Api.Services.IOrderService> _mockOrderService;
     private readonly OrdersController _controller;
 
     public OrdersControllerTests()
     {
-        _mockOrdersRepository = new Mock<IOrdersRepository>();
-        _controller = new OrdersController(_mockOrdersRepository.Object);
+        _mockOrderService = new Mock<Adhara.Api.Services.IOrderService>();
+
+        _controller = new OrdersController(_mockOrderService.Object);
     }
 
     [Fact]
@@ -23,8 +24,8 @@ public class OrdersControllerTests
         // Arrange
         var orderId = 1;
         var expectedOrder = new Order();
-        _mockOrdersRepository
-            .Setup(repo => repo.Get(orderId))
+        _mockOrderService
+            .Setup(s => s.GetOrderAsync(orderId))
             .ReturnsAsync(expectedOrder);
 
         // Act
@@ -40,8 +41,8 @@ public class OrdersControllerTests
     {
         // Arrange
         var orderId = 1;
-        _mockOrdersRepository
-            .Setup(repo => repo.Get(orderId))
+        _mockOrderService
+            .Setup(s => s.GetOrderAsync(orderId))
             .ReturnsAsync(default(Order?));
 
         // Act
@@ -55,18 +56,22 @@ public class OrdersControllerTests
     public async Task Create_ReturnsCreatedAt_WhenInsertSucceeds()
     {
         // Arrange
-        var request = new Adhara.Api.Models.CreateOrderRequest
+        var request = new Models.CreateOrderRequest
         {
             OrderNumber = "ORD-1",
             OrderDate = DateTime.UtcNow,
             OrderStatusId = 1,
             TotalAmount = 100m,
-            CustomerId = 10
+            CustomerId = 10,
+            OrderLines = new List<Adhara.Api.Models.OrderItem>
+            {
+                new Adhara.Api.Models.OrderItem { ProductId = 5, Quantity = 2, UnitPrice = 12.50m }
+            }
         };
 
-        _mockOrdersRepository
-            .Setup(repo => repo.Insert(It.IsAny<Order>(), It.IsAny<System.Data.IDbTransaction?>()))
-            .ReturnsAsync(42);
+        var expectedOrder = new Order { Id = 42, OrderNumber = request.OrderNumber };
+        _mockOrderService.Setup(s => s.CreateOrderAsync(request)).ReturnsAsync(expectedOrder);
+        _mockOrderService.Setup(s => s.UpdateOrderAsync(It.IsAny<int>(), It.IsAny<Adhara.Api.Models.UpdateOrderRequest>())).ReturnsAsync(true);
 
         // Act
         var result = await _controller.Create(request);
@@ -74,7 +79,7 @@ public class OrdersControllerTests
         // Assert
         var created = Assert.IsType<CreatedAtActionResult>(result.Result);
         var returned = Assert.IsType<Order>(created.Value);
-        Assert.Equal(42, returned.Id);
+        Assert.Equal(expectedOrder.Id, returned.Id);
         Assert.Equal(request.OrderNumber, returned.OrderNumber);
     }
 
@@ -89,13 +94,7 @@ public class OrdersControllerTests
             TotalAmount = 50m,
         };
 
-        _mockOrdersRepository
-            .Setup(repo => repo.Get(orderId))
-            .ReturnsAsync(new Order { Id = orderId });
-
-        _mockOrdersRepository
-            .Setup(repo => repo.Update(It.Is<Order>(o => o.Id == orderId), It.IsAny<System.Data.IDbTransaction?>()))
-            .ReturnsAsync(1);
+        _mockOrderService.Setup(s => s.UpdateOrderAsync(orderId, request)).ReturnsAsync(true);
 
         // Act
         var result = await _controller.Update(orderId, request);
@@ -109,9 +108,7 @@ public class OrdersControllerTests
     {
         // Arrange
         var orderId = 7;
-        _mockOrdersRepository
-            .Setup(repo => repo.Delete(orderId, It.IsAny<System.Data.IDbTransaction?>()))
-            .ReturnsAsync(1);
+        _mockOrderService.Setup(s => s.DeleteOrderAsync(orderId)).ReturnsAsync(true);
 
         // Act
         var result = await _controller.Delete(orderId);

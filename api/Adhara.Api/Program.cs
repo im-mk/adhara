@@ -3,6 +3,7 @@ using Npgsql;
 using Adhara.Api.Repositories;
 using Dapper.FluentMap;
 using Adhara.Api.Entities.Mappings;
+using Adhara.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +36,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:8090") // React app origin
+        policy.WithOrigins("http://localhost:8090")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -85,8 +86,10 @@ static void AddDependencies(WebApplicationBuilder builder)
     });
 
     builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
+    builder.Services.AddScoped<IOrderLinesRepository, OrderLinesRepository>();
+    builder.Services.AddScoped<IOrderService, OrderService>();
     builder.Services.AddScoped<ICustomersRepository, CustomersRepository>();
     builder.Services.AddScoped<IAddressesRepository, AddressesRepository>();
     builder.Services.AddScoped<ICustomerAddressesRepository, CustomerAddressesRepository>();
-    builder.Services.AddScoped<Adhara.Api.Services.ICustomerService, Adhara.Api.Services.CustomerService>();
+    builder.Services.AddScoped<ICustomerService, CustomerService>();
 }

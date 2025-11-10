@@ -93,4 +93,57 @@ public class CustomerService : ICustomerService
             throw;
         }
     }
+
+    public async Task<bool> DeleteCustomerAsync(int customerId)
+    {
+        using var tx = _dbConnection.BeginTransaction();
+        try
+        {
+            var addressIds = (await _customerAddressesRepository.DeleteAndReturnAddressIdsByCustomerId(customerId, tx)).ToList();
+
+            if (addressIds.Count > 0)
+            {
+                await _addressesRepository.DeleteByIds(addressIds, tx);
+            }
+
+            var rows = await _customersRepository.Delete(customerId, tx);
+
+            if (rows > 0)
+            {
+                tx.Commit();
+                return true;
+            }
+
+            tx.Rollback();
+            return false;
+        }
+        catch
+        {
+            try { tx.Rollback(); } catch { }
+            throw;
+        }
+    }
+
+    public async Task<bool> UpdateCustomerAsync(int customerId, Adhara.Api.Models.UpdateCustomerRequest request)
+    {
+        var customer = new Customer
+        {
+            Id = customerId,
+            FirstName = request.FirstName,
+            LastName = request.LastName
+        };
+
+        var rows = await _customersRepository.Update(customer);
+        return rows > 0;
+    }
+
+    public Task<Customer?> GetCustomerAsync(int customerId)
+    {
+        return _customersRepository.Get(customerId);
+    }
+
+    public Task<IEnumerable<Customer>> GetAllCustomersAsync()
+    {
+        return _customersRepository.GetAll();
+    }
 }

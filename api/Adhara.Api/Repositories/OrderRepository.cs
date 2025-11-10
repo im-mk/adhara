@@ -27,24 +27,17 @@ public class OrdersRepository(
         new { start, end });
     }
 
-    public Task<int?> Insert(Order order, System.Data.IDbTransaction? transaction = null)
+    public Task<int> Insert(Order order, IDbTransaction? transaction = null)
     {
         const string sql = @"
             INSERT INTO public.orders (order_number, order_date, order_status_id, total_amount, customer_id)
             VALUES (@OrderNumber, @OrderDate, @OrderStatusId, @TotalAmount, @CustomerId)
             RETURNING id;";
 
-        return _dbConnection.QuerySingleAsync<int?>(sql, new
-        {
-            order.OrderNumber,
-            order.OrderDate,
-            order.OrderStatusId,
-            order.TotalAmount,
-            order.CustomerId
-        }, transaction);
+        return _dbConnection.QuerySingleAsync<int>(sql, order, transaction);
     }
 
-    public Task<int> Update(Order order, System.Data.IDbTransaction? transaction = null)
+    public Task<int> Update(Order order, IDbTransaction? transaction = null)
     {
         const string sql = @"
             UPDATE public.orders
@@ -53,15 +46,10 @@ public class OrdersRepository(
                 total_amount = @TotalAmount                
             WHERE id = @Id;";
 
-        return _dbConnection.ExecuteAsync(sql, new
-        {
-            order.OrderStatusId,
-            order.TotalAmount,
-            order.Id
-        }, transaction);
+        return _dbConnection.ExecuteAsync(sql, order, transaction);
     }
 
-    public Task<int> Delete(int orderId, System.Data.IDbTransaction? transaction = null)
+    public Task<int> Delete(int orderId, IDbTransaction? transaction = null)
     {
         const string sql = "DELETE FROM public.orders WHERE id = @orderId";
         return _dbConnection.ExecuteAsync(sql, new { orderId }, transaction);

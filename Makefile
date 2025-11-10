@@ -28,3 +28,7 @@ start: start-db test-web test-api build-web build-api
 
 stop:
 	docker compose stop
+
+clean:
+	docker compose down -v
+	docker rmi adhara-api-build adhara-api-test adhara-web-build adhara-web-test || true

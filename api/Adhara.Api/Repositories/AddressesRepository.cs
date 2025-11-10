@@ -9,7 +9,7 @@ public class AddressesRepository(
 {
     private readonly IDbConnection _dbConnection = dbConnection;
 
-    public Task<int?> Insert(Address address, System.Data.IDbTransaction? transaction = null)
+    public Task<int?> Insert(Address address, IDbTransaction? transaction = null)
     {
         const string sql = @"
             INSERT INTO public.addresses (address_line1, address_line2, address_line3, address_line4, postcode, country)
@@ -27,7 +27,7 @@ public class AddressesRepository(
         }, transaction);
     }
 
-    public Task<int> DeleteByIds(IEnumerable<int> ids, System.Data.IDbTransaction? transaction = null)
+    public Task<int> DeleteByIds(IEnumerable<int> ids, IDbTransaction? transaction = null)
     {
         const string sql = @"
             DELETE FROM public.addresses

@@ -20,7 +20,7 @@ public class CustomersRepository(
         return _dbConnection.QueryAsync<Customer>("SELECT * FROM public.customers");
     }
 
-    public Task<int?> Insert(Customer customer, System.Data.IDbTransaction? transaction = null)
+    public Task<int?> Insert(Customer customer, IDbTransaction? transaction = null)
     {
         const string sql = @"
             INSERT INTO public.customers (first_name, last_name)
@@ -34,7 +34,7 @@ public class CustomersRepository(
         }, transaction);
     }
 
-    public Task<int> Update(Customer customer, System.Data.IDbTransaction? transaction = null)
+    public Task<int> Update(Customer customer, IDbTransaction? transaction = null)
     {
         const string sql = @"
             UPDATE public.customers
@@ -50,7 +50,7 @@ public class CustomersRepository(
         }, transaction);
     }
 
-    public Task<int> Delete(int customerId, System.Data.IDbTransaction? transaction = null)
+    public Task<int> Delete(int customerId, IDbTransaction? transaction = null)
     {
         const string sql = "DELETE FROM public.customers WHERE id = @customerId";
         return _dbConnection.ExecuteAsync(sql, new { customerId }, transaction);
