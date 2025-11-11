@@ -8,12 +8,12 @@ namespace Adhara.Api.Tests.Controllers;
 
 public class OrdersControllerTests
 {
-    private readonly Mock<Adhara.Api.Services.IOrderService> _mockOrderService;
+    private readonly Mock<Services.IOrderService> _mockOrderService;
     private readonly OrdersController _controller;
 
     public OrdersControllerTests()
     {
-        _mockOrderService = new Mock<Adhara.Api.Services.IOrderService>();
+        _mockOrderService = new Mock<Services.IOrderService>();
 
         _controller = new OrdersController(_mockOrderService.Object);
     }
@@ -58,20 +58,17 @@ public class OrdersControllerTests
         // Arrange
         var request = new Models.CreateOrderRequest
         {
-            OrderNumber = "ORD-1",
-            OrderDate = DateTime.UtcNow,
-            OrderStatusId = 1,
             TotalAmount = 100m,
             CustomerId = 10,
-            OrderLines = new List<Adhara.Api.Models.OrderItem>
+            OrderLines = new List<Models.OrderItem>
             {
-                new Adhara.Api.Models.OrderItem { ProductId = 5, Quantity = 2, UnitPrice = 12.50m }
+                new Models.OrderItem { ProductId = 5, Quantity = 2, UnitPrice = 12.50m }
             }
         };
 
-        var expectedOrder = new Order { Id = 42, OrderNumber = request.OrderNumber };
+        var expectedOrder = new Order { Id = 42, OrderNumber = "A12345" };
         _mockOrderService.Setup(s => s.CreateOrderAsync(request)).ReturnsAsync(expectedOrder);
-        _mockOrderService.Setup(s => s.UpdateOrderAsync(It.IsAny<int>(), It.IsAny<Adhara.Api.Models.UpdateOrderRequest>())).ReturnsAsync(true);
+        _mockOrderService.Setup(s => s.UpdateOrderAsync(It.IsAny<int>(), It.IsAny<Models.UpdateOrderRequest>())).ReturnsAsync(true);
 
         // Act
         var result = await _controller.Create(request);
@@ -80,7 +77,7 @@ public class OrdersControllerTests
         var created = Assert.IsType<CreatedAtActionResult>(result.Result);
         var returned = Assert.IsType<Order>(created.Value);
         Assert.Equal(expectedOrder.Id, returned.Id);
-        Assert.Equal(request.OrderNumber, returned.OrderNumber);
+        Assert.Equal(expectedOrder.OrderNumber, returned.OrderNumber);
     }
 
     [Fact]

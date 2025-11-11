@@ -1,5 +1,6 @@
 using Adhara.Api.Models;
 using Adhara.Api.Repositories;
+using Adhara.Api.Mappers;
 
 namespace Adhara.Api.Services;
 
@@ -27,61 +28,31 @@ public class CustomerService : ICustomerService
         using var tx = _dbConnection.BeginTransaction();
         try
         {
-            var customer = new Customer
-            {
-                FirstName = request.FirstName,
-                LastName = request.LastName
-            };
+            var customer = CustomerMapper.FromCreate(request);
 
             var customerId = await _customersRepository.Insert(customer, tx);
             if (customerId == null) throw new InvalidOperationException("Failed to insert customer");
             customer.Id = customerId.Value;
 
-            var billing = new Address
-            {
-                AddressLine1 = request.BillingAddress.AddressLine1,
-                AddressLine2 = request.BillingAddress.AddressLine2,
-                AddressLine3 = request.BillingAddress.AddressLine3,
-                AddressLine4 = request.BillingAddress.AddressLine4,
-                Postcode = request.BillingAddress.Postcode,
-                Country = request.BillingAddress.Country
-            };
+            var billing = AddressMapper.FromRequest(request.BillingAddress);
 
             var billingId = await _addressesRepository.Insert(billing, tx);
-            if (billingId == null) throw new InvalidOperationException("Failed to insert billing address");
+            if (billingId < 1) throw new InvalidOperationException("Failed to insert billing address");
 
-            var billingMap = new CustomerAddress
-            {
-                CustomerId = customer.Id,
-                AddressId = billingId.Value,
-                AddressType = "Billing"
-            };
+            var billingMap = CustomerAddressMapper.Create(customer.Id, billingId, "Billing");
 
             var billingMapId = await _customerAddressesRepository.Insert(billingMap, tx);
-            if (billingMapId == null) throw new InvalidOperationException("Failed to insert customer_address mapping for billing");
+            if (billingMapId < 1) throw new InvalidOperationException("Failed to insert customer_address mapping for billing");
 
-            var shipping = new Address
-            {
-                AddressLine1 = request.ShippingAddress.AddressLine1,
-                AddressLine2 = request.ShippingAddress.AddressLine2,
-                AddressLine3 = request.ShippingAddress.AddressLine3,
-                AddressLine4 = request.ShippingAddress.AddressLine4,
-                Postcode = request.ShippingAddress.Postcode,
-                Country = request.ShippingAddress.Country
-            };
+            var shipping = AddressMapper.FromRequest(request.ShippingAddress);
 
             var shippingId = await _addressesRepository.Insert(shipping, tx);
-            if (shippingId == null) throw new InvalidOperationException("Failed to insert shipping address");
+            if (shippingId < 1) throw new InvalidOperationException("Failed to insert shipping address");
 
-            var shippingMap = new CustomerAddress
-            {
-                CustomerId = customer.Id,
-                AddressId = shippingId.Value,
-                AddressType = "Shipping"
-            };
+            var shippingMap = CustomerAddressMapper.Create(customer.Id, shippingId, "Shipping");
 
             var shippingMapId = await _customerAddressesRepository.Insert(shippingMap, tx);
-            if (shippingMapId == null) throw new InvalidOperationException("Failed to insert customer_address mapping for shipping");
+            if (shippingMapId < 1) throw new InvalidOperationException("Failed to insert customer_address mapping for shipping");
 
             tx.Commit();
 
@@ -124,14 +95,9 @@ public class CustomerService : ICustomerService
         }
     }
 
-    public async Task<bool> UpdateCustomerAsync(int customerId, Adhara.Api.Models.UpdateCustomerRequest request)
+    public async Task<bool> UpdateCustomerAsync(int customerId, UpdateCustomerRequest request)
     {
-        var customer = new Customer
-        {
-            Id = customerId,
-            FirstName = request.FirstName,
-            LastName = request.LastName
-        };
+        var customer = CustomerMapper.FromUpdate(customerId, request);
 
         var rows = await _customersRepository.Update(customer);
         return rows > 0;
@@ -146,4 +112,6 @@ public class CustomerService : ICustomerService
     {
         return _customersRepository.GetAll();
     }
+
+
 }

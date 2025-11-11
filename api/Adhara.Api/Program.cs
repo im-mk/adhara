@@ -1,6 +1,7 @@
 using System.Data;
 using Npgsql;
 using Adhara.Api.Repositories;
+using Adhara.Api.Middleware;
 using Dapper.FluentMap;
 using Adhara.Api.Entities.Mappings;
 using Adhara.Api.Services;
@@ -67,6 +68,9 @@ if (app.Environment.IsDevelopment())
 app.MapHealthChecks("/health");
 
 // app.UseHttpsRedirection();
+
+// Global exception handler middleware (returns 500 JSON on unhandled exceptions)
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseAuthorization();
 

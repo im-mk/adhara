@@ -9,22 +9,14 @@ public class AddressesRepository(
 {
     private readonly IDbConnection _dbConnection = dbConnection;
 
-    public Task<int?> Insert(Address address, IDbTransaction? transaction = null)
+    public Task<int> Insert(Address address, IDbTransaction? transaction = null)
     {
         const string sql = @"
             INSERT INTO public.addresses (address_line1, address_line2, address_line3, address_line4, postcode, country)
             VALUES (@AddressLine1, @AddressLine2, @AddressLine3, @AddressLine4, @Postcode, @Country)
             RETURNING id;";
 
-        return _dbConnection.QuerySingleAsync<int?>(sql, new
-        {
-            address.AddressLine1,
-            address.AddressLine2,
-            address.AddressLine3,
-            address.AddressLine4,
-            address.Postcode,
-            address.Country
-        }, transaction);
+        return _dbConnection.QuerySingleAsync<int>(sql, address, transaction);
     }
 
     public Task<int> DeleteByIds(IEnumerable<int> ids, IDbTransaction? transaction = null)

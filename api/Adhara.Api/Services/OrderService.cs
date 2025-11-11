@@ -2,7 +2,7 @@ using Adhara.Api.Models;
 using Adhara.Api.Repositories;
 using Adhara.Api.Entities;
 using Dapper;
-using System.Collections.Generic;
+using Adhara.Api.Mappers;
 
 namespace Adhara.Api.Services;
 
@@ -24,14 +24,7 @@ public class OrderService : IOrderService
 
     public async Task<Order> CreateOrderAsync(CreateOrderRequest request)
     {
-        var order = new Order
-        {
-            OrderNumber = request.OrderNumber,
-            OrderDate = request.OrderDate,
-            OrderStatusId = request.OrderStatusId,
-            TotalAmount = request.TotalAmount,
-            CustomerId = request.CustomerId
-        };
+        var order = OrderMapper.FromCreate(request);
 
         using var tx = _dbConnection.BeginTransaction();
         try
@@ -46,14 +39,7 @@ public class OrderService : IOrderService
 
             foreach (var item in request.OrderLines)
             {
-                var line = new OrderLine
-                {
-                    OrderId = order.Id,
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity,
-                    Price = item.UnitPrice,
-                    Total = item.UnitPrice * item.Quantity
-                };
+                var line = OrderLineMapper.FromItem(item, order.Id);
 
                 var lineId = await _orderLinesRepository.Insert(line, tx);
                 if (lineId <= 0)
@@ -74,7 +60,7 @@ public class OrderService : IOrderService
         }
     }
 
-    public async Task<bool> UpdateOrderAsync(int orderId, Adhara.Api.Models.UpdateOrderRequest request)
+    public async Task<bool> UpdateOrderAsync(int orderId, UpdateOrderRequest request)
     {
         // simple update: fetch, modify fields, save
         var existing = await _ordersRepository.Get(orderId);

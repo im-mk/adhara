@@ -9,10 +9,10 @@ namespace Adhara.Api.Controllers;
 [Route("[controller]")]
 public class OrdersController : ControllerBase
 {
-    private readonly Adhara.Api.Services.IOrderService _orderService;
+    private readonly Services.IOrderService _orderService;
 
     public OrdersController(
-        Adhara.Api.Services.IOrderService orderService)
+        Services.IOrderService orderService)
     {
         _orderService = orderService;
     }
@@ -57,15 +57,5 @@ public class OrdersController : ControllerBase
         return ok ? NoContent() : NotFound();
     }
 
-    private static Order GetOrder(CreateOrderRequest request)
-    {
-        return new Order
-        {
-            OrderNumber = request.OrderNumber,
-            OrderDate = request.OrderDate,
-            OrderStatusId = request.OrderStatusId,
-            TotalAmount = request.TotalAmount,
-            CustomerId = request.CustomerId
-        };
-    }
+
 }

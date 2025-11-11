@@ -1,4 +1,3 @@
-using Adhara.Api.Entities;
 using Dapper;
 using System.Data;
 
@@ -9,19 +8,14 @@ public class CustomerAddressesRepository(
 {
     private readonly IDbConnection _dbConnection = dbConnection;
 
-    public Task<int?> Insert(CustomerAddress mapping, IDbTransaction? transaction = null)
+    public Task<int> Insert(CustomerAddress address, IDbTransaction? transaction = null)
     {
         const string sql = @"
             INSERT INTO public.customer_addresses (customer_id, address_id, address_type)
             VALUES (@CustomerId, @AddressId, @AddressType)
             RETURNING id;";
 
-        return _dbConnection.QuerySingleAsync<int?>(sql, new
-        {
-            mapping.CustomerId,
-            mapping.AddressId,
-            mapping.AddressType
-        }, transaction);
+        return _dbConnection.QuerySingleAsync<int>(sql, address, transaction);
     }
 
     public Task<IEnumerable<int>> DeleteAndReturnAddressIdsByCustomerId(int customerId, IDbTransaction? transaction = null)
