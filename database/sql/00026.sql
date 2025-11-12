@@ -11,8 +11,10 @@ CREATE TABLE IF NOT EXISTS public.addresses
     address_line3 VARCHAR(255),
     address_line4 VARCHAR(255),
     postcode VARCHAR(10) NOT NULL,
-    country CHAR(2) DEFAULT 'GB' NOT NULL, -- Use ISO 3166-1 alpha-2 country code (e.g., 'GB' for the United Kingdom)
-    CONSTRAINT pk_addresses_id PRIMARY KEY (id)
+    country CHAR(2) DEFAULT 'GB' NOT NULL, 
+    CONSTRAINT pk_addresses_id PRIMARY KEY (id),
+    CONSTRAINT fk_addresses_countries_country FOREIGN KEY (country)
+        REFERENCES public.countries (id)
 );
 
 --rollback DROP TABLE IF EXISTS public.addresses;

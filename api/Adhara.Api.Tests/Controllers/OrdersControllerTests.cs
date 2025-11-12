@@ -3,17 +3,18 @@ using Adhara.Api.Controllers;
 using Adhara.Api.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Adhara.Api.Entities;
+using Adhara.Api.Services;
 
 namespace Adhara.Api.Tests.Controllers;
 
 public class OrdersControllerTests
 {
-    private readonly Mock<Services.IOrderService> _mockOrderService;
+    private readonly Mock<IOrderService> _mockOrderService;
     private readonly OrdersController _controller;
 
     public OrdersControllerTests()
     {
-        _mockOrderService = new Mock<Services.IOrderService>();
+        _mockOrderService = new Mock<IOrderService>();
 
         _controller = new OrdersController(_mockOrderService.Object);
     }

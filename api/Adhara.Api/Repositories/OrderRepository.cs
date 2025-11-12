@@ -15,16 +15,29 @@ public class OrdersRepository(
             "SELECT * FROM orders WHERE id = @orderId", new { orderId });
     }
 
-    public async Task<IEnumerable<Order>> GetAll(DateOnly startDate, DateOnly endDate)
+    public async Task<IEnumerable<Order>> GetAll(DateOnly? startDate, DateOnly? endDate)
     {
-        var start = startDate.ToDateTime(TimeOnly.MinValue);
-        var end = endDate.AddDays(1).ToDateTime(TimeOnly.MinValue);
+        if (startDate == null && endDate == null)
+        {
+            return await _dbConnection.QueryAsync<Order>("SELECT * FROM public.orders");
+        }
 
-        return await _dbConnection.QueryAsync<Order>(
-        @"SELECT *
-          FROM public.orders 
-          WHERE order_date >= @start AND order_date < @end",
-        new { start, end });
+        var sql = "SELECT * FROM public.orders";
+        var where = new List<string>();
+        DateTime? start = startDate?.ToDateTime(TimeOnly.MinValue);
+        DateTime? end = endDate != null ? endDate.Value.AddDays(1).ToDateTime(TimeOnly.MinValue) : null;
+
+        if (start != null) where.Add("order_date >= @start");
+        if (end != null) where.Add("order_date < @end");
+
+        object? parameters = null;
+        if (where.Count > 0)
+        {
+            sql += " WHERE " + string.Join(" AND ", where);
+            parameters = new { start, end };
+        }
+
+        return await _dbConnection.QueryAsync<Order>(sql, parameters);
     }
 
     public Task<int> Insert(Order order, IDbTransaction? transaction = null)

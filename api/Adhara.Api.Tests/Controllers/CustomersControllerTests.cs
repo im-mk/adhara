@@ -1,6 +1,7 @@
 using Moq;
 using Adhara.Api.Controllers;
 using Adhara.Api.Repositories;
+using Adhara.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Adhara.Api.Entities;
 
@@ -8,12 +9,12 @@ namespace Adhara.Api.Tests.Controllers;
 
 public class CustomersControllerTests
 {
-    private readonly Mock<Services.ICustomerService> _mockService;
+    private readonly Mock<ICustomerService> _mockService;
     private readonly CustomersController _controller;
 
     public CustomersControllerTests()
     {
-        _mockService = new Mock<Services.ICustomerService>();
+        _mockService = new Mock<ICustomerService>();
 
         _controller = new CustomersController(_mockService.Object);
     }

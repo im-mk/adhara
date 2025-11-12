@@ -92,6 +92,8 @@ static void AddDependencies(WebApplicationBuilder builder)
     builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
     builder.Services.AddScoped<IOrderLinesRepository, OrderLinesRepository>();
     builder.Services.AddScoped<IOrderService, OrderService>();
+    builder.Services.AddScoped<ICountriesService, CountriesService>();
+    builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
     builder.Services.AddScoped<ICustomersRepository, CustomersRepository>();
     builder.Services.AddScoped<IAddressesRepository, AddressesRepository>();
     builder.Services.AddScoped<ICustomerAddressesRepository, CustomerAddressesRepository>();

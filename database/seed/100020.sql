@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset user:00001
+--changeset user:00020
 --comment: insert data into order statues table
 
 INSERT INTO order_statuses
@@ -49,3 +49,39 @@ VALUES
     ('A00004', NOW(), 4, 4.56, 4),
     ('A00005', NOW(), 5, 5.67, 5);
     
+-- Insert sample addresses
+INSERT INTO addresses
+    (id, address_line1, address_line2, address_line3, address_line4, postcode, country)
+VALUES
+    (1, '123 Main St', NULL, NULL, NULL, '10001', 'US'),
+    (2, '456 Oak Ave', NULL, NULL, NULL, '20002', 'US'),
+    (3, '789 Pine Rd', NULL, NULL, NULL, '30003', 'US'),
+    (4, '321 Elm St', NULL, NULL, NULL, '40004', 'US'),
+    (5, '654 Maple Ln', NULL, NULL, NULL, '50005', 'US');
+
+SELECT setval(pg_get_serial_sequence('public.addresses','id'), COALESCE((SELECT MAX(id) FROM public.addresses), 1), true);
+
+-- Map customers to addresses (customer_addresses)
+INSERT INTO customer_addresses
+    (id, customer_id, address_id, address_type)
+VALUES
+    (1, 1, 1, 'Billing'),
+    (2, 2, 2, 'Billing'),
+    (3, 3, 3, 'Billing'),
+    (4, 4, 4, 'Billing'),
+    (5, 5, 5, 'Billing');
+
+SELECT setval(pg_get_serial_sequence('public.customer_addresses','id'), COALESCE((SELECT MAX(id) FROM public.customer_addresses), 1), true);
+
+-- Insert sample order lines (one per order)
+INSERT INTO order_lines
+    (id, order_id, product_id, quantity, price, total)
+VALUES
+    (1, 1, 1, 1, 1.23, 1.23),
+    (2, 2, 2, 1, 2.34, 2.34),
+    (3, 3, 3, 1, 3.45, 3.45),
+    (4, 4, 4, 1, 4.56, 4.56),
+    (5, 5, 5, 1, 5.67, 5.67);
+
+SELECT setval(pg_get_serial_sequence('public.orders','id'), COALESCE((SELECT MAX(id) FROM public.orders), 1), true);
+SELECT setval(pg_get_serial_sequence('public.order_lines','id'), COALESCE((SELECT MAX(id) FROM public.order_lines), 1), true);

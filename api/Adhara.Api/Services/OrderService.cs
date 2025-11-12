@@ -8,9 +8,10 @@ namespace Adhara.Api.Services;
 
 public class OrderService : IOrderService
 {
-    private readonly System.Data.IDbConnection _dbConnection;
     private readonly IOrdersRepository _ordersRepository;
     private readonly IOrderLinesRepository _orderLinesRepository;
+
+    private readonly System.Data.IDbConnection _dbConnection;
 
     public OrderService(
         System.Data.IDbConnection dbConnection,
@@ -80,32 +81,7 @@ public class OrderService : IOrderService
 
     public async Task<IEnumerable<Order>> GetAllOrdersAsync(DateOnly? startDate, DateOnly? endDate)
     {
-        // If no date filters provided, return all orders directly from DB here (service owns DB logic now).
-        if (startDate == null && endDate == null)
-        {
-            return await _dbConnection.QueryAsync<Order>("SELECT * FROM public.orders");
-        }
-
-        // Build query with optional clauses
-        var sql = "SELECT * FROM public.orders";
-        var where = new List<string>();
-        object? parameters = null;
-
-        DateTime? start = startDate?.ToDateTime(System.TimeOnly.MinValue);
-        DateTime? end = endDate != null ? endDate.Value.AddDays(1).ToDateTime(System.TimeOnly.MinValue) : null;
-
-        if (start != null)
-            where.Add("order_date >= @start");
-        if (end != null)
-            where.Add("order_date < @end");
-
-        if (where.Count > 0)
-        {
-            sql += " WHERE " + string.Join(" AND ", where);
-            parameters = new { start, end };
-        }
-
-        return await _dbConnection.QueryAsync<Order>(sql, parameters);
+        return await _ordersRepository.GetAll(startDate, endDate);
     }
 
     public async Task<bool> DeleteOrderAsync(int orderId)
