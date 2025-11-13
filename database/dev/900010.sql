@@ -1,19 +1,7 @@
 --liquibase formatted sql
 
---changeset user:00020
---comment: insert data into order statues table
-
-INSERT INTO order_statuses
-    (id, status_name, status_description)
-VALUES
-    (1, 'Pending', 'Order has been placed but not yet processed.'),
-    (2, 'Processing', 'Order is currently being processed.'),
-    (3, 'Shipped', 'Order has been shipped to the customer.'),
-    (4, 'Delivered', 'Order has been delivered to the customer.'),
-    (5, 'Cancelled', 'Order has been cancelled.'),
-    (6, 'Returned', 'Order has been returned by the customer.');
-
-SELECT setval(pg_get_serial_sequence('public.order_statuses','id'), COALESCE((SELECT MAX(id) FROM public.order_statuses), 1), true);
+--changeset user:90010
+--comment: insert sample data data
 
 -- Insert sample products
 INSERT INTO products
@@ -48,7 +36,9 @@ VALUES
     ('A00003', NOW(), 3, 3.45, 3),
     ('A00004', NOW(), 4, 4.56, 4),
     ('A00005', NOW(), 5, 5.67, 5);
-    
+
+SELECT setval(pg_get_serial_sequence('public.orders','id'), COALESCE((SELECT MAX(id) FROM public.orders), 1), true);
+
 -- Insert sample addresses
 INSERT INTO addresses
     (id, address_line1, address_line2, address_line3, address_line4, postcode, country)
@@ -83,5 +73,4 @@ VALUES
     (4, 4, 4, 1, 4.56, 4.56),
     (5, 5, 5, 1, 5.67, 5.67);
 
-SELECT setval(pg_get_serial_sequence('public.orders','id'), COALESCE((SELECT MAX(id) FROM public.orders), 1), true);
 SELECT setval(pg_get_serial_sequence('public.order_lines','id'), COALESCE((SELECT MAX(id) FROM public.order_lines), 1), true);
