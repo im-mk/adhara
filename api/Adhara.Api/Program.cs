@@ -5,6 +5,7 @@ using Adhara.Api.Middleware;
 using Dapper.FluentMap;
 using Adhara.Api.Entities.Mappings;
 using Adhara.Api.Services;
+using ZiggyCreatures.Caching.Fusion;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,13 @@ builder.Services.AddOpenApi(options =>
 });
 
 AddDependencies(builder);
+
+builder.Services.AddFusionCache()
+    .WithDefaultEntryOptions(new FusionCacheEntryOptions
+    {
+        Duration = TimeSpan.FromDays(1)
+    });
+
 
 builder.Services.AddHealthChecks();
 builder.Services.AddCors(options =>

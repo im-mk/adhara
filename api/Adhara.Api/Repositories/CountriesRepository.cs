@@ -1,20 +1,28 @@
 using Dapper;
 using Adhara.Api.Entities;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace Adhara.Api.Repositories;
 
-public class CountriesRepository : ICountriesRepository
+public class CountriesRepository(
+    System.Data.IDbConnection dbConnection,
+    IFusionCache fusionCache) : ICountriesRepository
 {
-    private readonly System.Data.IDbConnection _dbConnection;
-
-    public CountriesRepository(System.Data.IDbConnection dbConnection)
-    {
-        _dbConnection = dbConnection;
-    }
-
     public async Task<IEnumerable<Country>> GetAllAsync()
     {
-        var sql = "SELECT id AS Id, name AS Name FROM public.countries ORDER BY name";
-        return await _dbConnection.QueryAsync<Country>(sql);
+        const string cacheKey = "countries:all";
+
+        return await fusionCache.GetOrSetAsync(
+            cacheKey,
+            async _ => await LoadCountriesFromDatabaseAsync(),
+            TimeSpan.FromDays(1)
+        );
+    }
+
+    private async Task<List<Country>> LoadCountriesFromDatabaseAsync()
+    {
+        const string sql = @"SELECT id AS Id, name AS Name FROM public.countries ORDER BY name";
+        var rows = await dbConnection.QueryAsync<Country>(sql);
+        return rows.ToList();
     }
 }
