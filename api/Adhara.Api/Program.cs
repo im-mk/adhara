@@ -6,8 +6,17 @@ using Dapper.FluentMap;
 using Adhara.Api.Entities.Mappings;
 using Adhara.Api.Services;
 using ZiggyCreatures.Caching.Fusion;
+using Serilog;
+using Adhara.Api.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog early so it captures startup logs
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 

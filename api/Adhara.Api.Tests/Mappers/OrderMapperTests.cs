@@ -19,7 +19,7 @@ public class OrderMapperTests
         Assert.Equal(req.TotalAmount, order.TotalAmount);
         Assert.Equal(req.CustomerId, order.CustomerId);
         Assert.Equal(1, order.OrderStatusId);
-        Assert.NotNull(order.OrderDate);
+        Assert.NotEqual(default(DateTime), order.OrderDate);
         Assert.Matches("^A\\d{5}$", order.OrderNumber);
     }
 }
