@@ -10,46 +10,13 @@ using ZiggyCreatures.Caching.Fusion;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-// https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi(options =>
-{
-    options.AddDocumentTransformer((document, context, cancellationToken) =>
-    {
-        document.Info = new()
-        {
-            Title = "Adhara Service",
-            Version = "v1",
-            Description = "Adhara API - Manage orders.",
-        };
-        document.Servers.Clear();
-        document.Servers.Add(new Microsoft.OpenApi.Models.OpenApiServer
-        {
-            Url = "http://localhost:8080",
-            Description = "Adhara API- Localhost"
-        });
-        return Task.CompletedTask;
-    });
-});
 
+AddOpenApi(builder);
 AddDependencies(builder);
-
-builder.Services.AddFusionCache()
-    .WithDefaultEntryOptions(new FusionCacheEntryOptions
-    {
-        Duration = TimeSpan.FromDays(1)
-    });
-
+AddFusionCache(builder);
 
 builder.Services.AddHealthChecks();
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins("http://localhost:8090")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
+AddCors(builder);
 
 FluentMapper.Initialize(config =>
 {
@@ -70,14 +37,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/openapi/v1.json", "v1");
-        options.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
+        options.RoutePrefix = string.Empty;
     });
 }
 app.MapHealthChecks("/health");
 
 // app.UseHttpsRedirection();
 
-// Global exception handler middleware (returns 500 JSON on unhandled exceptions)
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseAuthorization();
@@ -106,4 +72,51 @@ static void AddDependencies(WebApplicationBuilder builder)
     builder.Services.AddScoped<IAddressesRepository, AddressesRepository>();
     builder.Services.AddScoped<ICustomerAddressesRepository, CustomerAddressesRepository>();
     builder.Services.AddScoped<ICustomerService, CustomerService>();
+}
+
+static void AddOpenApi(WebApplicationBuilder builder)
+{
+    builder.Services.AddOpenApi(options =>
+    {
+        options.AddDocumentTransformer((document, context, cancellationToken) =>
+        {
+            document.Info = new()
+            {
+                Title = "Adhara Service",
+                Version = "v1",
+                Description = "Adhara API - Manage orders.",
+            };
+            document.Servers =
+            [
+                new Microsoft.OpenApi.OpenApiServer
+            {
+                Url = "http://localhost:8080",
+                Description = "Adhara API- Localhost"
+            },
+        ];
+            return Task.CompletedTask;
+        });
+    });
+}
+
+static void AddFusionCache(WebApplicationBuilder builder)
+{
+    builder.Services.AddFusionCache()
+        .WithDefaultEntryOptions(new FusionCacheEntryOptions
+        {
+            Duration = TimeSpan.FromDays(1)
+        });
+}
+
+static void AddCors(WebApplicationBuilder builder)
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins("http://localhost:8090")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+    });
 }

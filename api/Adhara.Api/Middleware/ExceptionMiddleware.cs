@@ -40,7 +40,6 @@ public class ExceptionMiddleware
             }
             else
             {
-                // If response already started, we can't change headers — just rethrow so server handles it
                 throw;
             }
         }
