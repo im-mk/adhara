@@ -1,10 +1,10 @@
-using Moq;
 using Adhara.Api.Controllers;
-using Adhara.Api.Repositories;
-using Microsoft.AspNetCore.Mvc;
 using Adhara.Api.Entities;
+using Adhara.Api.Models;
 using Adhara.Api.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace Adhara.Api.Tests.Controllers;
 
@@ -27,9 +27,9 @@ public class OrdersControllerTests
     {
         // Arrange
         var orderId = 1;
-        var expectedOrder = new Order();
+        var expectedOrder = new OrderDetailsResponse { Order = new Order() };
         _mockOrderService
-            .Setup(s => s.GetOrderAsync(orderId))
+            .Setup(s => s.GetOrder(orderId))
             .ReturnsAsync(expectedOrder);
 
         // Act
@@ -46,8 +46,8 @@ public class OrdersControllerTests
         // Arrange
         var orderId = 1;
         _mockOrderService
-            .Setup(s => s.GetOrderAsync(orderId))
-            .ReturnsAsync(default(Order?));
+            .Setup(s => s.GetOrder(orderId))
+            .ReturnsAsync(default(OrderDetailsResponse?));
 
         // Act
         var result = await _controller.Get(orderId);
@@ -66,22 +66,22 @@ public class OrdersControllerTests
             CustomerId = 10,
             OrderLines = new List<Models.OrderItem>
             {
-                new Models.OrderItem { ProductId = 5, Quantity = 2, UnitPrice = 12.50m }
+                new Models.OrderItem { ProductId = 5, Quantity = 2 }
             }
         };
 
-        var expectedOrder = new Order { Id = 42, OrderNumber = "A12345" };
-        _mockOrderService.Setup(s => s.CreateOrderAsync(request)).ReturnsAsync(expectedOrder);
-        _mockOrderService.Setup(s => s.UpdateOrderAsync(It.IsAny<int>(), It.IsAny<Models.UpdateOrderRequest>())).ReturnsAsync(true);
+        var expectedOrderEntity = new Order { Id = 42, OrderNumber = "A12345" };
+        var expectedCreated = new Models.OrderCreatedResponse(orderId: expectedOrderEntity.Id, orderNumber: expectedOrderEntity.OrderNumber);
+        _mockOrderService.Setup(s => s.CreateOrder(request)).ReturnsAsync(expectedCreated);
 
         // Act
         var result = await _controller.Create(request);
 
         // Assert
         var created = Assert.IsType<CreatedAtActionResult>(result.Result);
-        var returned = Assert.IsType<Order>(created.Value);
-        Assert.Equal(expectedOrder.Id, returned.Id);
-        Assert.Equal(expectedOrder.OrderNumber, returned.OrderNumber);
+        var returned = Assert.IsType<Models.OrderCreatedResponse>(created.Value);
+        Assert.Equal(expectedOrderEntity.Id, returned.OrderId);
+        Assert.Equal(expectedOrderEntity.OrderNumber, returned.OrderNumber);
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class OrdersControllerTests
             TotalAmount = 50m,
         };
 
-        _mockOrderService.Setup(s => s.UpdateOrderAsync(orderId, request)).ReturnsAsync(true);
+        _mockOrderService.Setup(s => s.UpdateOrder(orderId, request)).ReturnsAsync(true);
 
         // Act
         var result = await _controller.Update(orderId, request);
@@ -109,7 +109,7 @@ public class OrdersControllerTests
     {
         // Arrange
         var orderId = 7;
-        _mockOrderService.Setup(s => s.DeleteOrderAsync(orderId)).ReturnsAsync(true);
+        _mockOrderService.Setup(s => s.DeleteOrder(orderId)).ReturnsAsync(true);
 
         // Act
         var result = await _controller.Delete(orderId);

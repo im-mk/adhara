@@ -1,6 +1,5 @@
-using Adhara.Api.Entities;
-using Dapper;
 using System.Data;
+using Dapper;
 
 namespace Adhara.Api.Repositories;
 

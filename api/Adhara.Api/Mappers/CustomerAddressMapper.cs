@@ -1,5 +1,3 @@
-using Adhara.Api.Entities;
-
 namespace Adhara.Api.Mappers;
 
 public static class CustomerAddressMapper

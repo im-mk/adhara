@@ -1,6 +1,6 @@
+using System.Data;
 using Adhara.Api.Entities;
 using Dapper;
-using System.Data;
 
 namespace Adhara.Api.Repositories;
 
@@ -17,5 +17,15 @@ public class OrderLinesRepository(
             RETURNING id;";
 
         return _dbConnection.QuerySingleAsync<int>(sql, orderLine, transaction);
+    }
+
+    public Task<IEnumerable<OrderLine>> GetByOrderId(int orderId)
+    {
+        const string sql = @"
+            SELECT id AS Id, order_id AS OrderId, product_id AS ProductId, quantity AS Quantity, price AS Price, total AS Total
+            FROM public.order_lines
+            WHERE order_id = @OrderId;";
+
+        return _dbConnection.QueryAsync<OrderLine>(sql, new { OrderId = orderId });
     }
 }

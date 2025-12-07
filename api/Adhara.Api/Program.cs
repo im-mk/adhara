@@ -1,13 +1,10 @@
 using System.Data;
-using Npgsql;
-using Adhara.Api.Repositories;
 using Adhara.Api.Middleware;
-using Dapper.FluentMap;
-using Adhara.Api.Entities.Mappings;
+using Adhara.Api.Repositories;
 using Adhara.Api.Services;
-using ZiggyCreatures.Caching.Fusion;
+using Npgsql;
 using Serilog;
-using Adhara.Api.Controllers;
+using ZiggyCreatures.Caching.Fusion;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,16 +24,7 @@ AddFusionCache(builder);
 builder.Services.AddHealthChecks();
 AddCors(builder);
 
-FluentMapper.Initialize(config =>
-{
-    config.AddMap(new OrderMap());
-    config.AddMap(new CustomerMap());
-    config.AddMap(new AddressMap());
-    config.AddMap(new OrderLineMap());
-    config.AddMap(new OrderStatusMap());
-    config.AddMap(new ProductMap());
-    config.AddMap(new CustomerAddressMap());
-});
+Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 var app = builder.Build();
 
@@ -74,12 +62,15 @@ static void AddDependencies(WebApplicationBuilder builder)
 
     builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
     builder.Services.AddScoped<IOrderLinesRepository, OrderLinesRepository>();
-    builder.Services.AddScoped<IOrderService, OrderService>();
-    builder.Services.AddScoped<ICountriesService, CountriesService>();
     builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
     builder.Services.AddScoped<ICustomersRepository, CustomersRepository>();
     builder.Services.AddScoped<IAddressesRepository, AddressesRepository>();
+    builder.Services.AddScoped<IProductRepository, ProductRepository>();
+    builder.Services.AddScoped<IOutboxRepository, OutboxRepository>();
     builder.Services.AddScoped<ICustomerAddressesRepository, CustomerAddressesRepository>();
+
+    builder.Services.AddScoped<IOrderService, OrderService>();
+    builder.Services.AddScoped<ICountriesService, CountriesService>();
     builder.Services.AddScoped<ICustomerService, CustomerService>();
 }
 

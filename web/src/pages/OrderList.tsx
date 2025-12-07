@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import OrderDetails from "./OrderDetails";
-import { Order, OrdersService } from "../api";
+import { Order, OrderListResponse, OrdersService } from "../api";
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -17,21 +17,21 @@ import Button from "@mui/material/Button";
 
 const OrderList: React.FC = () => {
 
-    const [orders, setOrders] = useState<Order[]>([]);
+    const [orders, setOrders] = useState<OrderListResponse[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [selectedOrderId, setSelectedOrderId] = useState<number | undefined>(undefined);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
-    const fetchOrders = async () => {
-        try {
-            const orders = await OrdersService.getAll('2023-01-01', '2030-01-01');
-            setOrders(orders);
-        } catch {
-            setError("Could not fetch orders");
-        }
-    };
-
     useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const orderData = await OrdersService.getList('2023-01-01', '2030-01-01');
+                setOrders(orderData);
+            } catch {
+                setError("Could not fetch orders");
+            }
+        };
+
         fetchOrders();
     }, []);
 
@@ -70,8 +70,7 @@ const OrderList: React.FC = () => {
                                 </TableCell>
                                 <TableCell align="right">{row.orderDate}</TableCell>
                                 <TableCell align="right">{row.orderStatusId}</TableCell>
-                                <TableCell align="right">{row.totalAmount}</TableCell>
-                                <TableCell align="right">{row.customerId}</TableCell>
+                                <TableCell align="right">{row.totalAmount}</TableCell>                                
                             </TableRow>
                         ))}
                     </TableBody>

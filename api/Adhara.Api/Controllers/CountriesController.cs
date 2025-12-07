@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
-using Dapper;
 using Adhara.Api.Entities;
 using Adhara.Api.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Adhara.Api.Controllers;
 

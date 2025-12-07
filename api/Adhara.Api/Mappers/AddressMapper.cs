@@ -1,4 +1,3 @@
-using Adhara.Api.Entities;
 using Adhara.Api.Models;
 
 namespace Adhara.Api.Mappers;

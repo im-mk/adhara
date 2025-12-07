@@ -1,2 +1,11 @@
 {
+    "version": "0.2.0",
+    "configurations": [        
+        {
+            "name": "Debug - Adhara.Api",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/api/Adhara.Api/Adhara.Api.csproj"
+        },
+    ]
 }

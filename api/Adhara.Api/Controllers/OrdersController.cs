@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
-using Adhara.Api.Repositories;
-using Adhara.Api.Entities;
 using Adhara.Api.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Adhara.Api.Controllers;
 
@@ -13,35 +11,35 @@ public class OrdersController(
 {
     [HttpGet("{orderId}")]
     [EndpointName("GetOrderById")]
-    public async Task<ActionResult<Order>> Get(int orderId)
+    public async Task<ActionResult<OrderDetailsResponse>> Get(int orderId)
     {
-        var result = await orderService.GetOrderAsync(orderId);
+        var result = await orderService.GetOrder(orderId);
         return result != null ? Ok(result) : NotFound();
     }
 
     [HttpGet]
-    [EndpointName("GetAll")]
-    public async Task<ActionResult<IEnumerable<Order>>> GetAll([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+    [EndpointName("GetList")]
+    public async Task<ActionResult<IEnumerable<OrderListResponse>>> GetList([FromQuery] DateOnly? startDate, [FromQuery] DateOnly? endDate)
     {
         logger.LogInformation("Getting all orders between {StartDate} and {EndDate}", startDate, endDate);
-        var result = await orderService.GetAllOrdersAsync(startDate, endDate);
+        var result = await orderService.GetList(startDate, endDate);
         return Ok(result);
     }
 
     [HttpPost]
     [EndpointName("CreateOrder")]
-    public async Task<ActionResult<Order>> Create([FromBody] CreateOrderRequest request)
+    public async Task<ActionResult<OrderCreatedResponse>> Create([FromBody] CreateOrderRequest request)
     {
         logger.LogInformation("Creating a new order");
-        var created = await orderService.CreateOrderAsync(request);
-        return CreatedAtAction(nameof(Get), new { orderId = created.Id }, created);
+        var result = await orderService.CreateOrder(request);
+        return CreatedAtAction(nameof(Get), new { orderId = result.OrderId }, result);
     }
 
     [HttpPut("{orderId}")]
     [EndpointName("UpdateOrder")]
     public async Task<IActionResult> Update(int orderId, [FromBody] UpdateOrderRequest request)
     {
-        var ok = await orderService.UpdateOrderAsync(orderId, request);
+        var ok = await orderService.UpdateOrder(orderId, request);
         return ok ? NoContent() : NotFound();
     }
 
@@ -49,7 +47,7 @@ public class OrdersController(
     [EndpointName("DeleteOrder")]
     public async Task<IActionResult> Delete(int orderId)
     {
-        var ok = await orderService.DeleteOrderAsync(orderId);
+        var ok = await orderService.DeleteOrder(orderId);
         return ok ? NoContent() : NotFound();
     }
 }

@@ -1,4 +1,3 @@
-using Dapper;
 using Adhara.Api.Entities;
 using Adhara.Api.Repositories;
 

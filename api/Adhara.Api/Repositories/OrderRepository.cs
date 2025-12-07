@@ -1,6 +1,7 @@
-using Adhara.Api.Entities;
-using Dapper;
 using System.Data;
+using Adhara.Api.Entities;
+using Adhara.Api.Models;
+using Dapper;
 
 namespace Adhara.Api.Repositories;
 
@@ -15,20 +16,21 @@ public class OrdersRepository(
             "SELECT * FROM orders WHERE id = @orderId", new { orderId });
     }
 
-    public async Task<IEnumerable<Order>> GetAll(DateOnly? startDate, DateOnly? endDate)
+    public async Task<IEnumerable<OrderList>> GetList(DateOnly? startDate, DateOnly? endDate)
     {
         if (startDate == null && endDate == null)
         {
-            return await _dbConnection.QueryAsync<Order>("SELECT * FROM public.orders");
+            return await _dbConnection.QueryAsync<OrderList>(
+                "SELECT o.Id, o.order_number, o.order_date, o.order_status_id, o.total_amount FROM public.orders o");
         }
 
-        var sql = "SELECT * FROM public.orders";
+        var sql = "SELECT o.Id, o.order_number, o.order_date, o.order_status_id, o.total_amount FROM public.orders o";
         var where = new List<string>();
         DateTime? start = startDate?.ToDateTime(TimeOnly.MinValue);
         DateTime? end = endDate != null ? endDate.Value.AddDays(1).ToDateTime(TimeOnly.MinValue) : null;
 
-        if (start != null) where.Add("order_date >= @start");
-        if (end != null) where.Add("order_date < @end");
+        if (start != null) where.Add("o.order_date >= @start");
+        if (end != null) where.Add("o.order_date < @end");
 
         object? parameters = null;
         if (where.Count > 0)
@@ -37,7 +39,7 @@ public class OrdersRepository(
             parameters = new { start, end };
         }
 
-        return await _dbConnection.QueryAsync<Order>(sql, parameters);
+        return await _dbConnection.QueryAsync<OrderList>(sql, parameters);
     }
 
     public Task<int> Insert(Order order, IDbTransaction? transaction = null)

@@ -1,8 +1,7 @@
-using Moq;
-using Adhara.Api.Services;
-using Adhara.Api.Repositories;
 using Adhara.Api.Models;
-using Adhara.Api.Entities;
+using Adhara.Api.Repositories;
+using Adhara.Api.Services;
+using Moq;
 
 namespace Adhara.Api.Tests.Services;
 
@@ -44,7 +43,7 @@ public class CustomerServiceTests
 
         var created = await _service.CreateCustomerAsync(req);
 
-        Assert.Equal(10, created.Id);
+        Assert.Equal(10, created);
         _mockCustomers.Verify(r => r.Insert(It.IsAny<Customer>(), tx.Object), Times.Once);
         _mockAddresses.Verify(r => r.Insert(It.IsAny<Address>(), tx.Object), Times.Exactly(2));
         _mockCustomerAddresses.Verify(r => r.Insert(It.IsAny<CustomerAddress>(), tx.Object), Times.Exactly(2));

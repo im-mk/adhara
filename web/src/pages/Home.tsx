@@ -11,7 +11,7 @@ const Home: React.FC = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const orders = await OrdersService.getAll('2023-01-01', '2030-01-01');
+                const orders = await OrdersService.getList('2023-01-01', '2030-01-01');
                 setTotalOrders(orders.length);
             } catch {
                 setError('Could not fetch orders');

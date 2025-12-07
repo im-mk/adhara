@@ -1,9 +1,7 @@
-using Moq;
 using Adhara.Api.Controllers;
-using Adhara.Api.Repositories;
 using Adhara.Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Adhara.Api.Entities;
+using Moq;
 
 namespace Adhara.Api.Tests.Controllers;
 
@@ -63,14 +61,17 @@ public class CustomersControllerTests
             }
         };
 
-        var createdCustomer = new Customer { Id = 11, FirstName = req.FirstName, LastName = req.LastName };
-        _mockService.Setup(s => s.CreateCustomerAsync(req)).ReturnsAsync(createdCustomer);
+        var createdId = 11;
+        _mockService.Setup(s => s.CreateCustomerAsync(req)).ReturnsAsync(createdId);
 
         var result = await _controller.Create(req);
 
         var created = Assert.IsType<CreatedAtActionResult>(result.Result);
-        var returned = Assert.IsType<Customer>(created.Value);
-        Assert.Equal(11, returned.Id);
+        var returnedValue = created.Value;
+        var idProp = returnedValue!.GetType().GetProperty("customerId");
+        Assert.NotNull(idProp);
+        var idValue = (int)idProp.GetValue(returnedValue)!;
+        Assert.Equal(createdId, idValue);
         _mockService.Verify(s => s.CreateCustomerAsync(req), Times.Once);
     }
 

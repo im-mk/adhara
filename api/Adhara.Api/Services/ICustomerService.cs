@@ -4,7 +4,7 @@ namespace Adhara.Api.Services;
 
 public interface ICustomerService
 {
-    Task<Customer> CreateCustomerAsync(CreateCustomerRequest request);
+    Task<int> CreateCustomerAsync(CreateCustomerRequest request);
     Task<bool> DeleteCustomerAsync(int customerId);
     Task<bool> UpdateCustomerAsync(int customerId, UpdateCustomerRequest request);
     Task<Customer?> GetCustomerAsync(int customerId);

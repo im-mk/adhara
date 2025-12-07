@@ -5,13 +5,13 @@
 
 -- Insert sample products
 INSERT INTO products
-    (id, product_name, product_description)
+    (id, product_name, product_description, unit_price)
 VALUES
-    (1, 'Wireless Mouse', 'Ergonomic wireless mouse with a sleek design'),
-    (2, 'Bluetooth Headphones', 'Over-ear Bluetooth headphones with noise cancellation'),
-    (3, 'Smartphone Case', 'Slim-fit protective case for smartphones'),
-    (4, 'Laptop Sleeve', 'Padded sleeve to protect your laptop from scratches and bumps'),
-    (5, 'Mechanical Keyboard', 'RGB backlit mechanical keyboard with custom switches');
+    (1, 'Wireless Mouse', 'Ergonomic wireless mouse with a sleek design', 19.99),
+    (2, 'Bluetooth Headphones', 'Over-ear Bluetooth headphones with noise cancellation', 59.99),
+    (3, 'Smartphone Case', 'Slim-fit protective case for smartphones', 12.49),
+    (4, 'Laptop Sleeve', 'Padded sleeve to protect your laptop from scratches and bumps', 25.00),
+    (5, 'Mechanical Keyboard', 'RGB backlit mechanical keyboard with custom switches', 89.99);
 
 SELECT setval(pg_get_serial_sequence('public.products','id'), COALESCE((SELECT MAX(id) FROM public.products), 1), true);
 

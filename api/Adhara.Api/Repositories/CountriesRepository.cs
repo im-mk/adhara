@@ -1,5 +1,5 @@
-using Dapper;
 using Adhara.Api.Entities;
+using Dapper;
 using ZiggyCreatures.Caching.Fusion;
 
 namespace Adhara.Api.Repositories;

@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
-using Adhara.Api.Repositories;
-using Adhara.Api.Entities;
 using Adhara.Api.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Adhara.Api.Controllers;
 
@@ -37,8 +35,8 @@ public class CustomersController : ControllerBase
     [EndpointName("CreateCustomer")]
     public async Task<ActionResult<Customer>> Create([FromBody] CreateCustomerRequest request)
     {
-        var created = await _customerService.CreateCustomerAsync(request);
-        return CreatedAtAction(nameof(Get), new { customerId = created.Id }, created);
+        var id = await _customerService.CreateCustomerAsync(request);
+        return CreatedAtAction(nameof(Get), new { customerId = id }, new { customerId = id });
     }
 
     [HttpPut("{customerId}")]

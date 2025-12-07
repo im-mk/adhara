@@ -1,6 +1,6 @@
+using Adhara.Api.Mappers;
 using Adhara.Api.Models;
 using Adhara.Api.Repositories;
-using Adhara.Api.Mappers;
 
 namespace Adhara.Api.Services;
 
@@ -23,7 +23,7 @@ public class CustomerService : ICustomerService
         _customerAddressesRepository = customerAddressesRepository;
     }
 
-    public async Task<Customer> CreateCustomerAsync(CreateCustomerRequest request)
+    public async Task<int> CreateCustomerAsync(CreateCustomerRequest request)
     {
         using var tx = _dbConnection.BeginTransaction();
         try
@@ -56,7 +56,7 @@ public class CustomerService : ICustomerService
 
             tx.Commit();
 
-            return customer;
+            return customer.Id;
         }
         catch
         {
@@ -84,15 +84,13 @@ public class CustomerService : ICustomerService
                 tx.Commit();
                 return true;
             }
-
-            tx.Rollback();
-            return false;
         }
         catch
         {
-            try { tx.Rollback(); } catch { }
+            tx.Rollback();
             throw;
         }
+        return false;
     }
 
     public async Task<bool> UpdateCustomerAsync(int customerId, UpdateCustomerRequest request)

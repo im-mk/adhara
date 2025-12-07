@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS public.products
     id SERIAL NOT NULL,
     product_name VARCHAR(255) NOT NULL,
     product_description TEXT,
+    unit_price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     CONSTRAINT pk_products_id PRIMARY KEY (id)
 );
 

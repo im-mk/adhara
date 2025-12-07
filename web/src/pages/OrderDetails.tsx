@@ -10,7 +10,7 @@ const OrderDetails: React.FC<{ orderId: number }> = ({ orderId }) => {
         const fetchOrder = async () => {
             try {
                 const order = await OrdersService.getOrderById(orderId);
-                setOrderName(order.orderNumber);
+                setOrderName(order.order?.orderNumber);
             } catch {
                 setError("Could not fetch order");
             }
