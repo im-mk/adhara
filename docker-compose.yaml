@@ -43,7 +43,7 @@ services:
     image: postgres:18
     volumes:
       # - db:/data/postgres # enable this line to persist data
-      - ./database/init:/docker-entrypoint-initdb.d
+      - ./api/database/init:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -65,11 +65,11 @@ services:
     # contexts: dev to seed data in dev environment
     command: --defaultsFile=liquibase.properties --contexts=dev update
     volumes:
-      - ./database/liquibase.properties:/liquibase/liquibase.properties
-      - ./database/changelog.yaml:/liquibase/changelog/changelog.yaml
-      - ./database/sql:/liquibase/changelog/sql
-      - ./database/seed:/liquibase/changelog/seed
-      - ./database/dev:/liquibase/changelog/dev
+      - ./api/database/liquibase.properties:/liquibase/liquibase.properties
+      - ./api/database/changelog.yaml:/liquibase/changelog/changelog.yaml
+      - ./api/database/sql:/liquibase/changelog/sql
+      - ./api/database/seed:/liquibase/changelog/seed
+      - ./api/database/dev:/liquibase/changelog/dev
     environment:
       - LIQUIBASE_COMMAND_URL=jdbc:postgresql://adhara-db:5432/${POSTGRES_DB}
       - LIQUIBASE_COMMAND_USERNAME=${POSTGRES_USER}
