@@ -5,7 +5,7 @@ start-pgadmin:
 
 # Order Service
 start-db:
-	docker compose up -d --build db pgadmin liquibase
+	docker compose up -d db pgadmin liquibase
 
 build-api:
 	docker build -f api/Adhara.Api/Dockerfile --target build -t adhara-api-build ./api
@@ -14,8 +14,8 @@ test-api:
 	docker build -f api/Adhara.Api/Dockerfile --target test -t adhara-api-test ./api
 	docker run --rm adhara-api-test
 
-start-api: test-api build-api
-	docker compose up -d --build db pgadmin liquibase api
+start-api: test-api build-api start-db
+	docker compose up -d api
 
 newman-test:
 	docker compose run --rm newman
@@ -23,7 +23,7 @@ newman-test:
 # User Service
 
 start-user-db:
-	docker compose up -d --build user-service-db user-service-liquibase
+	docker compose up -d user-service-db user-service-liquibase
 
 build-user-api:
 	docker build -f user-service/Dockerfile --target build -t user-service ./user-service
@@ -32,8 +32,8 @@ test-user-api:
 	docker build -f user-service/Dockerfile --target test -t user-service-test ./user-service
 	docker run --rm user-service-test
 
-start-user-api: test-user-api build-user-api
-	docker compose up -d --build user-service-db user-service-liquibase user-service
+start-user-api: test-user-api build-user-api start-user-db
+	docker compose up -d user-service
 
 # Web Application
 build-web:
@@ -44,7 +44,7 @@ test-web:
 	docker run --rm adhara-web-test
 
 # All Services
-start: start-db test-web test-api build-web build-api start-user-api
+start: start-api start-user-api
 	docker compose up -d --build
 
 stop:

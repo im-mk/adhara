@@ -1,18 +1,15 @@
-# build
-FROM node:lts-slim AS build
+FROM node:lts-slim AS base
 WORKDIR /app
-
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
 
-# Test stage
-FROM build AS test
-WORKDIR /app
+FROM base AS test
 RUN npm run test
 
-# production
+FROM base AS build
+RUN npm run build
+
 FROM nginx:stable-alpine AS production
 WORKDIR /usr/share/nginx/html
 
