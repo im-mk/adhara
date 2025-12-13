@@ -3,9 +3,9 @@ package services
 import (
 	"errors"
 
-	"github.com/im-mk/user-service/src/models"
-	"github.com/im-mk/user-service/src/repositories"
-	"github.com/im-mk/user-service/src/utils"
+	"github.com/im-mk/adhara/user-service/models"
+	"github.com/im-mk/adhara/user-service/repositories"
+	"github.com/im-mk/adhara/user-service/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 

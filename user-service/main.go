@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/im-mk/user-service/src/controllers"
-	_ "github.com/im-mk/user-service/src/docs"
-	"github.com/im-mk/user-service/src/repositories"
-	"github.com/im-mk/user-service/src/services"
-	"github.com/im-mk/user-service/src/utils"
+	"github.com/im-mk/adhara/user-service/controllers"
+	_ "github.com/im-mk/adhara/user-service/docs"
+	"github.com/im-mk/adhara/user-service/repositories"
+	"github.com/im-mk/adhara/user-service/services"
+	"github.com/im-mk/adhara/user-service/utils"
 )
 
 // @title						user-service

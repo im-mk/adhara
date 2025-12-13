@@ -1,4 +1,4 @@
-FROM node:lts-slim AS base
+FROM node:24-slim AS base
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -10,7 +10,7 @@ RUN npm run test
 FROM base AS build
 RUN npm run build
 
-FROM nginx:stable-alpine AS production
+FROM nginx:1.28-alpine AS production
 WORKDIR /usr/share/nginx/html
 
 RUN apk add --no-cache curl

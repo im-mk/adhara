@@ -1,4 +1,4 @@
-module github.com/im-mk/user-service/src
+module github.com/im-mk/adhara/user-service
 
 go 1.25
 

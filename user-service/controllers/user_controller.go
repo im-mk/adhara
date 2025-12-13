@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/im-mk/user-service/src/models"
-	"github.com/im-mk/user-service/src/services"
+	"github.com/im-mk/adhara/user-service/models"
+	"github.com/im-mk/adhara/user-service/services"
 	_ "github.com/lib/pq"
 )
 

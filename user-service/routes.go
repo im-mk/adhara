@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/im-mk/user-service/src/controllers"
-	_ "github.com/im-mk/user-service/src/docs"
+	"github.com/im-mk/adhara/user-service/controllers"
+	_ "github.com/im-mk/adhara/user-service/docs"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )

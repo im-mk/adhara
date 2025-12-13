@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/im-mk/user-service/src/docs"
+	_ "github.com/im-mk/adhara/user-service/docs"
 )
 
 func initDB(dbConnection DBConfig) *sql.DB {

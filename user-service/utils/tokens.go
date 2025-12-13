@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/im-mk/user-service/src/models"
+	"github.com/im-mk/adhara/user-service/models"
 )
 
 type JWTGenerator func(username string, jwtKey []byte) (string, error)

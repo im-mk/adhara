@@ -3,7 +3,7 @@ package repositories
 import (
 	"database/sql"
 
-	"github.com/im-mk/user-service/src/models"
+	"github.com/im-mk/adhara/user-service/models"
 )
 
 type UserRepositoryInterface interface {

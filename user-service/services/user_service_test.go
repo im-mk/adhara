@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/im-mk/user-service/src/models"
+	"github.com/im-mk/adhara/user-service/models"
 )
 
 type MockUserRepository struct {
