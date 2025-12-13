@@ -1,5 +1,6 @@
 .PHONY: start-db build-api test-api start-api newman-test build-web test-web start stop
 
+# Order Service
 start-db:
 	docker compose up -d --build db pgadmin liquibase
 
@@ -16,6 +17,23 @@ start-api: test-api build-api
 newman-test:
 	docker compose run --rm newman
 
+# User Service
+
+start-user-db:
+	docker compose up -d --build user-service-db user-service-liquibase
+
+build-user-api:
+	docker build -f user-service/Dockerfile --target build -t user-service ./user-service
+
+# test-user-api:
+# 	docker build -f user-service/Dockerfile --target test -t user-service-test ./user-service
+# 	docker run --rm user-service-test
+
+# start-user-api: test-user-api build-user-api
+start-user-api: build-user-api
+	docker compose up -d --build user-service-db user-service-liquibase user-service
+
+# Web Application
 build-web:
 	docker build -f web/Dockerfile --target build -t adhara-web-build ./web
 
@@ -23,7 +41,8 @@ test-web:
 	docker build -f web/Dockerfile --target test -t adhara-web-test ./web
 	docker run --rm adhara-web-test
 
-start: start-db test-web test-api build-web build-api
+# All Services
+start: start-db test-web test-api build-web build-api start-user-api
 	docker compose up -d --build
 
 stop:
