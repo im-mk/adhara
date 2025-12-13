@@ -1,13 +1,13 @@
 {
     "version": "0.2.0",
-    "configurations": [        
+    "configurations": [
         {
             "name": "Debug - Adhara.Api",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/api/Adhara.Api/Adhara.Api.csproj"
+            "projectPath": "${workspaceFolder}/order-service/Adhara.Api/Adhara.Api.csproj"
         },
-         {
+        {
             "name": "Debug - User Service",
             "type": "go",
             "request": "launch",

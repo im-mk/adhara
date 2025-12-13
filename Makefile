@@ -8,10 +8,10 @@ start-db:
 	docker compose up -d db pgadmin liquibase
 
 build-api:
-	docker build -f api/Adhara.Api/Dockerfile --target build -t adhara-api-build ./api
+	docker build -f order-service/Adhara.Api/Dockerfile --target build -t adhara-api-build ./order-service
 
 test-api:
-	docker build -f api/Adhara.Api/Dockerfile --target test -t adhara-api-test ./api
+	docker build -f order-service/Adhara.Api/Dockerfile --target test -t adhara-api-test ./order-service
 	docker run --rm adhara-api-test
 
 start-api: test-api build-api start-db
