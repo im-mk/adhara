@@ -28,12 +28,11 @@ start-user-db:
 build-user-api:
 	docker build -f user-service/Dockerfile --target build -t user-service ./user-service
 
-# test-user-api:
-# 	docker build -f user-service/Dockerfile --target test -t user-service-test ./user-service
-# 	docker run --rm user-service-test
+test-user-api:
+	docker build -f user-service/Dockerfile --target test -t user-service-test ./user-service
+	docker run --rm user-service-test
 
-# start-user-api: test-user-api build-user-api
-start-user-api: build-user-api
+start-user-api: test-user-api build-user-api
 	docker compose up -d --build user-service-db user-service-liquibase user-service
 
 # Web Application
