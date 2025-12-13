@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug - Adhara.Api",
+            "name": "Debug - Orders.Api",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/order-service/Adhara.Api/Adhara.Api.csproj"
+            "projectPath": "${workspaceFolder}/order-service/Orders.Api/Orders.Api.csproj"
         },
         {
             "name": "Debug - User Service",

@@ -1,5 +1,5 @@
 
-# Adhara
+# Orders
 
 React app with dotnet api and postgres database controller by liquibase.
 
@@ -37,7 +37,7 @@ See the Makefile and `docker-compose.yaml` for more commands and credentials.
 
 ## Project Structure and Conventions
 
-This section summarizes the architecture, workflows, and conventions specific to Adhara to help contributors get productive quickly.
+This section summarizes the architecture, workflows, and conventions specific to Orders to help contributors get productive quickly.
 
 ### Architecture Overview
 
@@ -47,7 +47,7 @@ This section summarizes the architecture, workflows, and conventions specific to
   - `web/`: Vite + React TypeScript frontend
   - `database/`: Liquibase-managed PostgreSQL migrations and seed data
 
-- **Data flow**: Frontend (`web/`) calls backend (`api/Adhara.Api/`) via REST endpoints. Backend persists to PostgreSQL, schema managed by Liquibase.
+- **Data flow**: Frontend (`web/`) calls backend (`api/Orders.Api/`) via REST endpoints. Backend persists to PostgreSQL, schema managed by Liquibase.
 - **Service boundaries**: API logic is organized by domain (e.g., Orders, Customers) with clear separation between Controllers, Entities, and Repositories.
 
 ## Developer Workflows
@@ -55,7 +55,7 @@ This section summarizes the architecture, workflows, and conventions specific to
 - **Build & Run**:
 
   - Use `docker-compose up` to start the full stack (API, DB, pgAdmin, frontend)
-  - For local API dev: `dotnet run --project api/Adhara.Api/Adhara.Api.csproj`
+  - For local API dev: `dotnet run --project api/Orders.Api/Orders.Api.csproj`
   - For frontend dev: `cd web && npm install && npm run dev`
 
 - **Database**:
@@ -65,16 +65,16 @@ This section summarizes the architecture, workflows, and conventions specific to
 
 - **Testing**:
 
-  - API: `dotnet test api/Adhara.Api.Tests/Adhara.Api.Tests.csproj`
+  - API: `dotnet test api/Orders.Api.Tests/Orders.Api.Tests.csproj`
   - Frontend: `cd web && npm test` (see `web/pages/Sample.test.ts`)
 
 ## Project Conventions & Patterns
 
 - **API**:
 
-  - Controllers in `api/Adhara.Api/Controllers/` (e.g., `OrdersController.cs`)
-  - Entities in `api/Adhara.Api/Entities/` map to DB tables; mapping in `Entities/Mappings/`
-  - Repositories in `api/Adhara.Api/Repositories/` abstract DB access
+  - Controllers in `api/Orders.Api/Controllers/` (e.g., `OrdersController.cs`)
+  - Entities in `api/Orders.Api/Entities/` map to DB tables; mapping in `Entities/Mappings/`
+  - Repositories in `api/Orders.Api/Repositories/` abstract DB access
   - Use dependency injection for services and repositories
 
 - **Frontend**:
@@ -105,4 +105,4 @@ This section summarizes the architecture, workflows, and conventions specific to
 ## References
 
 - See `README.md` in root and in `api/` and `web/` for more details
-- Key files: `docker-compose.yaml`, `api/Adhara.Api/Controllers/`, `web/src/api/services/`, `database/changelog.yaml`
+- Key files: `docker-compose.yaml`, `api/Orders.Api/Controllers/`, `web/src/api/services/`, `database/changelog.yaml`

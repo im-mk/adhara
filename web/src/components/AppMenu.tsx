@@ -46,7 +46,7 @@ const AppMenu: React.FC = () => {
         </Menu>
 
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Adhara
+          Orders
         </Typography>
       </Toolbar>
     </AppBar>

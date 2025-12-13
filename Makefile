@@ -8,14 +8,14 @@ start-db:
 	docker compose up -d db pgadmin liquibase
 
 build-api:
-	docker build -f order-service/Adhara.Api/Dockerfile --target build -t adhara-api-build ./order-service
+	docker build -f order-service/Orders.Api/Dockerfile --target build -t order-service-build ./order-service
 
 test-api:
-	docker build -f order-service/Adhara.Api/Dockerfile --target test -t adhara-api-test ./order-service
-	docker run --rm adhara-api-test
+	docker build -f order-service/Orders.Api/Dockerfile --target test -t order-service-test ./order-service
+	docker run --rm order-service-test
 
 start-api: test-api build-api start-db
-	docker compose up -d api
+	docker compose up -d order-service
 
 newman-test:
 	docker compose run --rm newman
@@ -52,4 +52,4 @@ stop:
 
 clean:
 	docker compose down -v
-	docker rmi adhara-api-build adhara-api-test adhara-web-build adhara-web-test || true
+	docker rmi order-service-build order-service-test adhara-web-build adhara-web-test || true

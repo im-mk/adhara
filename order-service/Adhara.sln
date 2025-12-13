@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adhara.Api", "Adhara.Api\Adhara.Api.csproj", "{FC17E8E8-EB17-4DDA-A2AA-08D4ED51221A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orders.Api", "Orders.Api\Orders.Api.csproj", "{FC17E8E8-EB17-4DDA-A2AA-08D4ED51221A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adhara.Api.Tests", "Adhara.Api.Tests\Adhara.Api.Tests.csproj", "{AD981D29-6619-4830-B1D5-5F159E0F2837}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orders.Api.Tests", "Orders.Api.Tests\Orders.Api.Tests.csproj", "{AD981D29-6619-4830-B1D5-5F159E0F2837}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
