@@ -49,7 +49,7 @@ if (app.Environment.IsDevelopment())
             "Adhara API v1"
         );
 
-        options.RoutePrefix = "swagger"; // or string.Empty
+        options.RoutePrefix = "swagger";
     });
 }
 app.MapHealthChecks("/health");
@@ -76,11 +76,7 @@ static void SetupDb(WebApplicationBuilder builder)
         conn.Open();
         return conn;
     });
-
-
 }
-
-
 
 static void AddFusionCache(WebApplicationBuilder builder)
 {
