@@ -1,5 +1,8 @@
 .PHONY: start-db build-api test-api start-api newman-test build-web test-web start stop
 
+start-pgadmin:
+	docker compose up -d pgadmin
+
 # Order Service
 start-db:
 	docker compose up -d --build db pgadmin liquibase

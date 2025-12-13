@@ -7,5 +7,12 @@
             "request": "launch",
             "projectPath": "${workspaceFolder}/api/Adhara.Api/Adhara.Api.csproj"
         },
+         {
+            "name": "Debug - User Service",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/user-service/."
+        }
     ]
 }

@@ -5,8 +5,6 @@ docs:
 test:
 	go test ./... 
 
-run:
+start:
 	go run .
 	
-build:
-	go test ./... -v && docker build -t user-service .
