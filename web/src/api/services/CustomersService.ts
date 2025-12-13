@@ -15,7 +15,7 @@ export class CustomersService {
      * @throws ApiError
      */
     public static getCustomerById(
-        customerId: number | string,
+        customerId: number,
     ): CancelablePromise<Customer> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -32,8 +32,8 @@ export class CustomersService {
      * @throws ApiError
      */
     public static updateCustomer(
-        customerId: number | string,
-        requestBody: UpdateCustomerRequest,
+        customerId: number,
+        requestBody?: UpdateCustomerRequest,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
@@ -51,7 +51,7 @@ export class CustomersService {
      * @throws ApiError
      */
     public static deleteCustomer(
-        customerId: number | string,
+        customerId: number,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
@@ -77,7 +77,7 @@ export class CustomersService {
      * @throws ApiError
      */
     public static createCustomer(
-        requestBody: CreateCustomerRequest,
+        requestBody?: CreateCustomerRequest,
     ): CancelablePromise<Customer> {
         return __request(OpenAPI, {
             method: 'POST',

@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type UpdateOrderRequest = {
-    orderStatusId?: number | string;
-    totalAmount?: number | string;
+    orderStatusId?: number;
+    totalAmount?: number;
 };
 

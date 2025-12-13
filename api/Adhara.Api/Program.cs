@@ -8,7 +8,6 @@ using ZiggyCreatures.Caching.Fusion;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog early so it captures startup logs
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
@@ -16,9 +15,18 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new()
+    {
+        Title = "Adhara API",
+        Version = "v1"
+    });
+});
 
-AddOpenApi(builder);
-AddDependencies(builder);
+SetupDb(builder);
+AddDomainDependencies(builder);
 AddFusionCache(builder);
 
 builder.Services.AddHealthChecks();
@@ -30,11 +38,18 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger(c =>
+    {
+        c.RouteTemplate = "swagger/{documentName}/swagger.json";
+    });
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/openapi/v1.json", "v1");
-        options.RoutePrefix = string.Empty;
+        options.SwaggerEndpoint(
+            "/swagger/v1/swagger.json",
+            "Adhara API v1"
+        );
+
+        options.RoutePrefix = "swagger"; // or string.Empty
     });
 }
 app.MapHealthChecks("/health");
@@ -42,6 +57,8 @@ app.MapHealthChecks("/health");
 // app.UseHttpsRedirection();
 
 app.UseMiddleware<ExceptionMiddleware>();
+
+app.UseRouting();
 
 app.UseAuthorization();
 
@@ -51,7 +68,7 @@ app.MapControllers();
 
 app.Run();
 
-static void AddDependencies(WebApplicationBuilder builder)
+static void SetupDb(WebApplicationBuilder builder)
 {
     builder.Services.AddScoped<IDbConnection>(sp =>
     {
@@ -60,44 +77,10 @@ static void AddDependencies(WebApplicationBuilder builder)
         return conn;
     });
 
-    builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
-    builder.Services.AddScoped<IOrderLinesRepository, OrderLinesRepository>();
-    builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
-    builder.Services.AddScoped<ICustomersRepository, CustomersRepository>();
-    builder.Services.AddScoped<IAddressesRepository, AddressesRepository>();
-    builder.Services.AddScoped<IProductRepository, ProductRepository>();
-    builder.Services.AddScoped<IOutboxRepository, OutboxRepository>();
-    builder.Services.AddScoped<ICustomerAddressesRepository, CustomerAddressesRepository>();
 
-    builder.Services.AddScoped<IOrderService, OrderService>();
-    builder.Services.AddScoped<ICountriesService, CountriesService>();
-    builder.Services.AddScoped<ICustomerService, CustomerService>();
 }
 
-static void AddOpenApi(WebApplicationBuilder builder)
-{
-    builder.Services.AddOpenApi(options =>
-    {
-        options.AddDocumentTransformer((document, context, cancellationToken) =>
-        {
-            document.Info = new()
-            {
-                Title = "Adhara Service",
-                Version = "v1",
-                Description = "Adhara API - Manage orders.",
-            };
-            document.Servers =
-            [
-                new Microsoft.OpenApi.OpenApiServer
-            {
-                Url = "http://localhost:8080",
-                Description = "Adhara API- Localhost"
-            },
-        ];
-            return Task.CompletedTask;
-        });
-    });
-}
+
 
 static void AddFusionCache(WebApplicationBuilder builder)
 {
@@ -119,4 +102,20 @@ static void AddCors(WebApplicationBuilder builder)
                   .AllowAnyMethod();
         });
     });
+}
+
+static void AddDomainDependencies(WebApplicationBuilder builder)
+{
+    builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
+    builder.Services.AddScoped<IOrderLinesRepository, OrderLinesRepository>();
+    builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
+    builder.Services.AddScoped<ICustomersRepository, CustomersRepository>();
+    builder.Services.AddScoped<IAddressesRepository, AddressesRepository>();
+    builder.Services.AddScoped<IProductRepository, ProductRepository>();
+    builder.Services.AddScoped<IOutboxRepository, OutboxRepository>();
+    builder.Services.AddScoped<ICustomerAddressesRepository, CustomerAddressesRepository>();
+
+    builder.Services.AddScoped<IOrderService, OrderService>();
+    builder.Services.AddScoped<ICountriesService, CountriesService>();
+    builder.Services.AddScoped<ICustomerService, CustomerService>();
 }

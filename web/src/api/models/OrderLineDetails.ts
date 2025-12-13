@@ -3,11 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 export type OrderLineDetails = {
-    id?: number | string;
-    productId?: number | string;
-    productName?: string;
-    quantity?: number | string;
-    price?: number | string;
-    total?: number | string;
+    id?: number;
+    productId?: number;
+    productName?: string | null;
+    quantity?: number;
+    price?: number;
+    total?: number;
 };
 

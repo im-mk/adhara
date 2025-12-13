@@ -3,11 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 export type Order = {
-    id?: number | string;
-    orderNumber?: string;
+    id?: number;
+    orderNumber?: string | null;
     orderDate?: string;
-    orderStatusId?: number | string;
-    totalAmount?: number | string;
-    customerId?: number | string;
+    orderStatusId?: number;
+    totalAmount?: number;
+    customerId?: number;
 };
 

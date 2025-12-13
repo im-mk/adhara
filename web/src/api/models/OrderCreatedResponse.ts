@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type OrderCreatedResponse = {
-    orderId: number | string;
-    orderNumber: string;
+    orderId?: number;
+    orderNumber?: string | null;
 };
 

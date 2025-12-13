@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 export type OrderListResponse = {
-    id?: number | string;
-    orderNumber?: string;
+    id?: number;
+    orderNumber?: string | null;
     orderDate?: string;
-    orderStatusId?: number | string;
-    totalAmount?: number | string;
+    orderStatusId?: number;
+    totalAmount?: number;
 };
 

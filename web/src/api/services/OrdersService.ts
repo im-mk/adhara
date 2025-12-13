@@ -17,7 +17,7 @@ export class OrdersService {
      * @throws ApiError
      */
     public static getOrderById(
-        orderId: number | string,
+        orderId: number,
     ): CancelablePromise<OrderDetailsResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -34,8 +34,8 @@ export class OrdersService {
      * @throws ApiError
      */
     public static updateOrder(
-        orderId: number | string,
-        requestBody: UpdateOrderRequest,
+        orderId: number,
+        requestBody?: UpdateOrderRequest,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
@@ -53,7 +53,7 @@ export class OrdersService {
      * @throws ApiError
      */
     public static deleteOrder(
-        orderId: number | string,
+        orderId: number,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
@@ -88,7 +88,7 @@ export class OrdersService {
      * @throws ApiError
      */
     public static createOrder(
-        requestBody: CreateOrderRequest,
+        requestBody?: CreateOrderRequest,
     ): CancelablePromise<OrderCreatedResponse> {
         return __request(OpenAPI, {
             method: 'POST',

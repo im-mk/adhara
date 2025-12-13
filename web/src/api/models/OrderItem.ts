@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type OrderItem = {
-    productId?: number | string;
-    quantity?: number | string;
+    productId?: number;
+    quantity?: number;
 };
 

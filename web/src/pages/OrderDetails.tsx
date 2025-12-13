@@ -3,7 +3,7 @@ import { OrdersService } from "../api";
 
 
 const OrderDetails: React.FC<{ orderId: number }> = ({ orderId }) => {
-    const [orderName, setOrderName] = useState<string | undefined>(undefined);
+    const [orderName, setOrderName] = useState<string | undefined | null>(undefined);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {

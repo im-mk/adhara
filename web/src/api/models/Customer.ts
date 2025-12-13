@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type Customer = {
-    id?: number | string;
-    firstName?: string;
-    lastName?: string;
+    id?: number;
+    firstName?: string | null;
+    lastName?: string | null;
 };
 

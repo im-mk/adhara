@@ -4,8 +4,8 @@
 /* eslint-disable */
 import type { OrderItem } from './OrderItem';
 export type CreateOrderRequest = {
-    customerId?: number | string;
-    totalAmount?: number | string;
-    orderLines?: Array<OrderItem>;
+    customerId?: number;
+    totalAmount?: number;
+    orderLines?: Array<OrderItem> | null;
 };
 

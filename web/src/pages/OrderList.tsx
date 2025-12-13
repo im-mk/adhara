@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import OrderDetails from "./OrderDetails";
-import { Order, OrderListResponse, OrdersService } from "../api";
+import { OrderListResponse, OrdersService } from "../api";
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -70,7 +70,7 @@ const OrderList: React.FC = () => {
                                 </TableCell>
                                 <TableCell align="right">{row.orderDate}</TableCell>
                                 <TableCell align="right">{row.orderStatusId}</TableCell>
-                                <TableCell align="right">{row.totalAmount}</TableCell>                                
+                                <TableCell align="right">{row.totalAmount}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
