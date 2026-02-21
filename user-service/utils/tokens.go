@@ -10,6 +10,7 @@ import (
 type JWTGenerator func(userId string, username string, jwtKey []byte) (string, error)
 
 func GenerateJWT(userID string, username string, jwtKey []byte) (string, error) {
+
 	claims := models.Claims{
 		UserID:   userID,
 		Username: username,
