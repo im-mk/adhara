@@ -19,12 +19,12 @@ func initDB(dbConnection DBConfig) *sql.DB {
 	)
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Printf("Failed to connect to database: %v", err)
 	}
 
 	// Ensure the database is available
 	if err := db.Ping(); err != nil {
-		log.Fatalf("Failed to ping database: %v", err)
+		log.Printf("Failed to ping database: %v", err)
 	}
 
 	return db

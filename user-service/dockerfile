@@ -12,7 +12,7 @@ ENV CGO_ENABLED=0
 RUN go build -v -o server
 
 FROM alpine:3.23
-ENV GIN_MODE=release
+# ENV GIN_MODE=release
 RUN apk add --no-cache curl
 
 HEALTHCHECK --start-period=10s --interval=30s --timeout=5s \

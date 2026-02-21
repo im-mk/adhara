@@ -7,14 +7,11 @@ start-pgadmin:
 start-db:
 	docker compose up -d db pgadmin liquibase
 
-build-api:
-	docker build -f order-service/Orders.Api/Dockerfile --target build -t order-service-build ./order-service
-
 test-api:
 	docker build -f order-service/Orders.Api/Dockerfile --target test -t order-service-test ./order-service
 	docker run --rm order-service-test
 
-start-api: test-api build-api start-db
+start-api: test-api start-db
 	docker compose up -d order-service
 
 newman-test:
@@ -25,14 +22,11 @@ newman-test:
 start-user-db:
 	docker compose up -d user-service-db user-service-liquibase
 
-build-user-api:
-	docker build -f user-service/Dockerfile --target build -t user-service ./user-service
-
 test-user-api:
 	docker build -f user-service/Dockerfile --target test -t user-service-test ./user-service
 	docker run --rm user-service-test
 
-start-user-api: test-user-api build-user-api start-user-db
+start-user-api: test-user-api start-user-db
 	docker compose up -d user-service
 
 # Web Application

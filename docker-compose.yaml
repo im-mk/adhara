@@ -85,7 +85,6 @@ services:
     build:
       context: ./user-service
       dockerfile: Dockerfile
-    image: user-service
     environment:
       DB_HOST: user-service-db
       DB_PORT: 5432
