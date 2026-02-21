@@ -1,6 +1,7 @@
 package services
 
 import (
+	"crypto/rsa"
 	"errors"
 	"strconv"
 
@@ -12,16 +13,17 @@ import (
 
 type UserService struct {
 	UserRepo    repositories.UserRepositoryInterface
-	JwtKey      []byte
+	PrivateKey  *rsa.PrivateKey
 	GenerateJWT utils.JWTGenerator
+	TokenExpirySecond int
 }
 
-func NewUserService(userRepo repositories.UserRepositoryInterface, jwtKey []byte, generateJWT utils.JWTGenerator) *UserService {
+func NewUserService(userRepo repositories.UserRepositoryInterface, privateKey *rsa.PrivateKey, generateJWT utils.JWTGenerator, tokenExpirySecond int) *UserService {
 	if generateJWT == nil {
 		generateJWT = utils.GenerateJWT
 	}
 
-	return &UserService{UserRepo: userRepo, JwtKey: jwtKey, GenerateJWT: generateJWT}
+	return &UserService{UserRepo: userRepo, PrivateKey: privateKey, GenerateJWT: generateJWT, TokenExpirySecond: tokenExpirySecond}
 }
 
 func (s *UserService) Login(creds models.LoginRequest) (string, error) {
@@ -34,7 +36,7 @@ func (s *UserService) Login(creds models.LoginRequest) (string, error) {
 		return "", errors.New("invalid credentials")
 	}
 
-	token, err := s.GenerateJWT(strconv.Itoa(user.ID), user.Username, s.JwtKey)
+	token, err := s.GenerateJWT(strconv.Itoa(user.ID), user.Username, s.PrivateKey, s.TokenExpirySecond)
 	if err != nil {
 		return "", err
 	}

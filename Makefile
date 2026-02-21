@@ -1,4 +1,11 @@
-.PHONY: start-db build-api test-api start-api newman-test build-web test-web start stop
+.PHONY: start-db build-api test-api start-api newman-test build-web test-web start stop create-keys
+
+create-keys:
+	mkdir -p user-service/.keys
+	mkdir -p order-service/Orders.Api/.keys
+	openssl genrsa -out user-service/.keys/private.pem 2048
+	openssl rsa -in user-service/.keys/private.pem -pubout -out user-service/.keys/public.pem
+	cp user-service/.keys/public.pem order-service/Orders.Api/.keys/public.pem
 
 start-pgadmin:
 	docker compose up -d pgadmin
@@ -31,7 +38,7 @@ test-user-api:
 build-user-api:
 	docker compose build user-service
 
-start-user-api: test-user-api build-user-api start-user-db
+start-user-api: create-keys test-user-api build-user-api start-user-db
 	docker compose up -d user-service
 
 # Web Application

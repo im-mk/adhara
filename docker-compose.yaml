@@ -23,6 +23,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    volumes:
+      - ./order-service/Orders.Api/.keys/:/app/.keys
 
   web:
     container_name: adhara-web
@@ -97,6 +99,8 @@ services:
         condition: service_healthy
       user-service-liquibase:
         condition: service_completed_successfully
+    volumes:
+      - ./user-service/.keys:/app/.keys
 
   user-service-db:
     container_name: user-service-db

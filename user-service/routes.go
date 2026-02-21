@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rsa"
 	"fmt"
 	"net/http"
 
@@ -11,7 +12,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func registerRoutes(userController *controllers.UserController, appConfig AppConfig, jwtKey []byte) {
+func registerRoutes(userController *controllers.UserController, appConfig AppConfig, publicKey *rsa.PublicKey) {
 	router := gin.Default()
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, "healthy")
@@ -21,7 +22,7 @@ func registerRoutes(userController *controllers.UserController, appConfig AppCon
 	router.POST("/bootstrap", userController.Bootstrap)
 
 	auth := router.Group("/")
-	auth.Use(authMiddleware(jwtKey))
+	auth.Use(authMiddleware(publicKey))
 	{
 		auth.POST("/users", userController.CreateUser)
 	}

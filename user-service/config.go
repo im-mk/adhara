@@ -20,10 +20,16 @@ type AppConfig struct {
 	Port string
 }
 
+type AuthConfig struct {
+	PrivateKeyPath     string
+	PublicKeyPath      string
+	TokenExpirySeconds int
+}
+
 type ApplicationConfig struct {
-	App    AppConfig
-	DB     DBConfig
-	JWTKey string
+	App  AppConfig
+	DB   DBConfig
+	Auth AuthConfig
 }
 
 func GetConfig() ApplicationConfig {
@@ -45,6 +51,11 @@ func GetConfig() ApplicationConfig {
 	configErr := viper.Unmarshal(&appConfig)
 	if configErr != nil {
 		log.Printf("Invalid configuration %s", configErr)
+	}
+
+	if appConfig.Auth.TokenExpirySeconds == 0 {
+		log.Printf("using default time of 600 seconds")
+		appConfig.Auth.TokenExpirySeconds = 600
 	}
 
 	return appConfig

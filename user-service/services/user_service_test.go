@@ -1,6 +1,7 @@
 package services
 
 import (
+	"crypto/rsa"
 	"errors"
 	"testing"
 
@@ -17,6 +18,9 @@ type MockUserRepository struct {
 
 func (m *MockUserRepository) GetUserByUsername(username string) (*models.User, error) {
 	args := m.Called(username)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
@@ -36,23 +40,26 @@ func (m *MockUserRepository) AnyUserExists() (bool, error) {
 }
 
 func TestUserService_Login(t *testing.T) {
-	mockRepo := new(MockUserRepository)
-	jwtKey := []byte("my_secret_key")
-	mockGenerateJWT := func(userId string, username string, key []byte) (string, error) {
+
+	mockGenerateJWT := func(userId string, username string, key *rsa.PrivateKey, tokenExpirySeconds int) (string, error) {
 		return "mockToken", nil
 	}
 
-	userService := NewUserService(mockRepo, jwtKey, mockGenerateJWT)
-
 	t.Run("successful login", func(t *testing.T) {
+		mockRepo := new(MockUserRepository)
+
+		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
+
 		password := "password123"
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
 		mockUser := &models.User{
+			ID:       1,
 			Username: "testuser",
 			Password: string(hashedPassword),
 		}
 
-		mockRepo.On("GetUserByUsername", "testuser").Return(mockUser, nil)
+		mockRepo.On("GetUserByUsername", "testuser").Return(mockUser, nil).Once()
 
 		token, err := userService.Login(models.LoginRequest{
 			Username: "testuser",
@@ -65,14 +72,19 @@ func TestUserService_Login(t *testing.T) {
 	})
 
 	t.Run("invalid credentials - wrong password", func(t *testing.T) {
+		mockRepo := new(MockUserRepository)
+		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
+
 		password := "password123"
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
 		mockUser := &models.User{
+			ID:       1,
 			Username: "testuser",
 			Password: string(hashedPassword),
 		}
 
-		mockRepo.On("GetUserByUsername", "testuser").Return(mockUser, nil)
+		mockRepo.On("GetUserByUsername", "testuser").Return(mockUser, nil).Once()
 
 		token, err := userService.Login(models.LoginRequest{
 			Username: "testuser",
@@ -86,7 +98,10 @@ func TestUserService_Login(t *testing.T) {
 	})
 
 	t.Run("user not found", func(t *testing.T) {
-		mockRepo.On("GetUserByUsername", "unknownuser").Return(&models.User{}, errors.New("user not found"))
+		mockRepo := new(MockUserRepository)
+		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
+
+		mockRepo.On("GetUserByUsername", "unknownuser").Return(nil, errors.New("user not found")).Once()
 
 		token, err := userService.Login(models.LoginRequest{
 			Username: "unknownuser",
@@ -101,14 +116,15 @@ func TestUserService_Login(t *testing.T) {
 }
 
 func TestUserService_CreateUser(t *testing.T) {
-	mockRepo := new(MockUserRepository)
-	jwtKey := []byte("my_secret_key")
-	mockGenerateJWT := func(userId string, username string, key []byte) (string, error) {
+
+	mockGenerateJWT := func(userId string, username string, key *rsa.PrivateKey, tokenExpirySeconds int) (string, error) {
 		return "mockToken", nil
 	}
-	userService := NewUserService(mockRepo, jwtKey, mockGenerateJWT)
 
 	t.Run("successful user creation", func(t *testing.T) {
+		mockRepo := new(MockUserRepository)
+		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
+
 		req := models.CreateUserRequest{
 			Username: "newuser",
 			Email:    "newuser@example.com",
@@ -125,6 +141,9 @@ func TestUserService_CreateUser(t *testing.T) {
 	})
 
 	t.Run("user already exists", func(t *testing.T) {
+		mockRepo := new(MockUserRepository)
+		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
+
 		req := models.CreateUserRequest{
 			Username: "existinguser",
 			Email:    "existinguser@example.com",
@@ -141,6 +160,9 @@ func TestUserService_CreateUser(t *testing.T) {
 	})
 
 	t.Run("error checking user existence", func(t *testing.T) {
+		mockRepo := new(MockUserRepository)
+		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
+
 		req := models.CreateUserRequest{
 			Username: "newuser",
 			Email:    "newuser@example.com",

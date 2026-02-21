@@ -8,6 +8,7 @@ using ZiggyCreatures.Caching.Fusion;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,8 +38,13 @@ AddCors(builder);
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
-var key = builder.Configuration["Jwt:Key"];
-var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key!.PadRight((512 / 8), '\0')));
+var publicKeyPem = File.ReadAllText(builder.Configuration["Auth:PublicKeyPath"]!);
+
+var rsa = RSA.Create();
+rsa.ImportFromPem(publicKeyPem);
+
+var securityKey = new RsaSecurityKey(rsa);
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

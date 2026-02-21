@@ -1,16 +1,18 @@
 package main
 
 import (
+	"crypto/rsa"
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
-func authMiddleware(jwtKey []byte) gin.HandlerFunc {
+func authMiddleware(publicKey *rsa.PublicKey) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
@@ -19,11 +21,14 @@ func authMiddleware(jwtKey []byte) gin.HandlerFunc {
 		}
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+
+			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			return jwtKey, nil
+
+			return publicKey, nil
 		})
 
 		if err != nil || !token.Valid {

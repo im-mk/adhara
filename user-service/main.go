@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/im-mk/adhara/user-service/controllers"
 	_ "github.com/im-mk/adhara/user-service/docs"
 	"github.com/im-mk/adhara/user-service/repositories"
@@ -21,10 +24,30 @@ import (
 func main() {
 
 	appConfig := GetConfig()
+
+	log.Println(appConfig.Auth.PrivateKeyPath)
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Println("error getting working directory:", err)
+	} else {
+		log.Println("current working directory:", wd)
+	}
+
+	privateAuthKey, err := utils.LoadPrivateKey(appConfig.Auth.PrivateKeyPath)
+	if err != nil {
+		log.Println(err)
+	}
+
+	publicAuthKey, err := utils.LoadPublicKey(appConfig.Auth.PublicKeyPath)
+	if err != nil {
+		log.Println(err)
+	}
+
 	db := initDB(appConfig.DB)
 	userRepo := repositories.NewUserRepository(db)
-	userService := services.NewUserService(userRepo, []byte(appConfig.JWTKey), utils.GenerateJWT)
+
+	userService := services.NewUserService(userRepo, privateAuthKey, utils.GenerateJWT, appConfig.Auth.TokenExpirySeconds)
 	userController := controllers.NewUserController(userService)
 
-	registerRoutes(userController, appConfig.App, []byte(appConfig.JWTKey))
+	registerRoutes(userController, appConfig.App, publicAuthKey)
 }
