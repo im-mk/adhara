@@ -7,8 +7,6 @@ using Serilog;
 using ZiggyCreatures.Caching.Fusion;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,12 +36,8 @@ AddCors(builder);
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
-var publicKeyPem = File.ReadAllText(builder.Configuration["Auth:PublicKeyPath"]!);
-
-var rsa = RSA.Create();
-rsa.ImportFromPem(publicKeyPem);
-
-var securityKey = new RsaSecurityKey(rsa);
+var issuerUrl = builder.Configuration["Auth:IssuerUrl"];
+var jwksBaseUrl = builder.Configuration["Auth:JwksBaseUrl"];
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -51,14 +45,28 @@ builder.Services
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = securityKey,
             ValidateIssuer = true,
-            ValidIssuer = "https://auth.adhara.internal",
+            ValidIssuer = issuerUrl,
             ValidateAudience = true,
             ValidAudience = "orders-api",
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
+
+            IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
+            {
+                var client = new HttpClient();
+                var jwks = client.GetStringAsync($"{jwksBaseUrl}/.well-known/jwks.json").Result;
+                return new JsonWebKeySet(jwks).Keys;
+            }
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"JWT FAILED: {context.Exception}");
+                return Task.CompletedTask;
+            }
         };
     });
 

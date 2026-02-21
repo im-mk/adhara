@@ -12,11 +12,13 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func registerRoutes(userController *controllers.UserController, appConfig AppConfig, publicKey *rsa.PublicKey) {
+func registerRoutes(userController *controllers.UserController, jwksController *controllers.JwksController, appConfig AppConfig, publicKey *rsa.PublicKey) {
 	router := gin.Default()
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, "healthy")
 	})
+
+	router.GET("/.well-known/jwks.json", jwksController.JwksHandler)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.POST("/login", userController.Login)
 	router.POST("/bootstrap", userController.Bootstrap)
