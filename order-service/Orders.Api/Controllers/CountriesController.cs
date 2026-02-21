@@ -1,6 +1,7 @@
 using Orders.Api.Entities;
 using Orders.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Orders.Api.Controllers;
 
@@ -15,6 +16,7 @@ public class CountriesController : ControllerBase
         _countriesService = countriesService;
     }
 
+    [Authorize]
     [HttpGet]
     [EndpointName("GetAllCountries")]
     public async Task<ActionResult<IEnumerable<Country>>> GetAll()

@@ -5,6 +5,9 @@ using Orders.Api.Services;
 using Npgsql;
 using Serilog;
 using ZiggyCreatures.Caching.Fusion;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +37,27 @@ AddCors(builder);
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
+var key = builder.Configuration["Jwt:Key"];
+var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key!.PadRight((512 / 8), '\0')));
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = securityKey,
+            ValidateIssuer = true,
+            ValidIssuer = "https://auth.adhara.internal",
+            ValidateAudience = true,
+            ValidAudience = "orders-api",
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -59,6 +83,8 @@ app.MapHealthChecks("/health");
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseRouting();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
