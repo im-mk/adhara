@@ -22,9 +22,7 @@ import (
 // @name						Authorization
 func main() {
 
-	appConfig := GetConfig()
-
-	log.Println(appConfig.Auth.PrivateKeyPath)
+	appConfig := utils.GetConfig()
 
 	privateAuthKey, err := utils.LoadPrivateKey(appConfig.Auth.PrivateKeyPath)
 	if err != nil {
@@ -36,12 +34,21 @@ func main() {
 		log.Fatalf("failed to load public key: %v", err)
 	}
 
-	db := initDB(appConfig.DB)
+	db := utils.InitDB(appConfig.DB)
 	userRepo := repositories.NewUserRepository(db)
+	refreshTokenRepo := repositories.NewRefreshTokenRepository(db)
 
-	userService := services.NewUserService(userRepo, privateAuthKey, utils.GenerateJWT, appConfig.Auth.TokenExpirySeconds)
+	tokenProv := &services.DefaultTokenProvider{
+		PrivateKey: privateAuthKey,
+		AuthConfig: appConfig.Auth,
+	}
+
+	authService := services.NewAuthService(userRepo, refreshTokenRepo, tokenProv, appConfig.Auth)
+	userService := services.NewUserService(userRepo)
+
 	userController := controllers.NewUserController(userService)
 	jwksContrller := controllers.NewJwksController(publicAuthKey)
+	authController := controllers.NewAuthController(authService)
 
-	registerRoutes(userController, jwksContrller, appConfig.App, publicAuthKey)
+	registerRoutes(userController, authController, jwksContrller, appConfig.App, appConfig.Auth, publicAuthKey)
 }

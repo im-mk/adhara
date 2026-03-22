@@ -48,7 +48,7 @@ builder.Services
             ValidateIssuer = true,
             ValidIssuer = issuerUrl,
             ValidateAudience = true,
-            ValidAudience = "orders-api",
+            ValidAudience = "default-audience",
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero,
 

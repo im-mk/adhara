@@ -9,7 +9,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=adhara-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       - Auth__JwksBaseUrl=http://user-service:8070
-      - Auth__IssuerUrl=http://localhost:8070
+      - Auth__IssuerUrl=user-service
     ports:
       - "8080:80"
     depends_on:
