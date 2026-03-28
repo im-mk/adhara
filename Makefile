@@ -10,7 +10,7 @@ start-pgadmin:
 
 # Order Service
 start-db:
-	docker compose up -d db pgadmin liquibase
+	docker compose up -d db liquibase
 
 test-api:
 	docker build -f order-service/Orders.Api/Dockerfile --target test -t order-service-test ./order-service
