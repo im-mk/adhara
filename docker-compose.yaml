@@ -7,11 +7,11 @@ services:
       dockerfile: Orders.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=adhara-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
-      - Auth__JwksBaseUrl=http://user-service:8070
-      - Auth__IssuerUrl=http://localhost:8070
+      - ConnectionStrings__DefaultConnection=Host=adhara-db;Port=${ORDER_SERVICE_DB_INTERNAL_PORT};Database=${ORDER_SERVICE_DB_NAME};Username=${ORDER_SERVICE_DB_USER};Password=${ORDER_SERVICE_DB_PASSWORD}
+      - Auth__JwksBaseUrl=http://user-service:${USER_SERVICE_PORT}
+      - Auth__IssuerUrl=user-service
     ports:
-      - "8080:80"
+      - ${ORDER_SERVICE_EXTERNAL_PORT}:${ORDER_SERVICE_INTERNAL_PORT}
     depends_on:
       db:
         condition: service_healthy
@@ -21,7 +21,11 @@ services:
       - network1
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:80/health || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:${ORDER_SERVICE_INTERNAL_PORT}/health || exit 1",
+        ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -34,7 +38,7 @@ services:
       context: ./web
       dockerfile: Dockerfile
     ports:
-      - "8090:80"
+      - ${WEB_EXTERNAL_PORT}:${WEB_INTERNAL_PORT}
     networks:
       - network1
     restart: unless-stopped
@@ -44,28 +48,38 @@ services:
 
   db:
     container_name: adhara-db
-    image: postgres:18
+    image: postgres:18.3
     volumes:
       # - db:/data/postgres # enable this line to persist data
       - ./order-service/database/init:/docker-entrypoint-initdb.d
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${ORDER_SERVICE_DB_USER}
+      POSTGRES_PASSWORD: ${ORDER_SERVICE_DB_PASSWORD}
       PGDATA: /data/postgres
     ports:
-      - "5434:5432"
+      - ${ORDER_SERVICE_DB_EXTERNAL_PORT}:${ORDER_SERVICE_DB_INTERNAL_PORT}
     networks:
       - network1
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $ORDER_SERVICE_DB_USER -d $ORDER_SERVICE_DB_NAME",
+        ]
       interval: 5s
       timeout: 5s
       retries: 3
 
   liquibase:
     container_name: adhara-liquibase
-    image: liquibase/liquibase:4.33
+    image: liquibase/liquibase:5.0.1
+    entrypoint:
+      [
+        "sh",
+        "-c",
+        "liquibase lpm list | grep postgresql || liquibase lpm add postgresql --global; liquibase update",
+      ]
     # contexts: dev to seed data in dev environment
     command: --defaultsFile=liquibase.properties --contexts=dev update
     volumes:
@@ -75,9 +89,9 @@ services:
       - ./order-service/database/seed:/liquibase/changelog/seed
       - ./order-service/database/dev:/liquibase/changelog/dev
     environment:
-      - LIQUIBASE_COMMAND_URL=jdbc:postgresql://adhara-db:5432/${POSTGRES_DB}
-      - LIQUIBASE_COMMAND_USERNAME=${POSTGRES_USER}
-      - LIQUIBASE_COMMAND_PASSWORD=${POSTGRES_PASSWORD}
+      - LIQUIBASE_COMMAND_URL=jdbc:postgresql://adhara-db:${ORDER_SERVICE_DB_INTERNAL_PORT}/${ORDER_SERVICE_DB_NAME}
+      - LIQUIBASE_COMMAND_USERNAME=${ORDER_SERVICE_DB_USER}
+      - LIQUIBASE_COMMAND_PASSWORD=${ORDER_SERVICE_DB_PASSWORD}
     networks:
       - network1
     depends_on:
@@ -91,9 +105,9 @@ services:
       dockerfile: Dockerfile
     environment:
       DB_HOST: user-service-db
-      DB_PORT: 5432
+      DB_PORT: ${USER_SERVICE_DB_INTERNAL_PORT}
     ports:
-      - "8070:8070"
+      - ${USER_SERVICE_PORT}:${USER_SERVICE_PORT}
     networks:
       - network1
     depends_on:
@@ -106,16 +120,16 @@ services:
 
   user-service-db:
     container_name: user-service-db
-    image: postgres:18
+    image: postgres:18.3
     volumes:
       # - postgres:/data/postgres # enable this line to persist data
       - ./user-service/database/init:/docker-entrypoint-initdb.d
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${USER_SERVICE_DB_USER}
+      POSTGRES_PASSWORD: ${USER_SERVICE_DB_PASSWORD}
       PGDATA: /data/postgres
     ports:
-      - "5444:5432"
+      - ${USER_SERVICE_DB_EXTERNAL_PORT}:${USER_SERVICE_DB_INTERNAL_PORT}
     networks:
       - network1
     restart: unless-stopped
@@ -123,7 +137,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U $POSTGRES_USER -d $POSTGRES_USER_SERVICE_DB",
+          "pg_isready -U $USER_SERVICE_DB_USER -d $USER_SERVICE_DB_NAME",
         ]
       interval: 5s
       timeout: 5s
@@ -131,16 +145,22 @@ services:
 
   user-service-liquibase:
     container_name: user-service-liquibase
-    image: liquibase/liquibase:4.33
+    image: liquibase/liquibase:5.0.1
+    entrypoint:
+      [
+        "sh",
+        "-c",
+        "liquibase lpm list | grep postgresql || liquibase lpm add postgresql --global; liquibase update",
+      ]
     command: --defaultsFile=liquibase.properties update
     volumes:
       - ./user-service/database/liquibase.properties:/liquibase/liquibase.properties
       - ./user-service/database/changelog.yaml:/liquibase/changelog/changelog.yaml
       - ./user-service/database/sql:/liquibase/changelog/sql
     environment:
-      - LIQUIBASE_COMMAND_URL=jdbc:postgresql://user-service-db:5432/${POSTGRES_USER_SERVICE_DB}
-      - LIQUIBASE_COMMAND_USERNAME=${POSTGRES_USER}
-      - LIQUIBASE_COMMAND_PASSWORD=${POSTGRES_PASSWORD}
+      - LIQUIBASE_COMMAND_URL=jdbc:postgresql://user-service-db:${USER_SERVICE_DB_INTERNAL_PORT}/${USER_SERVICE_DB_NAME}
+      - LIQUIBASE_COMMAND_USERNAME=${USER_SERVICE_DB_USER}
+      - LIQUIBASE_COMMAND_PASSWORD=${USER_SERVICE_DB_PASSWORD}
     networks:
       - network1
     depends_on:
@@ -159,10 +179,11 @@ services:
       - pgadmin:/var/lib/pgadmin
       - ./pgadmin/servers.json:/pgadmin4/servers.json
     ports:
-      - "${PGADMIN_PORT:-5050}:80"
+      - "${PGADMIN_PORT}:80"
     networks:
       - network1
     restart: unless-stopped
+    profiles: ["dev"]
 
   newman:
     container_name: adhara-newman

@@ -1,138 +1,40 @@
 package services
 
 import (
-	"crypto/rsa"
 	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/im-mk/adhara/user-service/models"
 )
 
-type MockUserRepository struct {
-	mock.Mock
-}
-
-func (m *MockUserRepository) GetUserByUsername(username string) (*models.User, error) {
-	args := m.Called(username)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.User), args.Error(1)
-}
-
-func (m *MockUserRepository) UserExists(username, email string) (bool, error) {
-	args := m.Called(username, email)
-	return args.Bool(0), args.Error(1)
-}
-
-func (m *MockUserRepository) CreateUser(user models.User) error {
-	args := m.Called(user)
-	return args.Error(0)
-}
-
-func (m *MockUserRepository) AnyUserExists() (bool, error) {
-	args := m.Called()
-	return args.Bool(0), args.Error(1)
-}
-
-func TestUserService_Login(t *testing.T) {
-
-	mockGenerateJWT := func(userId string, username string, key *rsa.PrivateKey, tokenExpirySeconds int) (string, error) {
-		return "mockToken", nil
-	}
-
-	t.Run("successful login", func(t *testing.T) {
-		mockRepo := new(MockUserRepository)
-
-		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
-
-		password := "password123"
-		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
-		mockUser := &models.User{
-			ID:       1,
-			Username: "testuser",
-			Password: string(hashedPassword),
-		}
-
-		mockRepo.On("GetUserByUsername", "testuser").Return(mockUser, nil).Once()
-
-		token, err := userService.Login(models.LoginRequest{
-			Username: "testuser",
-			Password: password,
-		})
-
-		assert.NoError(t, err)
-		assert.Equal(t, "mockToken", token)
-		mockRepo.AssertExpectations(t)
-	})
-
-	t.Run("invalid credentials - wrong password", func(t *testing.T) {
-		mockRepo := new(MockUserRepository)
-		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
-
-		password := "password123"
-		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
-		mockUser := &models.User{
-			ID:       1,
-			Username: "testuser",
-			Password: string(hashedPassword),
-		}
-
-		mockRepo.On("GetUserByUsername", "testuser").Return(mockUser, nil).Once()
-
-		token, err := userService.Login(models.LoginRequest{
-			Username: "testuser",
-			Password: "wrongpassword",
-		})
-
-		assert.Error(t, err)
-		assert.Equal(t, "", token)
-		assert.EqualError(t, err, "invalid credentials")
-		mockRepo.AssertExpectations(t)
-	})
-
-	t.Run("user not found", func(t *testing.T) {
-		mockRepo := new(MockUserRepository)
-		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
-
-		mockRepo.On("GetUserByUsername", "unknownuser").Return(nil, errors.New("user not found")).Once()
-
-		token, err := userService.Login(models.LoginRequest{
-			Username: "unknownuser",
-			Password: "password123",
-		})
-
-		assert.Error(t, err)
-		assert.Equal(t, "", token)
-		assert.EqualError(t, err, "invalid credentials")
-		mockRepo.AssertExpectations(t)
-	})
-}
-
 func TestUserService_CreateUser(t *testing.T) {
-
-	mockGenerateJWT := func(userId string, username string, key *rsa.PrivateKey, tokenExpirySeconds int) (string, error) {
-		return "mockToken", nil
-	}
+	mockRepo := new(MockUserRepository)
+	userService := NewUserService(mockRepo)
 
 	t.Run("successful user creation", func(t *testing.T) {
-		mockRepo := new(MockUserRepository)
-		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
-
 		req := models.CreateUserRequest{
-			Username: "newuser",
-			Email:    "newuser@example.com",
-			Password: "password123",
+			Username:   "newuser",
+			Email:      "newuser@example.com",
+			Password:   "password123",
+			FirstName:  "New",
+			MiddleName: "",
+			LastName:   "User",
 		}
 
 		mockRepo.On("UserExists", req.Username, req.Email).Return(false, nil).Once()
-		mockRepo.On("CreateUser", mock.Anything).Return(nil).Once()
+		// validate that the passed user has the expected fields set
+		mockRepo.On("CreateUser", mock.MatchedBy(func(u models.User) bool {
+			return u.Username == req.Username &&
+				u.Email == req.Email &&
+				u.FirstName == req.FirstName &&
+				u.MiddleName == req.MiddleName &&
+				u.LastName == req.LastName &&
+				u.IsActive == true &&
+				u.IsVerified == false
+		})).Return(nil).Once()
 
 		err := userService.CreateUser(req)
 
@@ -141,9 +43,6 @@ func TestUserService_CreateUser(t *testing.T) {
 	})
 
 	t.Run("user already exists", func(t *testing.T) {
-		mockRepo := new(MockUserRepository)
-		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
-
 		req := models.CreateUserRequest{
 			Username: "existinguser",
 			Email:    "existinguser@example.com",
@@ -160,9 +59,6 @@ func TestUserService_CreateUser(t *testing.T) {
 	})
 
 	t.Run("error checking user existence", func(t *testing.T) {
-		mockRepo := new(MockUserRepository)
-		userService := NewUserService(mockRepo, nil, mockGenerateJWT, 10)
-
 		req := models.CreateUserRequest{
 			Username: "newuser",
 			Email:    "newuser@example.com",
@@ -175,6 +71,70 @@ func TestUserService_CreateUser(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.EqualError(t, err, "failed to check for existing user")
+		mockRepo.AssertExpectations(t)
+	})
+
+	// add a test for GetUser mapping
+
+	t.Run("bootstrap user is verified", func(t *testing.T) {
+		mockRepo := new(MockUserRepository)
+		userService := NewUserService(mockRepo)
+
+		req := models.CreateUserRequest{
+			Username: "first",
+			Email:    "first@example.com",
+			Password: "pass",
+		}
+
+		// no existing users
+		mockRepo.On("AnyUserExists").Return(false, nil).Once()
+		// when CreateUser is called we expect IsVerified true
+		mockRepo.On("CreateUser", mock.MatchedBy(func(u models.User) bool {
+			return u.IsVerified == true && u.Username == req.Username
+		})).Return(nil).Once()
+
+		err := userService.Bootstrap(req)
+		assert.NoError(t, err)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("bootstrap fails when users exist", func(t *testing.T) {
+		mockRepo := new(MockUserRepository)
+		userService := NewUserService(mockRepo)
+
+		mockRepo.On("AnyUserExists").Return(true, nil).Once()
+
+		err := userService.Bootstrap(models.CreateUserRequest{})
+		assert.Error(t, err)
+	})
+
+	t.Run("get user details mapping", func(t *testing.T) {
+		mockRepo := new(MockUserRepository)
+		userService := NewUserService(mockRepo)
+
+		domainUser := &models.User{
+			ID:         42,
+			Username:   "bob",
+			Email:      "bob@example.com",
+			FirstName:  "Bob",
+			MiddleName: "Q",
+			LastName:   "Builder",
+			IsActive:   true,
+			IsVerified: true,
+		}
+
+		mockRepo.On("GetUserByID", 42).Return(domainUser, nil).Once()
+
+		details, err := userService.GetUser(42)
+		assert.NoError(t, err)
+		assert.Equal(t, 42, details.ID)
+		assert.Equal(t, "bob", details.Username)
+		assert.Equal(t, "bob@example.com", details.Email)
+		assert.Equal(t, "Bob", details.FirstName)
+		assert.Equal(t, "Q", details.MiddleName)
+		assert.Equal(t, "Builder", details.LastName)
+		assert.True(t, details.IsActive)
+		assert.True(t, details.IsVerified)
 		mockRepo.AssertExpectations(t)
 	})
 }

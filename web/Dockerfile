@@ -10,7 +10,7 @@ RUN npm run test
 FROM base AS build
 RUN npm run build
 
-FROM nginx:1.28-alpine AS production
+FROM nginx:1.29-alpine AS production
 WORKDIR /usr/share/nginx/html
 
 RUN apk add --no-cache curl

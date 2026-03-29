@@ -1,4 +1,4 @@
-package main
+package middleware
 
 import (
 	"crypto/rsa"
@@ -8,9 +8,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/im-mk/adhara/user-service/models"
 )
 
-func authMiddleware(publicKey *rsa.PublicKey) gin.HandlerFunc {
+func AuthMiddleware(publicKey *rsa.PublicKey, cfg models.AuthConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		authHeader := c.GetHeader("Authorization")
@@ -22,6 +23,15 @@ func authMiddleware(publicKey *rsa.PublicKey) gin.HandlerFunc {
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
+		opts := []jwt.ParserOption{
+			jwt.WithValidMethods([]string{"RS256"}),
+		}
+		if cfg.Issuer != "" {
+			opts = append(opts, jwt.WithIssuer(cfg.Issuer))
+		}
+		if cfg.Audience != "" {
+			opts = append(opts, jwt.WithAudience(cfg.Audience))
+		}
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 
 			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
@@ -29,10 +39,7 @@ func authMiddleware(publicKey *rsa.PublicKey) gin.HandlerFunc {
 			}
 
 			return publicKey, nil
-		},
-			jwt.WithAudience("orders-api"),
-			jwt.WithIssuer("http://localhost:8070"),
-			jwt.WithValidMethods([]string{"RS256"}))
+		}, opts...)
 
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
@@ -40,7 +47,6 @@ func authMiddleware(publicKey *rsa.PublicKey) gin.HandlerFunc {
 			return
 		}
 
-		// Extract claims safely
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -49,7 +55,6 @@ func authMiddleware(publicKey *rsa.PublicKey) gin.HandlerFunc {
 			return
 		}
 
-		// Add useful values to Gin context
 		c.Set("userID", claims["sub"])
 		c.Set("username", claims["username"])
 		c.Set("scope", claims["scope"])
