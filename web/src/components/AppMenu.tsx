@@ -43,6 +43,9 @@ const AppMenu: React.FC = () => {
         >
           <MenuItem component={Link} to="/" onClick={handleClose}>Home</MenuItem>
           <MenuItem component={Link} to="/orders" onClick={handleClose}>Orders</MenuItem>
+          <MenuItem component={Link} to="/customers" onClick={handleClose}>Customers</MenuItem>
+          <MenuItem component={Link} to="/products" onClick={handleClose}>Products</MenuItem>
+          <MenuItem component={Link} to="/login" onClick={handleClose}>Login</MenuItem>
         </Menu>
 
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
