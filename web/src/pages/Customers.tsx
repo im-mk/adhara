@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Customer, CustomersService } from '../api';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import MuiLink from '@mui/material/Link';
 import Menu from '@mui/material/Menu';
@@ -23,22 +19,22 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import CreateCustomerDialog from '../components/CreateCustomerDialog';
+import EditCustomerDialog from '../components/EditCustomerDialog';
 
 const Customers: React.FC = () => {
+    const navigate = useNavigate();
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [saving, setSaving] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+    const [pageError, setPageError] = useState<string | null>(null);
     const [actionMessage, setActionMessage] = useState<string | null>(null);
     const [nameQuery, setNameQuery] = useState<string>('');
     const [postcodeQuery, setPostcodeQuery] = useState<string>('');
 
     const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-    const [customerBeingEdited, setCustomerBeingEdited] = useState<Customer | null>(null);
     const [editDialogOpen, setEditDialogOpen] = useState<boolean>(false);
-    const [editFirstName, setEditFirstName] = useState<string>('');
-    const [editLastName, setEditLastName] = useState<string>('');
+    const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
 
     const isMenuOpen = Boolean(menuAnchorEl);
 
@@ -73,7 +69,7 @@ const Customers: React.FC = () => {
                 const data = await CustomersService.getAllCustomers();
                 setCustomers(data);
             } catch {
-                setError('Could not fetch customers');
+                setPageError('Could not fetch customers');
             } finally {
                 setLoading(false);
             }
@@ -89,59 +85,38 @@ const Customers: React.FC = () => {
 
     const handleCloseMenu = () => {
         setMenuAnchorEl(null);
-        setSelectedCustomer(null);
     };
 
     const handleOpenEditDialog = () => {
         if (!selectedCustomer) {
             return;
         }
-
-        setCustomerBeingEdited(selectedCustomer);
-        setEditFirstName(selectedCustomer.firstName ?? '');
-        setEditLastName(selectedCustomer.lastName ?? '');
         setEditDialogOpen(true);
         handleCloseMenu();
     };
 
-    const handleSaveCustomer = async () => {
-        if (!customerBeingEdited?.id) {
-            setError('Cannot edit customer without id');
+    const handleCreatedCustomer = (created: Customer) => {
+        if (!created.id) {
             return;
         }
 
-        const firstName = editFirstName.trim();
-        const lastName = editLastName.trim();
+        setCustomers((prev) => [created, ...prev]);
+        setActionMessage('Customer created');
+        setCreateDialogOpen(false);
+        navigate(`/customers/${created.id}/orders/new`);
+    };
 
-        if (!firstName || !lastName) {
-            setError('First name and last name are required');
+    const handleSavedCustomer = (updatedCustomer: Customer) => {
+        if (!updatedCustomer.id) {
             return;
         }
 
-        try {
-            setSaving(true);
-            setError(null);
-            setActionMessage(null);
-
-            await CustomersService.updateCustomer(customerBeingEdited.id, {
-                firstName,
-                lastName,
-            });
-
-            setCustomers((prev) => prev.map((customer) => (
-                customer.id === customerBeingEdited.id
-                    ? { ...customer, firstName, lastName }
-                    : customer
-            )));
-
-            setEditDialogOpen(false);
-            setCustomerBeingEdited(null);
-            setActionMessage('Customer updated');
-        } catch {
-            setError('Could not update customer');
-        } finally {
-            setSaving(false);
-        }
+        setCustomers((prev) => prev.map((customer) => (
+            customer.id === updatedCustomer.id ? updatedCustomer : customer
+        )));
+        setEditDialogOpen(false);
+        setSelectedCustomer(null);
+        setActionMessage('Customer updated');
     };
 
     if (loading) {
@@ -154,11 +129,16 @@ const Customers: React.FC = () => {
 
     return (
         <Box>
-            <Typography variant="h4" gutterBottom>
-                Customers
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, gap: 2, flexWrap: 'wrap' }}>
+                <Typography variant="h4" gutterBottom sx={{ mb: 0 }}>
+                    Customers
+                </Typography>
+                <Button variant="contained" onClick={() => setCreateDialogOpen(true)}>
+                    Create Customer
+                </Button>
+            </Box>
 
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            {pageError && <Alert severity="error" sx={{ mb: 2 }}>{pageError}</Alert>}
             {actionMessage && <Alert severity="success" sx={{ mb: 2 }}>{actionMessage}</Alert>}
 
             <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
@@ -226,7 +206,6 @@ const Customers: React.FC = () => {
                                         <IconButton
                                             aria-label="customer actions"
                                             onClick={(event) => handleOpenMenu(event, customer)}
-                                            disabled={saving}
                                         >
                                             <MoreVertIcon />
                                         </IconButton>
@@ -248,36 +227,21 @@ const Customers: React.FC = () => {
                 </MenuItem>
             </Menu>
 
-            <Dialog
+            <EditCustomerDialog
                 open={editDialogOpen}
-                onClose={() => setEditDialogOpen(false)}
-                fullWidth
-                maxWidth="sm"
-            >
-                <DialogTitle>Edit Customer</DialogTitle>
-                <DialogContent>
-                    <Box sx={{ display: 'grid', gap: 2, mt: 1 }}>
-                        <TextField
-                            label="First Name"
-                            value={editFirstName}
-                            onChange={(e) => setEditFirstName(e.target.value)}
-                            fullWidth
-                        />
-                        <TextField
-                            label="Last Name"
-                            value={editLastName}
-                            onChange={(e) => setEditLastName(e.target.value)}
-                            fullWidth
-                        />
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => { setEditDialogOpen(false); setCustomerBeingEdited(null); }}>Cancel</Button>
-                    <Button onClick={handleSaveCustomer} variant="contained" disabled={saving}>
-                        Save
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                customer={selectedCustomer}
+                onClose={() => {
+                    setEditDialogOpen(false);
+                    setSelectedCustomer(null);
+                }}
+                onSaved={handleSavedCustomer}
+            />
+
+            <CreateCustomerDialog
+                open={createDialogOpen}
+                onClose={() => setCreateDialogOpen(false)}
+                onCreated={handleCreatedCustomer}
+            />
         </Box>
     );
 };
