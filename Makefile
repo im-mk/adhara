@@ -1,9 +1,9 @@
 .PHONY: start-db build-api test-api start-api newman-test build-web test-web start stop create-keys
 
 create-keys:
-	mkdir -p user-service/.keys	
-	openssl genrsa -out user-service/.keys/private.pem 2048
-	openssl rsa -in user-service/.keys/private.pem -pubout -out user-service/.keys/public.pem
+	mkdir -p user-service/src/.keys	
+	openssl genrsa -out user-service/src/.keys/private.pem 2048
+	openssl rsa -in user-service/src/.keys/private.pem -pubout -out user-service/src/.keys/public.pem
 
 start-pgadmin:
 	docker compose up -d pgadmin
@@ -30,7 +30,7 @@ start-user-db:
 	docker compose up -d user-service-db user-service-liquibase
 
 test-user-api:
-	docker build -f user-service/Dockerfile --target test -t user-service-test ./user-service
+	docker build -f user-service/src/Dockerfile --target test -t user-service-test ./user-service/src
 	docker run --rm user-service-test
 
 build-user-api:

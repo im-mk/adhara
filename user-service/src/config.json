@@ -1,0 +1,22 @@
+{
+    "auth": {
+        "privateKeyPath": ".keys/private.pem",
+        "publicKeyPath": ".keys/public.pem",
+        "tokenExpirySeconds": 3600,
+        "refreshTokenExpirySeconds": 604800,
+        "issuer": "user-service",
+        "audience": "default-audience",
+        "kid": "default-key"
+    },
+    "app": {
+        "host": "0.0.0.0",
+        "port": "8040"
+    },
+    "db": {
+        "host": "localhost",
+        "user": "postgres",
+        "password": "postgres",
+        "dbname": "userservicedb",
+        "port": 5436
+    }
+}

@@ -101,7 +101,7 @@ services:
   user-service:
     container_name: user-service
     build:
-      context: ./user-service
+      context: ./user-service/src
       dockerfile: Dockerfile
     environment:
       DB_HOST: user-service-db
@@ -116,7 +116,7 @@ services:
       user-service-liquibase:
         condition: service_completed_successfully
     volumes:
-      - ./user-service/.keys:/app/.keys
+      - ./user-service/src/.keys:/app/.keys
 
   user-service-db:
     container_name: user-service-db
