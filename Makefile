@@ -13,7 +13,7 @@ start-db:
 	docker compose up -d db liquibase
 
 test-api:
-	docker build -f order-service/Orders.Api/Dockerfile --target test -t order-service-test ./order-service
+	docker build -f order-service/src/Orders.Api/Dockerfile --target test -t order-service-test ./order-service/src
 	docker run --rm order-service-test
 
 build-api:
