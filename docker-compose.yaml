@@ -7,15 +7,15 @@ services:
       dockerfile: Orders.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=adhara-db;Port=${ORDER_SERVICE_DB_INTERNAL_PORT};Database=${ORDER_SERVICE_DB_NAME};Username=${ORDER_SERVICE_DB_USER};Password=${ORDER_SERVICE_DB_PASSWORD}
+      - ConnectionStrings__DefaultConnection=Host=order-service-db;Port=${ORDER_SERVICE_DB_INTERNAL_PORT};Database=${ORDER_SERVICE_DB_NAME};Username=${ORDER_SERVICE_DB_USER};Password=${ORDER_SERVICE_DB_PASSWORD}
       - Auth__JwksBaseUrl=http://user-service:${USER_SERVICE_PORT}
       - Auth__IssuerUrl=user-service
     ports:
       - ${ORDER_SERVICE_EXTERNAL_PORT}:${ORDER_SERVICE_INTERNAL_PORT}
     depends_on:
-      db:
+      order-service-db:
         condition: service_healthy
-      liquibase:
+      order-service-liquibase:
         condition: service_completed_successfully
     networks:
       - network1
@@ -46,11 +46,11 @@ services:
       order-service:
         condition: service_healthy
 
-  db:
-    container_name: adhara-db
+  order-service-db:
+    container_name: order-service-db
     image: postgres:18.3
     volumes:
-      # - db:/data/postgres # enable this line to persist data
+      # - order-service-db:/data/postgres # enable this line to persist data
       - ./order-service/database/init:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: ${ORDER_SERVICE_DB_USER}
@@ -71,8 +71,8 @@ services:
       timeout: 5s
       retries: 3
 
-  liquibase:
-    container_name: adhara-liquibase
+  order-service-liquibase:
+    container_name: order-service-liquibase
     image: liquibase/liquibase:5.0.1
     entrypoint:
       [
@@ -89,13 +89,13 @@ services:
       - ./order-service/database/seed:/liquibase/changelog/seed
       - ./order-service/database/dev:/liquibase/changelog/dev
     environment:
-      - LIQUIBASE_COMMAND_URL=jdbc:postgresql://adhara-db:${ORDER_SERVICE_DB_INTERNAL_PORT}/${ORDER_SERVICE_DB_NAME}
+      - LIQUIBASE_COMMAND_URL=jdbc:postgresql://order-service-db:${ORDER_SERVICE_DB_INTERNAL_PORT}/${ORDER_SERVICE_DB_NAME}
       - LIQUIBASE_COMMAND_USERNAME=${ORDER_SERVICE_DB_USER}
       - LIQUIBASE_COMMAND_PASSWORD=${ORDER_SERVICE_DB_PASSWORD}
     networks:
       - network1
     depends_on:
-      db:
+      order-service-db:
         condition: service_healthy
 
   user-service:
@@ -106,6 +106,7 @@ services:
     environment:
       DB_HOST: user-service-db
       DB_PORT: ${USER_SERVICE_DB_INTERNAL_PORT}
+      APP_CORSURL: ${USER_SERVICE_CORS_URL}
     ports:
       - ${USER_SERVICE_PORT}:${USER_SERVICE_PORT}
     networks:
@@ -122,7 +123,7 @@ services:
     container_name: user-service-db
     image: postgres:18.3
     volumes:
-      # - postgres:/data/postgres # enable this line to persist data
+      # - user-service-db:/data/postgres # enable this line to persist data
       - ./user-service/database/init:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: ${USER_SERVICE_DB_USER}
@@ -207,5 +208,6 @@ networks:
     driver: bridge
 
 volumes:
-  db:
+  order-service-db:
+  user-service-db:
   pgadmin:

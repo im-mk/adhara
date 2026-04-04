@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -8,9 +8,10 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { Customer, CustomersService } from '../api';
+import { CountriesService, Country, Customer, CustomersService } from '../api';
 
 type AddressForm = {
     addressLine1: string;
@@ -45,6 +46,51 @@ const CreateCustomerDialog: React.FC<CreateCustomerDialogProps> = ({ open, onClo
     const [isBillingSameAsShipping, setIsBillingSameAsShipping] = useState<boolean>(true);
     const [creatingCustomer, setCreatingCustomer] = useState<boolean>(false);
     const [createDialogError, setCreateDialogError] = useState<string | null>(null);
+    const [countries, setCountries] = useState<Country[]>([]);
+    const [loadingCountries, setLoadingCountries] = useState<boolean>(false);
+    const [countriesError, setCountriesError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!open || countries.length > 0) {
+            return;
+        }
+
+        let cancelled = false;
+
+        const loadCountries = async () => {
+            try {
+                setLoadingCountries(true);
+                setCountriesError(null);
+
+                const data = await CountriesService.getAllCountries();
+                if (cancelled) {
+                    return;
+                }
+
+                const sortedCountries = [...data].sort((left, right) =>
+                    (left.name ?? left.id ?? '').localeCompare(right.name ?? right.id ?? '')
+                );
+
+                setCountries(sortedCountries);
+            } catch {
+                if (!cancelled) {
+                    setCountriesError('Could not load countries');
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoadingCountries(false);
+                }
+            }
+        };
+
+        loadCountries();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [open, countries.length]);
+
+    const countrySelectionUnavailable = loadingCountries || (countries.length === 0 && countriesError !== null);
 
     const resetCreateDialog = () => {
         setCreateStep(0);
@@ -159,6 +205,7 @@ const CreateCustomerDialog: React.FC<CreateCustomerDialogProps> = ({ open, onClo
             <DialogTitle>Create Customer</DialogTitle>
             <DialogContent>
                 {createDialogError && <Alert severity="error" sx={{ mb: 2 }}>{createDialogError}</Alert>}
+                {countriesError && <Alert severity="error" sx={{ mb: 2 }}>{countriesError}</Alert>}
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Step {createStep + 1} of 3
                 </Typography>
@@ -214,11 +261,28 @@ const CreateCustomerDialog: React.FC<CreateCustomerDialogProps> = ({ open, onClo
                             fullWidth
                         />
                         <TextField
+                            select
                             label="Country"
                             value={shippingAddress.country}
                             onChange={(e) => handleShippingAddressChange('country', e.target.value)}
+                            disabled={loadingCountries || countries.length === 0}
+                            helperText={loadingCountries ? 'Loading countries...' : undefined}
                             fullWidth
-                        />
+                        >
+                            <MenuItem value="">
+                                Select Country
+                            </MenuItem>
+                            {countries.map((country) => {
+                                const countryValue = country.id ?? '';
+                                const countryLabel = country.name ?? country.id ?? '';
+
+                                return (
+                                    <MenuItem key={countryValue} value={countryValue}>
+                                        {countryLabel}
+                                    </MenuItem>
+                                );
+                            })}
+                        </TextField>
                     </Box>
                 )}
 
@@ -270,12 +334,28 @@ const CreateCustomerDialog: React.FC<CreateCustomerDialogProps> = ({ open, onClo
                             fullWidth
                         />
                         <TextField
+                            select
                             label="Country"
                             value={billingAddress.country}
                             onChange={(e) => setBillingAddress((prev) => ({ ...prev, country: e.target.value }))}
-                            disabled={isBillingSameAsShipping}
+                            disabled={isBillingSameAsShipping || loadingCountries || countries.length === 0}
+                            helperText={loadingCountries ? 'Loading countries...' : undefined}
                             fullWidth
-                        />
+                        >
+                            <MenuItem value="">
+                                Select Country
+                            </MenuItem>
+                            {countries.map((country) => {
+                                const countryValue = country.id ?? '';
+                                const countryLabel = country.name ?? country.id ?? '';
+
+                                return (
+                                    <MenuItem key={countryValue} value={countryValue}>
+                                        {countryLabel}
+                                    </MenuItem>
+                                );
+                            })}
+                        </TextField>
                     </Box>
                 )}
             </DialogContent>
@@ -287,11 +367,11 @@ const CreateCustomerDialog: React.FC<CreateCustomerDialogProps> = ({ open, onClo
                     </Button>
                 )}
                 {createStep < 2 ? (
-                    <Button onClick={handleCreateNextStep} variant="contained" disabled={creatingCustomer}>
+                    <Button onClick={handleCreateNextStep} variant="contained" disabled={creatingCustomer || (createStep === 1 && countrySelectionUnavailable)}>
                         Next
                     </Button>
                 ) : (
-                    <Button onClick={handleCreateCustomer} variant="contained" disabled={creatingCustomer}>
+                    <Button onClick={handleCreateCustomer} variant="contained" disabled={creatingCustomer || countrySelectionUnavailable}>
                         {creatingCustomer ? 'Saving...' : 'Save Customer'}
                     </Button>
                 )}

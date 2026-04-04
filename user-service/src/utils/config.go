@@ -39,5 +39,10 @@ func GetConfig() models.ApplicationConfig {
 		appConfig.Auth.RefreshTokenExpirySeconds = 604800
 	}
 
+	if appConfig.App.CorsURL == "" {
+		log.Printf("using default cors url of http://localhost:8090")
+		appConfig.App.CorsURL = "http://localhost:8090"
+	}
+
 	return appConfig
 }

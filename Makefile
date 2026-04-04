@@ -1,29 +1,9 @@
-.PHONY: start-db build-api test-api start-api newman-test build-web test-web start stop create-keys
+.PHONY: start-keys start-user-db test-user-api build-user-api start-user-api newman-test build-web test-web start stop clean
 
 create-keys:
 	mkdir -p user-service/src/.keys	
 	openssl genrsa -out user-service/src/.keys/private.pem 2048
 	openssl rsa -in user-service/src/.keys/private.pem -pubout -out user-service/src/.keys/public.pem
-
-start-pgadmin:
-	docker compose up -d pgadmin
-
-# Order Service
-start-db:
-	docker compose up -d db liquibase
-
-test-api:
-	docker build -f order-service/src/Orders.Api/Dockerfile --target test -t order-service-test ./order-service/src
-	docker run --rm order-service-test
-
-build-api:
-	docker compose build order-service
-
-start-api: test-api build-api start-db
-	docker compose up -d order-service
-
-newman-test:
-	docker compose run --rm newman
 
 # User Service
 start-user-db:
@@ -39,6 +19,23 @@ build-user-api:
 start-user-api: create-keys test-user-api build-user-api start-user-db
 	docker compose up -d user-service
 
+# Order Service
+start-db:
+	docker compose up -d order-service-db order-service-liquibase
+
+test-api:
+	docker build -f order-service/src/Orders.Api/Dockerfile --target test -t order-service-test ./order-service/src
+	docker run --rm order-service-test
+
+build-api:
+	docker compose build order-service
+
+start-api: test-api build-api start-db
+	docker compose up -d order-service
+
+newman-test:
+	docker compose run --rm newman
+
 # Web Application
 build-web:
 	docker build -f web/Dockerfile --target build -t adhara-web-build ./web
@@ -48,7 +45,7 @@ test-web:
 	docker run --rm adhara-web-test
 
 # All Services
-start: start-api start-user-api
+start:
 	docker compose up -d --build
 
 stop:

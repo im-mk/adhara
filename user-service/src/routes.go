@@ -4,7 +4,9 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/im-mk/user-service/src/controllers"
 	_ "github.com/im-mk/user-service/src/docs"
@@ -16,6 +18,15 @@ import (
 
 func registerRoutes(userController *controllers.UserController, authController *controllers.AuthController, jwksController *controllers.JwksController, appConfig models.AppConfig, authCfg models.AuthConfig, publicKey *rsa.PublicKey) {
 	router := gin.Default()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{appConfig.CorsURL},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, "healthy")
 	})

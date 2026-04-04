@@ -9,8 +9,9 @@ type DBConfig struct {
 }
 
 type AppConfig struct {
-	Host string
-	Port string
+	Host    string
+	Port    string
+	CorsURL string
 }
 
 type AuthConfig struct {

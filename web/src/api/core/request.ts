@@ -12,6 +12,7 @@ import type { ApiResult } from './ApiResult';
 import { CancelablePromise } from './CancelablePromise';
 import type { OnCancel } from './CancelablePromise';
 import type { OpenAPIConfig } from './OpenAPI';
+import { clearAuthSession, refreshAccessToken } from '../../auth';
 
 export const isDefined = <T>(value: T | null | undefined): value is Exclude<T, null | undefined> => {
     return value !== undefined && value !== null;
@@ -263,6 +264,14 @@ export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): 
 
     const error = errors[result.status];
     if (error) {
+        if (result.status === 401) {
+            clearAuthSession();
+
+            if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+                window.location.assign('/login');
+            }
+        }
+
         throw new ApiError(options, result, error);
     }
 
@@ -300,7 +309,17 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions, ax
             const headers = await getHeaders(config, options, formData);
 
             if (!onCancel.isCancelled) {
-                const response = await sendRequest<T>(config, options, url, body, formData, headers, onCancel, axiosClient);
+                let response = await sendRequest<T>(config, options, url, body, formData, headers, onCancel, axiosClient);
+
+                if (response.status === 401 && isStringWithValue(headers.Authorization)) {
+                    const refreshedToken = await refreshAccessToken();
+
+                    if (refreshedToken && !onCancel.isCancelled) {
+                        const retryHeaders = await getHeaders(config, options, formData);
+                        response = await sendRequest<T>(config, options, url, body, formData, retryHeaders, onCancel, axiosClient);
+                    }
+                }
+
                 const responseBody = getResponseBody(response);
                 const responseHeader = getResponseHeader(response, options.responseHeader);
 

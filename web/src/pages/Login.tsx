@@ -8,14 +8,24 @@ import {
     Alert,
     CircularProgress,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { setAuthSession } from '../auth';
+
+type LoginResponse = {
+    token?: string;
+    refresh_token?: string;
+    error?: string;
+};
 
 const Login: React.FC = () => {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+    const loginBaseUrl = import.meta.env.VITE_USER_SERVICE_URL ?? 'http://localhost:8040';
+    const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,25 +33,31 @@ const Login: React.FC = () => {
         setLoading(true);
 
         try {
-            // Replace with your actual login API call
-            if (!email || !password) {
-                throw new Error('Email and password are required');
+            const nextUsername = username.trim();
+            const nextPassword = password.trim();
+
+            if (!nextUsername || !nextPassword) {
+                throw new Error('Username and password are required');
             }
 
-            // Example API call (update with your actual endpoint)
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch(`${loginBaseUrl}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ username: nextUsername, password: nextPassword }),
             });
 
+            const data = await response.json() as LoginResponse;
+
             if (!response.ok) {
-                throw new Error('Login failed');
+                throw new Error(data.error ?? 'Login failed');
             }
 
-            const data = await response.json();
-            localStorage.setItem('authToken', data.token);
-            navigate('/');
+            if (!data.token) {
+                throw new Error('Login response did not include an access token');
+            }
+
+            setAuthSession(data.token, data.refresh_token);
+            navigate(redirectTo, { replace: true });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {
@@ -61,10 +77,9 @@ const Login: React.FC = () => {
                 <form onSubmit={handleSubmit}>
                     <TextField
                         fullWidth
-                        label="Email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        label="Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                         margin="normal"
                         disabled={loading}
                         required

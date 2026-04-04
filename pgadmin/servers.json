@@ -1,9 +1,9 @@
 {
     "Servers": {
       "1": {
-        "Name": "adhara-db",
+        "Name": "order-service-db",
         "Group": "Servers",
-        "Host": "adhara-db",
+        "Host": "order-service-db",
         "Port": 5432,
         "MaintenanceDB": "postgres",
         "Username": "postgres",
