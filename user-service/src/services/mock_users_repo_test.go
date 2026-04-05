@@ -3,25 +3,25 @@ package services
 import (
 	"github.com/stretchr/testify/mock"
 
-	"github.com/im-mk/user-service/src/models"
+	"github.com/im-mk/user-service/src/entities"
 )
 
 type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) GetUserByUsername(username string) (*models.User, error) {
+func (m *MockUserRepository) GetUserByUsername(username string) (*entities.User, error) {
 	args := m.Called(username)
-	return args.Get(0).(*models.User), args.Error(1)
+	return args.Get(0).(*entities.User), args.Error(1)
 }
 
-func (m *MockUserRepository) GetUserByID(id int) (*models.User, error) {
+func (m *MockUserRepository) GetUserByID(id int) (*entities.User, error) {
 	args := m.Called(id)
 	// allow nil first arg
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*models.User), args.Error(1)
+	return args.Get(0).(*entities.User), args.Error(1)
 }
 
 func (m *MockUserRepository) UserExists(username, email string) (bool, error) {
@@ -29,7 +29,7 @@ func (m *MockUserRepository) UserExists(username, email string) (bool, error) {
 	return args.Bool(0), args.Error(1)
 }
 
-func (m *MockUserRepository) CreateUser(user models.User) error {
+func (m *MockUserRepository) CreateUser(user entities.User) error {
 	args := m.Called(user)
 	return args.Error(0)
 }

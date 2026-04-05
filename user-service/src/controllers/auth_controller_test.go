@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/im-mk/user-service/src/dtos"
+	"github.com/im-mk/user-service/src/entities"
 	"github.com/im-mk/user-service/src/models"
 	"github.com/im-mk/user-service/src/services"
 	"github.com/stretchr/testify/assert"
@@ -27,21 +29,21 @@ func (m *MockUserRepo) UserExists(username, email string) (bool, error) {
 	args := m.Called(username, email)
 	return args.Bool(0), args.Error(1)
 }
-func (m *MockUserRepo) GetUserByUsername(username string) (*models.User, error) {
+func (m *MockUserRepo) GetUserByUsername(username string) (*entities.User, error) {
 	args := m.Called(username)
 	if u := args.Get(0); u != nil {
-		return u.(*models.User), args.Error(1)
+		return u.(*entities.User), args.Error(1)
 	}
 	return nil, args.Error(1)
 }
-func (m *MockUserRepo) GetUserByID(id int) (*models.User, error) {
+func (m *MockUserRepo) GetUserByID(id int) (*entities.User, error) {
 	args := m.Called(id)
 	if u := args.Get(0); u != nil {
-		return u.(*models.User), args.Error(1)
+		return u.(*entities.User), args.Error(1)
 	}
 	return nil, args.Error(1)
 }
-func (m *MockUserRepo) CreateUser(user models.User) error {
+func (m *MockUserRepo) CreateUser(user entities.User) error {
 	args := m.Called(user)
 	return args.Error(0)
 }
@@ -98,7 +100,7 @@ func TestAuthController_Login(t *testing.T) {
 		mockTokenProv := new(MockTokenProvider)
 
 		hashedPw, _ := bcrypt.GenerateFromPassword([]byte("pass123"), bcrypt.DefaultCost)
-		mockUserRepo.On("GetUserByUsername", "alice").Return(&models.User{
+		mockUserRepo.On("GetUserByUsername", "alice").Return(&entities.User{
 			ID:         1,
 			Username:   "alice",
 			Password:   string(hashedPw),
@@ -114,7 +116,7 @@ func TestAuthController_Login(t *testing.T) {
 		r := gin.New()
 		r.POST("/login", ctrl.Login)
 
-		body := models.LoginRequest{
+		body := dtos.LoginRequest{
 			Username: "alice",
 			Password: "pass123",
 		}
@@ -143,7 +145,7 @@ func TestAuthController_Login(t *testing.T) {
 		r := gin.New()
 		r.POST("/login", ctrl.Login)
 
-		body := models.LoginRequest{
+		body := dtos.LoginRequest{
 			Username: "alice",
 			Password: "wrongpass",
 		}
@@ -179,7 +181,7 @@ func TestAuthController_Refresh(t *testing.T) {
 		tokenHash := hashToken(oldRefreshToken)
 
 		mockRefreshRepo.On("GetRefreshToken", tokenHash).Return("1", nil)
-		mockUserRepo.On("GetUserByID", 1).Return(&models.User{
+		mockUserRepo.On("GetUserByID", 1).Return(&entities.User{
 			ID:       1,
 			Username: "alice",
 		}, nil)
@@ -194,7 +196,7 @@ func TestAuthController_Refresh(t *testing.T) {
 		r := gin.New()
 		r.POST("/refresh", ctrl.Refresh)
 
-		body := models.RefreshRequest{
+		body := dtos.RefreshRequest{
 			RefreshToken: oldRefreshToken,
 		}
 		jsonBody, _ := json.Marshal(body)

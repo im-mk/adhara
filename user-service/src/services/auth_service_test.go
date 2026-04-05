@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/im-mk/user-service/src/dtos"
+	"github.com/im-mk/user-service/src/entities"
 	"github.com/im-mk/user-service/src/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -26,7 +28,7 @@ func TestAuthService_Login(t *testing.T) {
 	t.Run("successful login", func(t *testing.T) {
 		password := "password123"
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		mockUser := &models.User{
+		mockUser := &entities.User{
 			Username:   "testuser",
 			Password:   string(hashedPassword),
 			IsActive:   true,
@@ -38,7 +40,7 @@ func TestAuthService_Login(t *testing.T) {
 		mockTokenProv.On("GenerateRefreshToken").Return("tokR", nil)
 		mockRefreshRepo.On("SaveRefreshToken", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-		access, refresh, err := authService.Login(models.LoginRequest{
+		access, refresh, err := authService.Login(dtos.LoginRequest{
 			Username: "testuser",
 			Password: password,
 		})
@@ -52,7 +54,7 @@ func TestAuthService_Login(t *testing.T) {
 	t.Run("invalid credentials - wrong password", func(t *testing.T) {
 		password := "password123"
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		mockUser := &models.User{
+		mockUser := &entities.User{
 			Username:   "testuser",
 			Password:   string(hashedPassword),
 			IsActive:   true,
@@ -61,7 +63,7 @@ func TestAuthService_Login(t *testing.T) {
 
 		mockRepo.On("GetUserByUsername", "testuser").Return(mockUser, nil)
 
-		access, refresh, err := authService.Login(models.LoginRequest{
+		access, refresh, err := authService.Login(dtos.LoginRequest{
 			Username: "testuser",
 			Password: "wrongpassword",
 		})
@@ -74,10 +76,10 @@ func TestAuthService_Login(t *testing.T) {
 	})
 
 	t.Run("user not found", func(t *testing.T) {
-		mockRepo.On("GetUserByUsername", "unknownuser").Return(&models.User{}, errors.New("user not found"))
+		mockRepo.On("GetUserByUsername", "unknownuser").Return(&entities.User{}, errors.New("user not found"))
 		// provider not invoked
 
-		access, refresh, err := authService.Login(models.LoginRequest{
+		access, refresh, err := authService.Login(dtos.LoginRequest{
 			Username: "unknownuser",
 			Password: "password123",
 		})
@@ -98,7 +100,7 @@ func TestAuthService_Login(t *testing.T) {
 
 		password := "password123"
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		mockUser := &models.User{
+		mockUser := &entities.User{
 			Username:   "testuser",
 			Password:   string(hashedPassword),
 			IsActive:   false,
@@ -107,7 +109,7 @@ func TestAuthService_Login(t *testing.T) {
 
 		inactiveMockRepo.On("GetUserByUsername", "testuser").Return(mockUser, nil)
 
-		access, refresh, err := inactiveAuthService.Login(models.LoginRequest{
+		access, refresh, err := inactiveAuthService.Login(dtos.LoginRequest{
 			Username: "testuser",
 			Password: password,
 		})
@@ -128,7 +130,7 @@ func TestAuthService_Login(t *testing.T) {
 
 		password := "password123"
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		mockUser := &models.User{
+		mockUser := &entities.User{
 			Username:   "testuser",
 			Password:   string(hashedPassword),
 			IsActive:   true,
@@ -137,7 +139,7 @@ func TestAuthService_Login(t *testing.T) {
 
 		unverifiedMockRepo.On("GetUserByUsername", "testuser").Return(mockUser, nil)
 
-		access, refresh, err := unverifiedAuthService.Login(models.LoginRequest{
+		access, refresh, err := unverifiedAuthService.Login(dtos.LoginRequest{
 			Username: "testuser",
 			Password: password,
 		})

@@ -4,10 +4,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/im-mk/user-service/src/dtos"
+	"github.com/im-mk/user-service/src/entities"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-
-	"github.com/im-mk/user-service/src/models"
 )
 
 func TestUserService_CreateUser(t *testing.T) {
@@ -15,7 +15,7 @@ func TestUserService_CreateUser(t *testing.T) {
 	userService := NewUserService(mockRepo)
 
 	t.Run("successful user creation", func(t *testing.T) {
-		req := models.CreateUserRequest{
+		req := dtos.CreateUserRequest{
 			Username:   "newuser",
 			Email:      "newuser@example.com",
 			Password:   "password123",
@@ -26,7 +26,7 @@ func TestUserService_CreateUser(t *testing.T) {
 
 		mockRepo.On("UserExists", req.Username, req.Email).Return(false, nil).Once()
 		// validate that the passed user has the expected fields set
-		mockRepo.On("CreateUser", mock.MatchedBy(func(u models.User) bool {
+		mockRepo.On("CreateUser", mock.MatchedBy(func(u entities.User) bool {
 			return u.Username == req.Username &&
 				u.Email == req.Email &&
 				u.FirstName == req.FirstName &&
@@ -43,7 +43,7 @@ func TestUserService_CreateUser(t *testing.T) {
 	})
 
 	t.Run("user already exists", func(t *testing.T) {
-		req := models.CreateUserRequest{
+		req := dtos.CreateUserRequest{
 			Username: "existinguser",
 			Email:    "existinguser@example.com",
 			Password: "password123",
@@ -59,7 +59,7 @@ func TestUserService_CreateUser(t *testing.T) {
 	})
 
 	t.Run("error checking user existence", func(t *testing.T) {
-		req := models.CreateUserRequest{
+		req := dtos.CreateUserRequest{
 			Username: "newuser",
 			Email:    "newuser@example.com",
 			Password: "password123",
@@ -80,7 +80,7 @@ func TestUserService_CreateUser(t *testing.T) {
 		mockRepo := new(MockUserRepository)
 		userService := NewUserService(mockRepo)
 
-		req := models.CreateUserRequest{
+		req := dtos.CreateUserRequest{
 			Username: "first",
 			Email:    "first@example.com",
 			Password: "pass",
@@ -89,7 +89,7 @@ func TestUserService_CreateUser(t *testing.T) {
 		// no existing users
 		mockRepo.On("AnyUserExists").Return(false, nil).Once()
 		// when CreateUser is called we expect IsVerified true
-		mockRepo.On("CreateUser", mock.MatchedBy(func(u models.User) bool {
+		mockRepo.On("CreateUser", mock.MatchedBy(func(u entities.User) bool {
 			return u.IsVerified == true && u.Username == req.Username
 		})).Return(nil).Once()
 
@@ -104,7 +104,7 @@ func TestUserService_CreateUser(t *testing.T) {
 
 		mockRepo.On("AnyUserExists").Return(true, nil).Once()
 
-		err := userService.Bootstrap(models.CreateUserRequest{})
+		err := userService.Bootstrap(dtos.CreateUserRequest{})
 		assert.Error(t, err)
 	})
 
@@ -112,7 +112,7 @@ func TestUserService_CreateUser(t *testing.T) {
 		mockRepo := new(MockUserRepository)
 		userService := NewUserService(mockRepo)
 
-		domainUser := &models.User{
+		domainUser := &entities.User{
 			ID:         42,
 			Username:   "bob",
 			Email:      "bob@example.com",

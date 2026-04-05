@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/im-mk/user-service/src/models"
+	"github.com/im-mk/user-service/src/dtos"
 	"github.com/im-mk/user-service/src/services"
 	_ "github.com/lib/pq"
 )
@@ -22,13 +22,13 @@ func NewAuthController(authService *services.AuthService) *AuthController {
 // @Tags			auth
 // @Accept			json
 // @Produce		json
-// @Param			credentials	body		models.LoginRequest	true	"User credentials"
+// @Param			credentials	body		dtos.LoginRequest	true	"User credentials"
 // @Success		200			{string}	string				"token"
 // @Failure		400			{object}	gin.H				"Invalid request"
 // @Failure		500			{object}	gin.H				"Could not create token"
 // @Router			/login [post]
 func (ctrl *AuthController) Login(c *gin.Context) {
-	var creds models.LoginRequest
+	var creds dtos.LoginRequest
 	if err := c.ShouldBindJSON(&creds); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -45,7 +45,7 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 
 // Refresh exchanges a refresh token for a new access token
 func (ctrl *AuthController) Refresh(c *gin.Context) {
-	var req models.RefreshRequest
+	var req dtos.RefreshRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

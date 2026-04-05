@@ -3,14 +3,14 @@ package repositories
 import (
 	"github.com/jmoiron/sqlx"
 
-	"github.com/im-mk/user-service/src/models"
+	"github.com/im-mk/user-service/src/entities"
 )
 
 type UserRepositoryInterface interface {
 	UserExists(username, email string) (bool, error)
-	GetUserByUsername(username string) (*models.User, error)
-	GetUserByID(userID int) (*models.User, error)
-	CreateUser(user models.User) error
+	GetUserByUsername(username string) (*entities.User, error)
+	GetUserByID(userID int) (*entities.User, error)
+	CreateUser(user entities.User) error
 	AnyUserExists() (bool, error)
 }
 
@@ -30,8 +30,8 @@ func (r *UserRepository) UserExists(username, email string) (bool, error) {
 	return exists, err
 }
 
-func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
-	var user models.User
+func (r *UserRepository) GetUserByUsername(username string) (*entities.User, error) {
+	var user entities.User
 	err := r.DB.Get(&user, `
 		SELECT id, username, email, password,
 		       first_name, middle_name, last_name,
@@ -45,8 +45,8 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 	return &user, nil
 }
 
-func (r *UserRepository) GetUserByID(userID int) (*models.User, error) {
-	var user models.User
+func (r *UserRepository) GetUserByID(userID int) (*entities.User, error) {
+	var user entities.User
 	err := r.DB.Get(&user, `
 		SELECT id, username, email, password,
 		       first_name, middle_name, last_name,
@@ -60,7 +60,7 @@ func (r *UserRepository) GetUserByID(userID int) (*models.User, error) {
 	return &user, nil
 }
 
-func (r *UserRepository) CreateUser(user models.User) error {
+func (r *UserRepository) CreateUser(user entities.User) error {
 	_, err := r.DB.Exec(`INSERT INTO users (username, email, password, first_name, middle_name, last_name, is_active, is_verified) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		user.Username, user.Email, user.Password,

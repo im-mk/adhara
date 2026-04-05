@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/im-mk/user-service/src/models"
+	"github.com/im-mk/user-service/src/dtos"
 	"github.com/im-mk/user-service/src/services"
 	_ "github.com/lib/pq"
 )
@@ -23,13 +23,13 @@ func NewUserController(userService *services.UserService) *UserController {
 // @Tags			users
 // @Accept			json
 // @Produce		json
-// @Param			user	body		models.CreateUserRequest	true	"Create User Request"
-// @Success		200		{object}	models.User
+// @Param			user	body		dtos.CreateUserRequest	true	"Create User Request"
+// @Success		200		{object}	gin.H
 // @Failure		400		{object}	gin.H
 // @Failure		500		{object}	gin.H
 // @Router			/users [post]
 func (ctrl *UserController) CreateUser(c *gin.Context) {
-	var req models.CreateUserRequest
+	var req dtos.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -48,8 +48,7 @@ func (ctrl *UserController) CreateUser(c *gin.Context) {
 // @Tags			users
 // @Accept			json
 // @Produce		json
-// @Param			user	body		models.CreateUserRequest	true	"Create User Request"
-// @Success		200		{object}	models.User
+// @Success		200		{object}	dtos.UserDetails
 // @Failure		400		{object}	gin.H
 // @Failure		500		{object}	gin.H
 // @Router			/users [post]
@@ -75,13 +74,13 @@ func (ctrl *UserController) GetUser(c *gin.Context) {
 // @Tags       bootstrap
 // @Accept     json
 // @Produce    json
-// @Param      user  body      models.CreateUserRequest  true  "Create User Request"
+// @Param      user  body      dtos.CreateUserRequest  true  "Create User Request"
 // @Success    200   {object}  gin.H
 // @Failure    400   {object}  gin.H
 // @Failure    500   {object}  gin.H
 // @Router     /bootstrap [post]
 func (ctrl *UserController) Bootstrap(c *gin.Context) {
-	var req models.CreateUserRequest
+	var req dtos.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

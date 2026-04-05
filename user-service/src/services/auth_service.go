@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/im-mk/user-service/src/dtos"
 	"github.com/im-mk/user-service/src/models"
 	"github.com/im-mk/user-service/src/repositories"
 	"golang.org/x/crypto/bcrypt"
@@ -39,7 +40,7 @@ func NewAuthService(
 	}
 }
 
-func (s *AuthService) Login(creds models.LoginRequest) (string, string, error) {
+func (s *AuthService) Login(creds dtos.LoginRequest) (string, string, error) {
 
 	user, err := s.UserRepo.GetUserByUsername(creds.Username)
 	if err != nil {

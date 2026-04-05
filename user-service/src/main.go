@@ -36,6 +36,8 @@ func main() {
 
 	db := utils.InitDB(appConfig.DB)
 	userRepo := repositories.NewUserRepository(db)
+	addressRepo := repositories.NewAddressRepository(db)
+	customerRepo := repositories.NewCustomerRepository(db)
 	refreshTokenRepo := repositories.NewRefreshTokenRepository(db)
 
 	tokenProv := &services.DefaultTokenProvider{
@@ -45,10 +47,12 @@ func main() {
 
 	authService := services.NewAuthService(userRepo, refreshTokenRepo, tokenProv, appConfig.Auth)
 	userService := services.NewUserService(userRepo)
+	customerService := services.NewCustomerService(customerRepo, addressRepo)
 
 	userController := controllers.NewUserController(userService)
+	customerController := controllers.NewCustomerController(customerService)
 	jwksContrller := controllers.NewJwksController(publicAuthKey)
 	authController := controllers.NewAuthController(authService)
 
-	registerRoutes(userController, authController, jwksContrller, appConfig.App, appConfig.Auth, publicAuthKey)
+	registerRoutes(userController, customerController, authController, jwksContrller, appConfig.App, appConfig.Auth, publicAuthKey)
 }

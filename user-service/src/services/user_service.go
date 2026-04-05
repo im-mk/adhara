@@ -3,7 +3,8 @@ package services
 import (
 	"errors"
 
-	"github.com/im-mk/user-service/src/models"
+	"github.com/im-mk/user-service/src/dtos"
+	"github.com/im-mk/user-service/src/entities"
 	"github.com/im-mk/user-service/src/repositories"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,7 +17,7 @@ func NewUserService(userRepo repositories.UserRepositoryInterface) *UserService 
 	return &UserService{UserRepo: userRepo}
 }
 
-func (s *UserService) CreateUser(req models.CreateUserRequest) error {
+func (s *UserService) CreateUser(req dtos.CreateUserRequest) error {
 
 	exists, err := s.UserRepo.UserExists(req.Username, req.Email)
 	if err != nil {
@@ -32,7 +33,7 @@ func (s *UserService) CreateUser(req models.CreateUserRequest) error {
 		return err
 	}
 
-	user := models.User{
+	user := entities.User{
 		Username:   req.Username,
 		Email:      req.Email,
 		Password:   string(hashedPassword),
@@ -46,14 +47,14 @@ func (s *UserService) CreateUser(req models.CreateUserRequest) error {
 	return s.UserRepo.CreateUser(user)
 }
 
-func (s *UserService) GetUser(userId int) (*models.UserDetails, error) {
+func (s *UserService) GetUser(userId int) (*dtos.UserDetails, error) {
 
 	user, err := s.UserRepo.GetUserByID(userId)
 	if err != nil {
 		return nil, err
 	}
 
-	userDetails := &models.UserDetails{
+	userDetails := &dtos.UserDetails{
 		ID:         user.ID,
 		Username:   user.Username,
 		Email:      user.Email,
@@ -68,7 +69,7 @@ func (s *UserService) GetUser(userId int) (*models.UserDetails, error) {
 }
 
 // Bootstrap creates the first user if no users exist in the system.
-func (s *UserService) Bootstrap(req models.CreateUserRequest) error {
+func (s *UserService) Bootstrap(req dtos.CreateUserRequest) error {
 
 	any, err := s.UserRepo.AnyUserExists()
 	if err != nil || any {
@@ -80,7 +81,7 @@ func (s *UserService) Bootstrap(req models.CreateUserRequest) error {
 		return err
 	}
 
-	user := models.User{
+	user := entities.User{
 		Username:   req.Username,
 		Email:      req.Email,
 		Password:   string(hashedPassword),

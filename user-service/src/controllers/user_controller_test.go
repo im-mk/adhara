@@ -10,27 +10,28 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/im-mk/user-service/src/models"
+	"github.com/im-mk/user-service/src/dtos"
+	"github.com/im-mk/user-service/src/entities"
 	"github.com/im-mk/user-service/src/services"
 )
 
 // fakeRepo is a simple in-test implementation of UserRepositoryInterface
 type fakeRepo struct {
-	f func(int) (*models.User, error)
+	f func(int) (*entities.User, error)
 }
 
-func (r *fakeRepo) UserExists(username, email string) (bool, error)         { return false, nil }
-func (r *fakeRepo) GetUserByUsername(username string) (*models.User, error) { return nil, nil }
-func (r *fakeRepo) GetUserByID(id int) (*models.User, error)                { return r.f(id) }
-func (r *fakeRepo) CreateUser(user models.User) error                       { return nil }
-func (r *fakeRepo) AnyUserExists() (bool, error)                            { return false, nil }
+func (r *fakeRepo) UserExists(username, email string) (bool, error)           { return false, nil }
+func (r *fakeRepo) GetUserByUsername(username string) (*entities.User, error) { return nil, nil }
+func (r *fakeRepo) GetUserByID(id int) (*entities.User, error)                { return r.f(id) }
+func (r *fakeRepo) CreateUser(user entities.User) error                       { return nil }
+func (r *fakeRepo) AnyUserExists() (bool, error)                              { return false, nil }
 
 func TestGetUserHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("success", func(t *testing.T) {
-		funcRepo := &fakeRepo{f: func(id int) (*models.User, error) {
-			return &models.User{
+		funcRepo := &fakeRepo{f: func(id int) (*entities.User, error) {
+			return &entities.User{
 				ID:         id,
 				Username:   "alice",
 				Email:      "alice@example.com",
@@ -53,7 +54,7 @@ func TestGetUserHandler(t *testing.T) {
 		r.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		var got models.UserDetails
+		var got dtos.UserDetails
 		err := json.Unmarshal(w.Body.Bytes(), &got)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, got.ID)
@@ -66,7 +67,7 @@ func TestGetUserHandler(t *testing.T) {
 	})
 
 	t.Run("not found", func(t *testing.T) {
-		funcRepo := &fakeRepo{f: func(id int) (*models.User, error) { return nil, errors.New("not found") }}
+		funcRepo := &fakeRepo{f: func(id int) (*entities.User, error) { return nil, errors.New("not found") }}
 
 		userSvc := services.NewUserService(funcRepo)
 		ctrl := NewUserController(userSvc)
