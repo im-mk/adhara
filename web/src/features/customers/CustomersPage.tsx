@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Customer, CustomersService } from '../api';
+import { Customer, CustomersService } from '../../api';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -19,10 +19,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import CreateCustomerDialog from '../components/CreateCustomerDialog';
-import EditCustomerDialog from '../components/EditCustomerDialog';
+import CreateCustomerDialog from './CreateCustomerDialog';
+import EditCustomerDialog from './EditCustomerDialog';
 
-const Customers: React.FC = () => {
+const CustomersPage: React.FC = () => {
     const navigate = useNavigate();
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -246,4 +246,4 @@ const Customers: React.FC = () => {
     );
 };
 
-export default Customers;
+export default CustomersPage;

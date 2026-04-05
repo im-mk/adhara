@@ -24,7 +24,7 @@ interface Product {
     quantity?: number;
 }
 
-const Products: React.FC = () => {
+const ProductsPage: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -151,4 +151,4 @@ const Products: React.FC = () => {
     );
 };
 
-export default Products;
+export default ProductsPage;

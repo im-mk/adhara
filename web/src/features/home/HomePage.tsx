@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CustomersService, OrdersService } from '../api';
+import { CustomersService, OrdersService } from '../../api';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -14,7 +14,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { OrderListResponse } from '../api';
+import { OrderListResponse } from '../../api';
 
 const getTodayIsoDate = () => {
     const today = new Date();
@@ -31,7 +31,7 @@ const toIsoDate = (date: Date) => {
     return `${yyyy}-${mm}-${dd}`;
 };
 
-const Home: React.FC = () => {
+const HomePage: React.FC = () => {
     const today = getTodayIsoDate();
     const [startDate, setStartDate] = useState<string>(today);
     const [endDate, setEndDate] = useState<string>(today);
@@ -190,4 +190,4 @@ const Home: React.FC = () => {
     );
 };
 
-export default Home;
+export default HomePage;

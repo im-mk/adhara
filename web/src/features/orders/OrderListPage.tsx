@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { OrderListResponse, OrdersService } from "../api";
+import { OrderListResponse, OrdersService } from "../../api";
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -10,7 +10,7 @@ import TableRow from '@mui/material/TableRow';
 import Link from "@mui/material/Link";
 import { Link as RouterLink } from 'react-router-dom';
 
-const OrderList: React.FC = () => {
+const OrderListPage: React.FC = () => {
 
     const [orders, setOrders] = useState<OrderListResponse[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -68,4 +68,4 @@ const OrderList: React.FC = () => {
     );
 };
 
-export default OrderList;
+export default OrderListPage;

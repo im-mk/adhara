@@ -13,8 +13,8 @@ import {
     Typography,
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { CustomersService, OrderItem, OrdersService } from '../api';
-import { useNotification } from '../components/notification-context';
+import { CustomersService, OrderItem, OrdersService } from '../../api';
+import { useNotification } from '../../components/notification-context';
 
 type OrderLineForm = {
     id: string;
@@ -43,7 +43,7 @@ const createEmptyLine = (): OrderLineForm => ({
     quantity: '1',
 });
 
-const NewOrder: React.FC = () => {
+const NewOrderPage: React.FC = () => {
     const { customerId } = useParams();
     const parsedCustomerId = Number(customerId);
     const navigate = useNavigate();
@@ -405,4 +405,4 @@ const NewOrder: React.FC = () => {
     );
 };
 
-export default NewOrder;
+export default NewOrderPage;

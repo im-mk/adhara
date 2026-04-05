@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from 'react-router-dom';
-import { OrderDetailsResponse, OrdersService } from "../api";
+import { OrderDetailsResponse, OrdersService } from "../../api";
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -24,9 +24,9 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import type { OrderLineDetails } from '../api';
+import type { OrderLineDetails } from '../../api';
 
-const OrderDetails: React.FC = () => {
+const OrderDetailsPage: React.FC = () => {
     const { orderId } = useParams();
     const parsedOrderId = Number(orderId);
     const [orderDetails, setOrderDetails] = useState<OrderDetailsResponse | null>(null);
@@ -452,4 +452,4 @@ const OrderDetails: React.FC = () => {
     );
 };
 
-export default OrderDetails;
+export default OrderDetailsPage;

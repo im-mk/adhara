@@ -9,10 +9,10 @@ import {
     CircularProgress,
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { setAuthSession } from '../auth.ts';
-import { AuthService } from '../api/services/AuthService';
+import { setAuthSession } from '../../auth.ts';
+import { AuthService } from '../../api/services/AuthService';
 
-const Login: React.FC = () => {
+const LoginPage: React.FC = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -96,4 +96,4 @@ const Login: React.FC = () => {
     );
 };
 
-export default Login;
+export default LoginPage;

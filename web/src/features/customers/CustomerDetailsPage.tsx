@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Customer, CustomersService, OrderListResponse, OrdersService } from '../api';
+import { Customer, CustomersService, OrderListResponse, OrdersService } from '../../api';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -25,7 +25,7 @@ type CustomerOrderRow = {
     totalAmount?: number;
 };
 
-const CustomerDetails: React.FC = () => {
+const CustomerDetailsPage: React.FC = () => {
     const { customerId } = useParams();
     const parsedCustomerId = Number(customerId);
 
@@ -226,4 +226,4 @@ const CustomerDetails: React.FC = () => {
     );
 };
 
-export default CustomerDetails;
+export default CustomerDetailsPage;

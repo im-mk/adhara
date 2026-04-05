@@ -11,7 +11,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { CountriesService, Country, Customer, CustomersService } from '../api';
+import { CountriesService, Country, Customer, CustomersService } from '../../api';
 
 type AddressForm = {
     addressLine1: string;
