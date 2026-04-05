@@ -5,5 +5,6 @@ export type Order = {
     orderStatusId?: number;
     totalAmount?: number;
     customerId?: number;
+    customerName?: string | null;
 };
 

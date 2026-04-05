@@ -28,7 +28,7 @@ public sealed class BffProxyController(DownstreamProxyService downstreamProxySer
     [Route("Customers")]
     [Route("Customers/{*path}")]
     public Task<IActionResult> Customers()
-        => downstreamProxyService.ForwardToOrderServiceAsync(HttpContext);
+        => downstreamProxyService.ForwardToUserServiceAsync(HttpContext);
 
     [Authorize]
     [AcceptVerbs("GET", "POST", "PUT", "DELETE")]

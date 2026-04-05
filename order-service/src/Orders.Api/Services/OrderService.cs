@@ -11,7 +11,7 @@ public class OrderService : IOrderService
     private readonly IOrdersRepository _ordersRepository;
     private readonly IOrderLinesRepository _orderLinesRepository;
     private readonly IOutboxRepository _outboxRepository;
-    private readonly ICustomersRepository _customersRepository;
+    private readonly IAddressesRepository _addressesRepository;
     private readonly System.Data.IDbConnection _dbConnection;
     private readonly IProductRepository _productRepository;
 
@@ -19,23 +19,20 @@ public class OrderService : IOrderService
         System.Data.IDbConnection dbConnection,
         IOrdersRepository ordersRepository,
         IOrderLinesRepository orderLinesRepository,
-        ICustomersRepository customersRepository,
         IOutboxRepository outboxRepository,
-        IProductRepository productRepository)
+        IProductRepository productRepository,
+        IAddressesRepository addressesRepository)
     {
         _dbConnection = dbConnection;
         _ordersRepository = ordersRepository;
         _orderLinesRepository = orderLinesRepository;
-        _customersRepository = customersRepository;
         _productRepository = productRepository;
         _outboxRepository = outboxRepository;
+        _addressesRepository = addressesRepository;
     }
 
     public async Task<OrderCreatedResponse> CreateOrder(CreateOrderRequest request)
     {
-        var customer = await _customersRepository.Get(request.CustomerId)
-            ?? throw new ArgumentException("Invalid customer ID", nameof(request.CustomerId));
-
         var productIds = request.OrderLines.Select(ol => ol.ProductId).ToList();
         var productsMap = new Dictionary<int, Product>();
         foreach (var productId in productIds)
@@ -50,6 +47,15 @@ public class OrderService : IOrderService
         using var tx = _dbConnection.BeginTransaction();
         try
         {
+            var shippingAddressId = await _addressesRepository.Insert(
+                AddressMapper.FromRequest(request.ShippingAddress), tx);
+
+            var billingAddressId = await _addressesRepository.Insert(
+                AddressMapper.FromRequest(request.BillingAddress), tx);
+
+            order.ShippingAddressId = shippingAddressId;
+            order.BillingAddressId = billingAddressId;
+
             var id = await _ordersRepository.Insert(order, tx);
             if (id <= 0)
                 throw new InvalidOperationException("Failed to insert order");
@@ -69,7 +75,7 @@ public class OrderService : IOrderService
                 orderLines.Add(line);
             }
 
-            var outboxResult = await InsertOutboxEvent(customer, order, tx, orderLines, productsMap.Values.ToList());
+            var outboxResult = await InsertOutboxEvent(request.CustomerName, order, tx, orderLines, productsMap.Values.ToList());
             if (outboxResult < 1)
                 throw new InvalidOperationException("Failed to insert outbox event");
 
@@ -89,9 +95,6 @@ public class OrderService : IOrderService
         var order = await _ordersRepository.Get(orderId);
         if (order == null) return null;
 
-        var customer = await _customersRepository.Get(order.CustomerId)
-            ?? throw new InvalidOperationException($"Customer not found: {order.CustomerId}");
-
         var orderLines = (await _orderLinesRepository.GetByOrderId(orderId)).ToList();
 
         var productsMap = new Dictionary<int, Product>();
@@ -105,7 +108,7 @@ public class OrderService : IOrderService
             }
         }
 
-        return await MapToOrderDetailsResponse(order, customer, orderLines, productsMap.Values.ToList());
+        return MapToOrderDetailsResponse(order, orderLines, productsMap.Values.ToList());
     }
 
     public async Task<bool> UpdateOrder(int orderId, UpdateOrderRequest request)
@@ -133,7 +136,7 @@ public class OrderService : IOrderService
         return rows == 1;
     }
 
-    private async Task<OrderDetailsResponse> MapToOrderDetailsResponse(Order order, Customer customer, List<OrderLine> orderLines, List<Product> products)
+    private static OrderDetailsResponse MapToOrderDetailsResponse(Order order, List<OrderLine> orderLines, List<Product> products)
     {
         var detailLines = orderLines.Select(l =>
         {
@@ -152,12 +155,12 @@ public class OrderService : IOrderService
         return new OrderDetailsResponse
         {
             Order = order,
-            CustomerName = customer != null ? $"{customer.FirstName} {customer.LastName}" : null,
+            CustomerName = order.CustomerName,
             OrderLines = detailLines
         };
     }
 
-    private async Task<int> InsertOutboxEvent(Customer customer, Order order, System.Data.IDbTransaction tx, List<OrderLine> orderLines, IEnumerable<Product> products)
+    private async Task<int> InsertOutboxEvent(string customerName, Order order, System.Data.IDbTransaction tx, List<OrderLine> orderLines, IEnumerable<Product> products)
     {
         var orderLineEvents = await MapOrderLines(orderLines, products);
 
@@ -165,7 +168,7 @@ public class OrderService : IOrderService
         {
             OrderId = order.Id,
             CreatedAt = DateTime.UtcNow,
-            CustomerName = $"{customer.FirstName} {customer.LastName}",
+            CustomerName = customerName,
             TotalAmount = order.TotalAmount,
             Lines = orderLineEvents
         };

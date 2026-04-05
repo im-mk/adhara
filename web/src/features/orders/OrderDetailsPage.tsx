@@ -294,7 +294,7 @@ const OrderDetailsPage: React.FC = () => {
                                 to={`/customers/${orderDetails.order.customerId}`}
                                 underline="hover"
                             >
-                                {orderDetails.customerName ?? `Customer ${orderDetails.order.customerId}`}
+                                {orderDetails.customerName ?? orderDetails.order.customerName ?? `Customer ${orderDetails.order.customerId}`}
                             </MuiLink>
                         ) : (
                             '-'

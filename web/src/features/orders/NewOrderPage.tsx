@@ -13,7 +13,7 @@ import {
     Typography,
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { CustomersService, OrderItem, OrdersService } from '../../api';
+import { CustomersService, OrderItem, OrdersService, type AddressRequest } from '../../api';
 import { useNotification } from '../../components/notification-context';
 
 type OrderLineForm = {
@@ -72,13 +72,8 @@ const NewOrderPage: React.FC = () => {
                 const customer = await CustomersService.getCustomerById(parsedCustomerId);
                 setCustomerName(`${customer.firstName ?? ''} ${customer.lastName ?? ''}`.trim() || `Customer ${parsedCustomerId}`);
 
-                const dynamicCustomer = customer as unknown as {
-                    shippingAddress?: AddressLike;
-                    billingAddress?: AddressLike;
-                };
-
-                setShippingAddress(dynamicCustomer.shippingAddress ?? null);
-                setBillingAddress(dynamicCustomer.billingAddress ?? null);
+                setShippingAddress(customer.shippingAddress ?? null);
+                setBillingAddress(customer.billingAddress ?? null);
             } catch {
                 setError('Could not load customer');
             } finally {
@@ -186,6 +181,29 @@ const NewOrderPage: React.FC = () => {
         });
     };
 
+    const toAddressRequest = (address: AddressLike | null): AddressRequest | null => {
+        if (!address) {
+            return null;
+        }
+
+        const addressLine1 = address.addressLine1?.trim() ?? '';
+        const postcode = address.postcode?.trim() ?? '';
+        const country = address.country?.trim() ?? '';
+
+        if (!addressLine1 || !postcode || !country) {
+            return null;
+        }
+
+        return {
+            addressLine1,
+            addressLine2: address.addressLine2?.trim() || null,
+            addressLine3: address.addressLine3?.trim() || null,
+            addressLine4: address.addressLine4?.trim() || null,
+            postcode,
+            country,
+        };
+    };
+
     const handleCreateOrder = async () => {
         if (!Number.isInteger(parsedCustomerId) || parsedCustomerId <= 0) {
             setError('Invalid customer id. Open create order from a customer page.');
@@ -197,12 +215,34 @@ const NewOrderPage: React.FC = () => {
             return;
         }
 
+        const normalizedCustomerName = customerName.trim();
+        if (!normalizedCustomerName) {
+            setError('Customer full name is required');
+            return;
+        }
+
+        const shippingAddressRequest = toAddressRequest(shippingAddress);
+        if (!shippingAddressRequest) {
+            setError('Shipping address is required');
+            return;
+        }
+
+        const billingAddressRequest = toAddressRequest(billingAddress);
+        if (!billingAddressRequest) {
+            setError('Billing address is required');
+            return;
+        }
+
         try {
             setSaving(true);
             setError(null);
 
             const created = await OrdersService.createOrder({
                 customerId: parsedCustomerId,
+                customerName: normalizedCustomerName,
+                totalAmount: Number(orderSummary.orderTotal.toFixed(2)),
+                shippingAddress: shippingAddressRequest,
+                billingAddress: billingAddressRequest,
                 orderLines: parsedOrderLines,
             });
 

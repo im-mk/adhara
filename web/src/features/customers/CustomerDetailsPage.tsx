@@ -146,9 +146,20 @@ const CustomerDetailsPage: React.FC = () => {
                         <Typography variant="h6" gutterBottom>
                             Shipping Address
                         </Typography>
-                        <Typography color="text.secondary" sx={{ mb: 2 }}>
-                            Shipping address is not available in the current customer details response.
-                        </Typography>
+                        {customer?.shippingAddress ? (
+                            <>
+                                <Typography>{customer.shippingAddress.addressLine1}</Typography>
+                                {customer.shippingAddress.addressLine2 && <Typography>{customer.shippingAddress.addressLine2}</Typography>}
+                                {customer.shippingAddress.addressLine3 && <Typography>{customer.shippingAddress.addressLine3}</Typography>}
+                                {customer.shippingAddress.addressLine4 && <Typography>{customer.shippingAddress.addressLine4}</Typography>}
+                                <Typography>{customer.shippingAddress.postcode}</Typography>
+                                <Typography>{customer.shippingAddress.country}</Typography>
+                            </>
+                        ) : (
+                            <Typography color="text.secondary" sx={{ mb: 2 }}>
+                                Shipping address is not available.
+                            </Typography>
+                        )}
 
                         <Typography variant="subtitle1" gutterBottom>
                             Previous History
@@ -164,9 +175,20 @@ const CustomerDetailsPage: React.FC = () => {
                         <Typography variant="h6" gutterBottom>
                             Billing Address
                         </Typography>
-                        <Typography color="text.secondary" sx={{ mb: 2 }}>
-                            Billing address is not available in the current customer details response.
-                        </Typography>
+                        {customer?.billingAddress ? (
+                            <>
+                                <Typography>{customer.billingAddress.addressLine1}</Typography>
+                                {customer.billingAddress.addressLine2 && <Typography>{customer.billingAddress.addressLine2}</Typography>}
+                                {customer.billingAddress.addressLine3 && <Typography>{customer.billingAddress.addressLine3}</Typography>}
+                                {customer.billingAddress.addressLine4 && <Typography>{customer.billingAddress.addressLine4}</Typography>}
+                                <Typography>{customer.billingAddress.postcode}</Typography>
+                                <Typography>{customer.billingAddress.country}</Typography>
+                            </>
+                        ) : (
+                            <Typography color="text.secondary" sx={{ mb: 2 }}>
+                                Billing address is not available.
+                            </Typography>
+                        )}
 
                         <Typography variant="subtitle1" gutterBottom>
                             Previous History

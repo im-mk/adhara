@@ -8,4 +8,7 @@ public class Order
     public int OrderStatusId { get; set; }
     public decimal TotalAmount { get; set; }
     public int CustomerId { get; set; }
+    public string CustomerName { get; set; } = default!;
+    public int ShippingAddressId { get; set; }
+    public int BillingAddressId { get; set; }
 }

@@ -16,19 +16,6 @@ VALUES
 SELECT setval(pg_get_serial_sequence('public.products','id'), COALESCE((SELECT MAX(id) FROM public.products), 1), true);
 
 
--- Insert sample orders
-INSERT INTO orders
-    (
-    order_number, order_date, order_status_id, total_amount, customer_id)
-VALUES
-    ('A00001', NOW(), 1, 1.23, 1),
-    ('A00002', NOW(), 2, 2.34, 2),
-    ('A00003', NOW(), 3, 3.45, 3),
-    ('A00004', NOW(), 4, 4.56, 4),
-    ('A00005', NOW(), 5, 5.67, 5);
-
-SELECT setval(pg_get_serial_sequence('public.orders','id'), COALESCE((SELECT MAX(id) FROM public.orders), 1), true);
-
 -- Insert sample addresses
 INSERT INTO addresses
     (id, address_line1, address_line2, address_line3, address_line4, postcode, country)
@@ -40,6 +27,21 @@ VALUES
     (5, '654 Maple Ln', NULL, NULL, NULL, '50005', 'US');
 
 SELECT setval(pg_get_serial_sequence('public.addresses','id'), COALESCE((SELECT MAX(id) FROM public.addresses), 1), true);
+
+
+-- Insert sample orders
+INSERT INTO orders
+    (
+    order_number, order_date, order_status_id, total_amount, customer_id, customer_name, shipping_address_id, billing_address_id
+    )
+VALUES
+    ('A00001', NOW(), 1, 1.23, 1, 'John Doe', 1, 1),
+    ('A00002', NOW(), 2, 2.34, 2, 'Jane Smith', 2, 2),
+    ('A00003', NOW(), 3, 3.45, 3, 'Bob Johnson', 3, 3),
+    ('A00004', NOW(), 4, 4.56, 4, 'Alice Williams', 4, 4),
+    ('A00005', NOW(), 5, 5.67, 5, 'Charlie Brown', 5, 5);
+
+SELECT setval(pg_get_serial_sequence('public.orders','id'), COALESCE((SELECT MAX(id) FROM public.orders), 1), true);
 
 -- Insert sample order lines (one per order)
 INSERT INTO order_lines

@@ -45,8 +45,8 @@ public class OrdersRepository(
     public Task<int> Insert(Order order, IDbTransaction? transaction = null)
     {
         const string sql = @"
-            INSERT INTO public.orders (order_number, order_date, order_status_id, total_amount, customer_id)
-            VALUES (@OrderNumber, @OrderDate, @OrderStatusId, @TotalAmount, @CustomerId)
+            INSERT INTO public.orders (order_number, order_date, order_status_id, total_amount, customer_id, customer_name, shipping_address_id, billing_address_id)
+            VALUES (@OrderNumber, @OrderDate, @OrderStatusId, @TotalAmount, @CustomerId, @CustomerName, @ShippingAddressId, @BillingAddressId)
             RETURNING id;";
 
         return _dbConnection.QuerySingleAsync<int>(sql, order, transaction);

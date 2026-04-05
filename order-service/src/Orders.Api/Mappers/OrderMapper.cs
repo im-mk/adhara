@@ -16,7 +16,8 @@ public static class OrderMapper
             OrderDate = DateTime.UtcNow,
             OrderStatusId = (int)OrderStatusEnum.Pending,
             TotalAmount = request.TotalAmount,
-            CustomerId = request.CustomerId
+            CustomerId = request.CustomerId,
+            CustomerName = request.CustomerName
         };
     }
 }
