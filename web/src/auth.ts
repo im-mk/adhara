@@ -1,11 +1,9 @@
 export const AUTH_TOKEN_STORAGE_KEY = 'authToken';
 export const REFRESH_TOKEN_STORAGE_KEY = 'refreshToken';
 export const AUTH_STATE_CHANGE_EVENT = 'auth-state-changed';
+export const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8020';
 
-type RefreshResponse = {
-    token?: string;
-    refresh_token?: string;
-};
+import { AuthService } from './api/services/AuthService';
 
 let refreshInFlight: Promise<string | null> | null = null;
 
@@ -45,22 +43,8 @@ export const refreshAccessToken = async (): Promise<string | null> => {
 
     refreshInFlight = (async () => {
         try {
-            const userServiceBaseUrl = import.meta.env.VITE_USER_SERVICE_URL ?? 'http://localhost:8040';
-
-            const response = await fetch(`${userServiceBaseUrl}/refresh`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refresh_token: currentRefreshToken }),
-            });
-
-            let data: RefreshResponse = {};
-            try {
-                data = await response.json() as RefreshResponse;
-            } catch {
-                data = {};
-            }
-
-            if (!response.ok || !data.token) {
+            const data = await AuthService.refresh({ refresh_token: currentRefreshToken });
+            if (!data.token) {
                 return null;
             }
 

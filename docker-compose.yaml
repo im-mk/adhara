@@ -8,8 +8,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=order-service-db;Port=${ORDER_SERVICE_DB_INTERNAL_PORT};Database=${ORDER_SERVICE_DB_NAME};Username=${ORDER_SERVICE_DB_USER};Password=${ORDER_SERVICE_DB_PASSWORD}
-      - Auth__JwksBaseUrl=http://user-service:${USER_SERVICE_PORT}
-      - Auth__IssuerUrl=user-service
     ports:
       - ${ORDER_SERVICE_EXTERNAL_PORT}:${ORDER_SERVICE_INTERNAL_PORT}
     depends_on:
@@ -32,20 +30,6 @@ services:
     volumes:
       - ./order-service/src/Orders.Api/.keys/:/app/.keys
 
-  web:
-    container_name: adhara-web
-    build:
-      context: ./web
-      dockerfile: Dockerfile
-    ports:
-      - ${WEB_EXTERNAL_PORT}:${WEB_INTERNAL_PORT}
-    networks:
-      - network1
-    restart: unless-stopped
-    depends_on:
-      order-service:
-        condition: service_healthy
-
   order-service-db:
     container_name: order-service-db
     image: postgres:18.3
@@ -67,9 +51,10 @@ services:
           "CMD-SHELL",
           "pg_isready -U $ORDER_SERVICE_DB_USER -d $ORDER_SERVICE_DB_NAME",
         ]
+      start_period: 30s
       interval: 5s
       timeout: 5s
-      retries: 3
+      retries: 10
 
   order-service-liquibase:
     container_name: order-service-liquibase
@@ -140,9 +125,10 @@ services:
           "CMD-SHELL",
           "pg_isready -U $USER_SERVICE_DB_USER -d $USER_SERVICE_DB_NAME",
         ]
+      start_period: 30s
       interval: 5s
       timeout: 5s
-      retries: 3
+      retries: 10
 
   user-service-liquibase:
     container_name: user-service-liquibase
@@ -166,6 +152,52 @@ services:
       - network1
     depends_on:
       user-service-db:
+        condition: service_healthy
+
+  app-service:
+    container_name: app-service
+    build:
+      context: ./app-service
+      dockerfile: App.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Cors__AllowedOrigin=${APP_SERVICE_CORS_URL}
+      - Auth__JwksBaseUrl=http://user-service:${USER_SERVICE_PORT}
+      - Auth__IssuerUrl=user-service
+      - DownstreamServices__OrderServiceBaseUrl=http://order-service:${ORDER_SERVICE_INTERNAL_PORT}
+      - DownstreamServices__UserServiceBaseUrl=http://user-service:${USER_SERVICE_PORT}
+    ports:
+      - ${APP_SERVICE_EXTERNAL_PORT}:${APP_SERVICE_INTERNAL_PORT}
+    depends_on:
+      order-service:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    networks:
+      - network1
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:${APP_SERVICE_INTERNAL_PORT}/health || exit 1",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    container_name: adhara-web
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - ${WEB_EXTERNAL_PORT}:${WEB_INTERNAL_PORT}
+    networks:
+      - network1
+    restart: unless-stopped
+    depends_on:
+      app-service:
         condition: service_healthy
 
   pgadmin:

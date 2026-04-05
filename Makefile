@@ -1,4 +1,4 @@
-.PHONY: start-keys start-user-db test-user-api build-user-api start-user-api newman-test build-web test-web start stop clean
+.PHONY: start-keys start-user-db test-user-api build-user-api start-user-api newman-test start-app-service build-app-service test-app-service build-web test-web start stop clean clean-all
 
 create-keys:
 	mkdir -p user-service/src/.keys	
@@ -36,6 +36,17 @@ start-api: test-api build-api start-db
 newman-test:
 	docker compose run --rm newman
 
+# App Service
+test-app-service:
+	docker build -f app-service/src/App.Api/Dockerfile --target test -t order-service-test ./app-service/src
+	docker run --rm app-service-test
+
+build-app-service:
+	docker compose build app-service
+
+start-app-service: test-app-service build-app-service
+	docker compose up -d app-service
+
 # Web Application
 build-web:
 	docker build -f web/Dockerfile --target build -t adhara-web-build ./web
@@ -52,5 +63,4 @@ stop:
 	docker compose stop
 
 clean:
-	docker compose down -v
-	docker rmi order-service-build order-service-test adhara-web-build adhara-web-test || true
+	docker compose down -v --remove-orphans

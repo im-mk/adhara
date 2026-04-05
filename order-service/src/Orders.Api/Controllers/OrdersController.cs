@@ -1,6 +1,5 @@
 using Orders.Api.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Orders.Api.Controllers;
 

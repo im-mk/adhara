@@ -9,13 +9,8 @@ import {
     CircularProgress,
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { setAuthSession } from '../auth';
-
-type LoginResponse = {
-    token?: string;
-    refresh_token?: string;
-    error?: string;
-};
+import { setAuthSession } from '../auth.ts';
+import { AuthService } from '../api/services/AuthService';
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -24,7 +19,6 @@ const Login: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const loginBaseUrl = import.meta.env.VITE_USER_SERVICE_URL ?? 'http://localhost:8040';
     const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/';
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -40,17 +34,7 @@ const Login: React.FC = () => {
                 throw new Error('Username and password are required');
             }
 
-            const response = await fetch(`${loginBaseUrl}/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: nextUsername, password: nextPassword }),
-            });
-
-            const data = await response.json() as LoginResponse;
-
-            if (!response.ok) {
-                throw new Error(data.error ?? 'Login failed');
-            }
+            const data = await AuthService.login({ username: nextUsername, password: nextPassword });
 
             if (!data.token) {
                 throw new Error('Login response did not include an access token');

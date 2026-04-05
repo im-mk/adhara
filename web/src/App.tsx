@@ -9,7 +9,7 @@ import CustomerDetails from './pages/CustomerDetails';
 import Login from './pages/Login';
 import Products from './pages/Products';
 import Layout from './layout/Layout';
-import { isAuthenticated } from './auth';
+import { isAuthenticated } from './auth.ts';
 
 const ProtectedRoutes = () => {
   const location = useLocation();

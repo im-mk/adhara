@@ -5,8 +5,6 @@ using Orders.Api.Services;
 using Npgsql;
 using Serilog;
 using ZiggyCreatures.Caching.Fusion;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,42 +34,6 @@ AddCors(builder);
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
-var issuerUrl = builder.Configuration["Auth:IssuerUrl"];
-var jwksBaseUrl = builder.Configuration["Auth:JwksBaseUrl"];
-
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = issuerUrl,
-            ValidateAudience = true,
-            ValidAudience = "default-audience",
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero,
-
-            IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
-            {
-                var client = new HttpClient();
-                var jwks = client.GetStringAsync($"{jwksBaseUrl}/.well-known/jwks.json").Result;
-                return new JsonWebKeySet(jwks).Keys;
-            }
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine($"JWT FAILED: {context.Exception}");
-                return Task.CompletedTask;
-            }
-        };
-    });
-
-builder.Services.AddAuthorization();
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -97,10 +59,6 @@ app.MapHealthChecks("/health");
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseRouting();
-
-app.UseAuthentication();
-
-app.UseAuthorization();
 
 app.UseCors();
 

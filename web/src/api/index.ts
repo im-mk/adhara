@@ -1,12 +1,3 @@
-/* generated using openapi-typescript-codegen -- do not edit */
-/* istanbul ignore file */
-/* tslint:disable */
-/* eslint-disable */
-export { ApiError } from './core/ApiError';
-export { CancelablePromise, CancelError } from './core/CancelablePromise';
-export { OpenAPI } from './core/OpenAPI';
-export type { OpenAPIConfig } from './core/OpenAPI';
-
 export type { AddressRequest } from './models/AddressRequest';
 export type { Country } from './models/Country';
 export type { CreateCustomerRequest } from './models/CreateCustomerRequest';
@@ -18,9 +9,14 @@ export type { OrderDetailsResponse } from './models/OrderDetailsResponse';
 export type { OrderItem } from './models/OrderItem';
 export type { OrderLineDetails } from './models/OrderLineDetails';
 export type { OrderListResponse } from './models/OrderListResponse';
+export type { LoginRequest } from './models/LoginRequest';
+export type { LoginResponse } from './models/LoginResponse';
+export type { RefreshRequest } from './models/RefreshRequest';
+export type { RefreshResponse } from './models/RefreshResponse';
 export type { UpdateCustomerRequest } from './models/UpdateCustomerRequest';
 export type { UpdateOrderRequest } from './models/UpdateOrderRequest';
 
+export { AuthService } from './services/AuthService';
 export { CountriesService } from './services/CountriesService';
 export { CustomersService } from './services/CustomersService';
 export { OrdersService } from './services/OrdersService';
