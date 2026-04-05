@@ -1,6 +1,6 @@
-import type { CreateCustomerRequest } from '../models/CreateCustomerRequest';
-import type { Customer } from '../models/Customer';
-import type { UpdateCustomerRequest } from '../models/UpdateCustomerRequest';
+import type { CreateCustomerRequest } from '../models/customer/CreateCustomerRequest';
+import type { Customer } from '../models/customer/Customer';
+import type { UpdateCustomerRequest } from '../models/customer/UpdateCustomerRequest';
 import { requestWithAuth } from './httpClient';
 
 export class CustomersService {

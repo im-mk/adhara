@@ -1,8 +1,8 @@
-import type { CreateOrderRequest } from '../models/CreateOrderRequest';
-import type { OrderCreatedResponse } from '../models/OrderCreatedResponse';
-import type { OrderDetailsResponse } from '../models/OrderDetailsResponse';
-import type { OrderListResponse } from '../models/OrderListResponse';
-import type { UpdateOrderRequest } from '../models/UpdateOrderRequest';
+import type { CreateOrderRequest } from '../models/order/CreateOrderRequest';
+import type { OrderCreatedResponse } from '../models/order/OrderCreatedResponse';
+import type { OrderDetailsResponse } from '../models/order/OrderDetailsResponse';
+import type { OrderListResponse } from '../models/order/OrderListResponse';
+import type { UpdateOrderRequest } from '../models/order/UpdateOrderRequest';
 import { requestWithAuth } from './httpClient';
 
 export class OrdersService {

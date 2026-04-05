@@ -1,7 +1,7 @@
-import type { LoginRequest } from '../models/LoginRequest';
-import type { LoginResponse } from '../models/LoginResponse';
-import type { RefreshRequest } from '../models/RefreshRequest';
-import type { RefreshResponse } from '../models/RefreshResponse';
+import type { LoginRequest } from '../models/auth/LoginRequest';
+import type { LoginResponse } from '../models/auth/LoginResponse';
+import type { RefreshRequest } from '../models/auth/RefreshRequest';
+import type { RefreshResponse } from '../models/auth/RefreshResponse';
 import { request } from './httpClient';
 
 export class AuthService {

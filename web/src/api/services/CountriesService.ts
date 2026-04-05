@@ -1,4 +1,4 @@
-import type { Country } from '../models/Country';
+import type { Country } from '../models/countries/Country';
 import { requestWithAuth } from './httpClient';
 
 export class CountriesService {

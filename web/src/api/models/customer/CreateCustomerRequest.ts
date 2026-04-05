@@ -1,4 +1,4 @@
-import type { AddressRequest } from './AddressRequest';
+import type { AddressRequest } from '../shared/AddressRequest';
 export type CreateCustomerRequest = {
     firstName: string;
     lastName: string;
