@@ -6,11 +6,28 @@ type RequestOptions = {
     method?: HttpMethod;
     body?: unknown;
     query?: Record<string, string | number | undefined>;
+    requestId?: string;
 };
 
 export type ResponseWithMeta<T> = {
     data: T;
     headers: Headers;
+    requestId: string;
+};
+
+const REQUEST_ID_HEADER = 'X-Request-Id';
+
+const generateRequestId = (): string => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+
+    return `web-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+const logRequest = (method: HttpMethod, url: string, status: number, durationMs: number, requestId: string): void => {
+    const duration = Number(durationMs.toFixed(1));
+    console.info(`[http] ${method} ${url} -> ${status} (${duration} ms) requestId=${requestId}`);
 };
 
 const buildUrl = (path: string, query?: Record<string, string | number | undefined>): string => {
@@ -36,26 +53,40 @@ const parseJson = async <T>(response: Response): Promise<T | null> => {
     }
 };
 
-const requestRaw = async (path: string, options: RequestOptions = {}, token?: string | null): Promise<Response> => {
+const requestRaw = async (
+    path: string,
+    options: RequestOptions = {},
+    token?: string | null,
+    requestId?: string,
+): Promise<Response> => {
+    const effectiveRequestId = requestId ?? options.requestId ?? generateRequestId();
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
+        [REQUEST_ID_HEADER]: effectiveRequestId,
     };
 
     if (token) {
         headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(buildUrl(path, options.query), {
+    const requestUrl = buildUrl(path, options.query);
+    const method = options.method ?? 'GET';
+    const startedAt = performance.now();
+
+    const response = await fetch(requestUrl, {
         method: options.method ?? 'GET',
         headers,
         body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
     });
 
+    logRequest(method, requestUrl, response.status, performance.now() - startedAt, effectiveRequestId);
+
     return response;
 };
 
 export const request = async <T>(path: string, options: RequestOptions = {}): Promise<T> => {
-    const response = await requestRaw(path, options);
+    const requestId = options.requestId ?? generateRequestId();
+    const response = await requestRaw(path, options, undefined, requestId);
     if (!response.ok) {
         const errorPayload = await parseJson<{ error?: string }>(response);
         throw new Error(errorPayload?.error ?? `Request failed with status ${response.status}`);
@@ -75,7 +106,8 @@ export const requestWithAuth = async <T>(path: string, options: RequestOptions =
 };
 
 export const requestWithAuthResponse = async <T>(path: string, options: RequestOptions = {}): Promise<ResponseWithMeta<T>> => {
-    const firstResponse = await requestRaw(path, options, getAccessToken());
+    const requestId = options.requestId ?? generateRequestId();
+    const firstResponse = await requestRaw(path, options, getAccessToken(), requestId);
 
     if (firstResponse.status !== 401) {
         if (!firstResponse.ok) {
@@ -87,6 +119,7 @@ export const requestWithAuthResponse = async <T>(path: string, options: RequestO
             return {
                 data: undefined as T,
                 headers: firstResponse.headers,
+                requestId,
             };
         }
 
@@ -94,6 +127,7 @@ export const requestWithAuthResponse = async <T>(path: string, options: RequestO
         return {
             data: (payload ?? undefined) as T,
             headers: firstResponse.headers,
+            requestId,
         };
     }
 
@@ -108,7 +142,7 @@ export const requestWithAuthResponse = async <T>(path: string, options: RequestO
         throw new Error('Session expired');
     }
 
-    const retryResponse = await requestRaw(path, options, refreshedToken);
+    const retryResponse = await requestRaw(path, options, refreshedToken, requestId);
     if (!retryResponse.ok) {
         const errorPayload = await parseJson<{ error?: string }>(retryResponse);
         throw new Error(errorPayload?.error ?? `Request failed with status ${retryResponse.status}`);
@@ -118,6 +152,7 @@ export const requestWithAuthResponse = async <T>(path: string, options: RequestO
         return {
             data: undefined as T,
             headers: retryResponse.headers,
+            requestId,
         };
     }
 
@@ -125,5 +160,6 @@ export const requestWithAuthResponse = async <T>(path: string, options: RequestO
     return {
         data: (payload ?? undefined) as T,
         headers: retryResponse.headers,
+        requestId,
     };
 };

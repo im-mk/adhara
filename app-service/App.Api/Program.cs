@@ -1,5 +1,6 @@
 using App.Api.Options;
 using App.Api.Services;
+using App.Api.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -56,7 +57,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(allowedOrigin)
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .WithExposedHeaders("X-Total-Count", "X-Page", "X-Page-Size");
+            .WithExposedHeaders("X-Total-Count", "X-Page", "X-Page-Size", "X-Request-Id");
     });
 });
 
@@ -68,6 +69,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapHealthChecks("/health");

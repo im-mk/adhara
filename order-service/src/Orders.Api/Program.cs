@@ -56,6 +56,7 @@ app.MapHealthChecks("/health");
 
 // app.UseHttpsRedirection();
 
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseRouting();
@@ -93,7 +94,8 @@ static void AddCors(WebApplicationBuilder builder)
         {
             policy.WithOrigins("http://localhost:8090")
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .WithExposedHeaders("X-Request-Id", "X-Total-Count", "X-Page", "X-Page-Size");
         });
     });
 }

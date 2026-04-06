@@ -18,11 +18,12 @@ import (
 
 func registerRoutes(userController *controllers.UserController, customerController *controllers.CustomerController, authController *controllers.AuthController, jwksController *controllers.JwksController, appConfig models.AppConfig, authCfg models.AuthConfig, publicKey *rsa.PublicKey) {
 	router := gin.Default()
+	router.Use(middleware.RequestLoggingMiddleware())
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{appConfig.CorsURL},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Request-Id"},
+		ExposeHeaders:    []string{"Content-Length", "X-Request-Id", "X-Total-Count", "X-Page", "X-Page-Size"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))

@@ -13,7 +13,7 @@ import {
     Typography,
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { CustomersService, OrderItem, OrdersService, type AddressRequest } from '../../api';
+import { CustomersService, OrderItem, OrdersService, ProductsService, type AddressRequest } from '../../api';
 import { useNotification } from '../../components/notification-context';
 
 type OrderLineForm = {
@@ -87,17 +87,12 @@ const NewOrderPage: React.FC = () => {
     useEffect(() => {
         const loadProducts = async () => {
             try {
-                const response = await fetch('/api/products');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch products');
-                }
-
-                const data = await response.json();
+                const data = await ProductsService.getAllProducts();
                 const mapped: ProductOption[] = (Array.isArray(data) ? data : [])
-                    .map((product: { id?: number; name?: string; price?: number }) => ({
+                    .map((product: { id?: number; productName?: string; unitPrice?: number }) => ({
                         id: Number(product.id),
-                        name: product.name ?? `Product ${product.id}`,
-                        price: Number(product.price ?? 0),
+                        name: product.productName ?? `Product ${product.id}`,
+                        price: Number(product.unitPrice ?? 0),
                     }))
                     .filter((product) => Number.isInteger(product.id) && product.id > 0);
 
