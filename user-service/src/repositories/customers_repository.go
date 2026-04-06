@@ -13,6 +13,8 @@ type CustomerRepositoryInterface interface {
 	GetCustomerByID(customerID int) (*entities.Customer, error)
 	GetCustomerWithAddressesByID(customerID int) (*entities.Customer, error)
 	GetAllCustomers() ([]entities.Customer, error)
+	GetCustomersPage(page int, pageSize int) ([]entities.Customer, error)
+	CountCustomers() (int, error)
 	CustomerExists(customerID int) (bool, error)
 	UpdateCustomer(customerID int, firstName string, lastName string) (*entities.Customer, error)
 	DeleteCustomer(customerID int) error
@@ -120,6 +122,67 @@ func (r *CustomerRepository) GetAllCustomers() ([]entities.Customer, error) {
 		customers = append(customers, *customersByID[customerID])
 	}
 	return customers, nil
+}
+
+func (r *CustomerRepository) GetCustomersPage(page int, pageSize int) ([]entities.Customer, error) {
+	offset := (page - 1) * pageSize
+	rows := []customerAddressRow{}
+	err := r.DB.Select(&rows, `
+		WITH paged_customers AS (
+			SELECT c.id, c.first_name, c.last_name
+			FROM customers c
+			ORDER BY c.id
+			LIMIT $1 OFFSET $2
+		)
+		SELECT c.id AS customer_id,
+		       c.first_name,
+		       c.last_name,
+		       ca.address_type,
+		       a.id AS address_id,
+		       a.address_line1,
+		       a.address_line2,
+		       a.address_line3,
+		       a.address_line4,
+		       a.postcode,
+		       a.country
+		FROM paged_customers c
+		LEFT JOIN customer_addresses ca ON ca.customer_id = c.id
+		LEFT JOIN addresses a ON a.id = ca.address_id
+		ORDER BY c.id, ca.id
+	`, pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+	if len(rows) == 0 {
+		return []entities.Customer{}, nil
+	}
+
+	customersByID := map[int]*entities.Customer{}
+	orderedIDs := []int{}
+	for _, row := range rows {
+		customer, exists := customersByID[row.CustomerID]
+		if !exists {
+			customer = &entities.Customer{ID: row.CustomerID, FirstName: row.FirstName, LastName: row.LastName}
+			customersByID[row.CustomerID] = customer
+			orderedIDs = append(orderedIDs, row.CustomerID)
+		}
+		applyAddressRow(customer, row)
+	}
+
+	customers := make([]entities.Customer, 0, len(orderedIDs))
+	for _, customerID := range orderedIDs {
+		customers = append(customers, *customersByID[customerID])
+	}
+	return customers, nil
+}
+
+func (r *CustomerRepository) CountCustomers() (int, error) {
+	var count int
+	err := r.DB.Get(&count, `SELECT COUNT(1) FROM customers`)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (r *CustomerRepository) CustomerExists(customerID int) (bool, error) {

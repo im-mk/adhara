@@ -14,60 +14,39 @@ import {
     Card,
     CardContent,
     Grid,
+    TablePagination,
 } from '@mui/material';
-
-interface Product {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    quantity?: number;
-}
+import { ProductsService, type Product } from '../../api';
 
 const ProductsPage: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
+    const [page, setPage] = useState<number>(0);
+    const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const pagedProducts = products.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage,
+    );
+
+    const handleChangePage = (_event: unknown, newPage: number) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
-                // Replace with your actual products API endpoint
-                const response = await fetch('/api/products');
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch products');
-                }
-
-                const data = await response.json();
+                const data = await ProductsService.getAllProducts();
                 setProducts(data || []);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'An error occurred');
-                // Mock data for demo purposes
-                setProducts([
-                    {
-                        id: '1',
-                        name: 'Product 1',
-                        description: 'High quality product',
-                        price: 99.99,
-                        quantity: 50,
-                    },
-                    {
-                        id: '2',
-                        name: 'Product 2',
-                        description: 'Premium quality product',
-                        price: 149.99,
-                        quantity: 30,
-                    },
-                    {
-                        id: '3',
-                        name: 'Product 3',
-                        description: 'Excellent product',
-                        price: 199.99,
-                        quantity: 20,
-                    },
-                ]);
+                setError(err instanceof Error ? err.message : 'Could not load products');
             } finally {
                 setLoading(false);
             }
@@ -109,42 +88,62 @@ const ProductsPage: React.FC = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {products.map((product) => (
+                                    {pagedProducts.map((product) => (
                                         <TableRow key={product.id} hover>
-                                            <TableCell>{product.name}</TableCell>
-                                            <TableCell>{product.description}</TableCell>
-                                            <TableCell align="right">${product.price.toFixed(2)}</TableCell>
-                                            <TableCell align="right">{product.quantity || 0}</TableCell>
+                                            <TableCell>{product.productName}</TableCell>
+                                            <TableCell>{product.productDescription ?? '-'}</TableCell>
+                                            <TableCell align="right">${product.unitPrice.toFixed(2)}</TableCell>
+                                            <TableCell align="right">-</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                             </Table>
                         </TableContainer>
+
+                        <TablePagination
+                            component="div"
+                            count={products.length}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            rowsPerPageOptions={[5, 10, 25, 50]}
+                        />
                     </Box>
 
                     {/* Card View - Mobile */}
                     <Grid container spacing={2} sx={{ display: { xs: 'grid', md: 'none' } }}>
-                        {products.map((product) => (
+                        {pagedProducts.map((product) => (
                             <Grid size={{ xs: 12 }} key={product.id}>
                                 <Card>
                                     <CardContent>
                                         <Typography variant="h6" gutterBottom>
-                                            {product.name}
+                                            {product.productName}
                                         </Typography>
                                         <Typography color="textSecondary" gutterBottom>
-                                            {product.description}
+                                            {product.productDescription ?? '-'}
                                         </Typography>
                                         <Typography variant="body2">
-                                            Price: ${product.price.toFixed(2)}
+                                            Price: ${product.unitPrice.toFixed(2)}
                                         </Typography>
                                         <Typography variant="body2">
-                                            Quantity: {product.quantity || 0}
+                                            Quantity: -
                                         </Typography>
                                     </CardContent>
                                 </Card>
                             </Grid>
                         ))}
                     </Grid>
+
+                    <TablePagination
+                        component="div"
+                        count={products.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[5, 10, 25, 50]}
+                    />
                 </>
             )}
         </Box>

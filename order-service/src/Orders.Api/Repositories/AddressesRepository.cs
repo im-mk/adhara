@@ -8,6 +8,16 @@ public class AddressesRepository(
 {
     private readonly IDbConnection _dbConnection = dbConnection;
 
+    public Task<Address?> Get(int addressId)
+    {
+        const string sql = @"
+            SELECT id, address_line1, address_line2, address_line3, address_line4, postcode, country
+            FROM public.addresses
+            WHERE id = @AddressId;";
+
+        return _dbConnection.QueryFirstOrDefaultAsync<Address?>(sql, new { AddressId = addressId });
+    }
+
     public Task<int> Insert(Address address, IDbTransaction? transaction = null)
     {
         const string sql = @"

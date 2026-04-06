@@ -96,6 +96,8 @@ public class OrderService : IOrderService
         if (order == null) return null;
 
         var orderLines = (await _orderLinesRepository.GetByOrderId(orderId)).ToList();
+        var billingAddress = await _addressesRepository.Get(order.BillingAddressId);
+        var shippingAddress = await _addressesRepository.Get(order.ShippingAddressId);
 
         var productsMap = new Dictionary<int, Product>();
         foreach (var line in orderLines)
@@ -108,7 +110,7 @@ public class OrderService : IOrderService
             }
         }
 
-        return MapToOrderDetailsResponse(order, orderLines, productsMap.Values.ToList());
+        return MapToOrderDetailsResponse(order, orderLines, productsMap.Values.ToList(), billingAddress, shippingAddress);
     }
 
     public async Task<bool> UpdateOrder(int orderId, UpdateOrderRequest request)
@@ -124,10 +126,17 @@ public class OrderService : IOrderService
         return rows == 1;
     }
 
-    public async Task<IEnumerable<OrderListResponse>> GetList(DateOnly? startDate, DateOnly? endDate)
+    public async Task<IEnumerable<OrderListResponse>> GetList(DateOnly? startDate, DateOnly? endDate, int? customerId = null, string? orderNumber = null, int? orderStatusId = null)
     {
-        var orders = await _ordersRepository.GetList(startDate, endDate);
+        var orders = await _ordersRepository.GetList(startDate, endDate, customerId, orderNumber, orderStatusId);
         return orders.Select(MapToOrderListResponse);
+    }
+
+    public async Task<(IReadOnlyCollection<OrderListResponse> Orders, int TotalCount)> GetListPaged(DateOnly? startDate, DateOnly? endDate, int page, int pageSize, int? customerId = null, string? orderNumber = null, int? orderStatusId = null)
+    {
+        var (orders, totalCount) = await _ordersRepository.GetListPaged(startDate, endDate, page, pageSize, customerId, orderNumber, orderStatusId);
+        var mapped = orders.Select(MapToOrderListResponse).ToArray();
+        return (mapped, totalCount);
     }
 
     public async Task<bool> DeleteOrder(int orderId)
@@ -136,7 +145,7 @@ public class OrderService : IOrderService
         return rows == 1;
     }
 
-    private static OrderDetailsResponse MapToOrderDetailsResponse(Order order, List<OrderLine> orderLines, List<Product> products)
+    private static OrderDetailsResponse MapToOrderDetailsResponse(Order order, List<OrderLine> orderLines, List<Product> products, Address? billingAddress, Address? shippingAddress)
     {
         var detailLines = orderLines.Select(l =>
         {
@@ -156,6 +165,8 @@ public class OrderService : IOrderService
         {
             Order = order,
             CustomerName = order.CustomerName,
+            BillingAddress = billingAddress,
+            ShippingAddress = shippingAddress,
             OrderLines = detailLines
         };
     }
@@ -214,7 +225,8 @@ public class OrderService : IOrderService
             OrderNumber = order.OrderNumber,
             OrderDate = order.OrderDate,
             OrderStatusId = order.OrderStatusId,
-            TotalAmount = order.TotalAmount
+            TotalAmount = order.TotalAmount,
+            CustomerId = order.CustomerId
         };
     }
 

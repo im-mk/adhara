@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Customer, CustomersService, OrderListResponse, OrdersService } from '../../api';
+import { Customer, OrdersService, CustomersService } from '../../api';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import MuiLink from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -33,7 +31,6 @@ const CustomerDetailsPage: React.FC = () => {
     const [customerOrders, setCustomerOrders] = useState<CustomerOrderRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'previous-orders' | 'shipping-address' | 'billing-address'>('previous-orders');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -47,25 +44,14 @@ const CustomerDetailsPage: React.FC = () => {
                 const customerResponse = await CustomersService.getCustomerById(parsedCustomerId);
                 setCustomer(customerResponse);
 
-                const allOrders = await OrdersService.getList('2023-01-01', '2030-01-01');
-                const withId = allOrders.filter((order): order is Required<Pick<OrderListResponse, 'id'>> & OrderListResponse =>
-                    Boolean(order.id)
-                );
-
-                const detailResponses = await Promise.all(
-                    withId.map(async (order) => {
-                        const details = await OrdersService.getOrderById(order.id);
-                        return { order, details };
-                    })
-                );
-
-                const filteredOrders = detailResponses
-                    .filter(({ details }) => details.order?.customerId === parsedCustomerId)
-                    .map(({ order, details }): CustomerOrderRow => ({
-                        id: order.id!,
+                const orders = await OrdersService.getList('2023-01-01', '2030-01-01', parsedCustomerId);
+                const filteredOrders = orders
+                    .filter((order): order is typeof order & { id: number } => Boolean(order.id))
+                    .map((order): CustomerOrderRow => ({
+                        id: order.id,
                         orderNumber: order.orderNumber,
                         orderDate: order.orderDate,
-                        orderStatusId: details.order?.orderStatusId ?? order.orderStatusId,
+                        orderStatusId: order.orderStatusId,
                         totalAmount: order.totalAmount,
                     }));
 
@@ -114,7 +100,7 @@ const CustomerDetailsPage: React.FC = () => {
             <Box
                 sx={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr',
+                    gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' },
                     gap: 2,
                     mb: 3,
                 }}
@@ -128,122 +114,87 @@ const CustomerDetailsPage: React.FC = () => {
                     <Typography>Last Name: {customer?.lastName ?? '-'}</Typography>
                 </Paper>
 
-                <Paper elevation={2} sx={{ p: 1 }}>
-                    <Tabs
-                        value={activeTab}
-                        onChange={(_, value) => setActiveTab(value)}
-                        variant="scrollable"
-                        scrollButtons="auto"
-                    >
-                        <Tab label="Previous Orders" value="previous-orders" />
-                        <Tab label="Shipping Address" value="shipping-address" />
-                        <Tab label="Billing Address" value="billing-address" />
-                    </Tabs>
+                <Paper elevation={2} sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                        Current Shipping Address
+                    </Typography>
+                    {customer?.shippingAddress ? (
+                        <>
+                            <Typography>{customer.shippingAddress.addressLine1}</Typography>
+                            {customer.shippingAddress.addressLine2 && <Typography>{customer.shippingAddress.addressLine2}</Typography>}
+                            {customer.shippingAddress.addressLine3 && <Typography>{customer.shippingAddress.addressLine3}</Typography>}
+                            {customer.shippingAddress.addressLine4 && <Typography>{customer.shippingAddress.addressLine4}</Typography>}
+                            <Typography>{customer.shippingAddress.postcode}</Typography>
+                            <Typography>{customer.shippingAddress.country}</Typography>
+                        </>
+                    ) : (
+                        <Typography color="text.secondary">
+                            Shipping address is not available.
+                        </Typography>
+                    )}
                 </Paper>
 
-                {activeTab === 'shipping-address' && (
-                    <Paper elevation={2} sx={{ p: 3 }}>
-                        <Typography variant="h6" gutterBottom>
-                            Shipping Address
-                        </Typography>
-                        {customer?.shippingAddress ? (
-                            <>
-                                <Typography>{customer.shippingAddress.addressLine1}</Typography>
-                                {customer.shippingAddress.addressLine2 && <Typography>{customer.shippingAddress.addressLine2}</Typography>}
-                                {customer.shippingAddress.addressLine3 && <Typography>{customer.shippingAddress.addressLine3}</Typography>}
-                                {customer.shippingAddress.addressLine4 && <Typography>{customer.shippingAddress.addressLine4}</Typography>}
-                                <Typography>{customer.shippingAddress.postcode}</Typography>
-                                <Typography>{customer.shippingAddress.country}</Typography>
-                            </>
-                        ) : (
-                            <Typography color="text.secondary" sx={{ mb: 2 }}>
-                                Shipping address is not available.
-                            </Typography>
-                        )}
-
-                        <Typography variant="subtitle1" gutterBottom>
-                            Previous History
-                        </Typography>
+                <Paper elevation={2} sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                        Current Billing Address
+                    </Typography>
+                    {customer?.billingAddress ? (
+                        <>
+                            <Typography>{customer.billingAddress.addressLine1}</Typography>
+                            {customer.billingAddress.addressLine2 && <Typography>{customer.billingAddress.addressLine2}</Typography>}
+                            {customer.billingAddress.addressLine3 && <Typography>{customer.billingAddress.addressLine3}</Typography>}
+                            {customer.billingAddress.addressLine4 && <Typography>{customer.billingAddress.addressLine4}</Typography>}
+                            <Typography>{customer.billingAddress.postcode}</Typography>
+                            <Typography>{customer.billingAddress.country}</Typography>
+                        </>
+                    ) : (
                         <Typography color="text.secondary">
-                            Shipping address history is not available.
+                            Billing address is not available.
                         </Typography>
-                    </Paper>
-                )}
-
-                {activeTab === 'billing-address' && (
-                    <Paper elevation={2} sx={{ p: 3 }}>
-                        <Typography variant="h6" gutterBottom>
-                            Billing Address
-                        </Typography>
-                        {customer?.billingAddress ? (
-                            <>
-                                <Typography>{customer.billingAddress.addressLine1}</Typography>
-                                {customer.billingAddress.addressLine2 && <Typography>{customer.billingAddress.addressLine2}</Typography>}
-                                {customer.billingAddress.addressLine3 && <Typography>{customer.billingAddress.addressLine3}</Typography>}
-                                {customer.billingAddress.addressLine4 && <Typography>{customer.billingAddress.addressLine4}</Typography>}
-                                <Typography>{customer.billingAddress.postcode}</Typography>
-                                <Typography>{customer.billingAddress.country}</Typography>
-                            </>
-                        ) : (
-                            <Typography color="text.secondary" sx={{ mb: 2 }}>
-                                Billing address is not available.
-                            </Typography>
-                        )}
-
-                        <Typography variant="subtitle1" gutterBottom>
-                            Previous History
-                        </Typography>
-                        <Typography color="text.secondary">
-                            Billing address history is not available.
-                        </Typography>
-                    </Paper>
-                )}
-
-                {activeTab === 'previous-orders' && (
-                    <>
-                        <Typography variant="h6" gutterBottom>
-                            Previous Orders
-                        </Typography>
-                        <TableContainer component={Paper}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Order Number</TableCell>
-                                        <TableCell>Order Date</TableCell>
-                                        <TableCell align="right">Order Status</TableCell>
-                                        <TableCell align="right">Total Amount</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {customerOrders.length === 0 ? (
-                                        <TableRow>
-                                            <TableCell colSpan={4}>No previous orders found for this customer.</TableCell>
-                                        </TableRow>
-                                    ) : (
-                                        customerOrders.map((order) => (
-                                            <TableRow key={order.id}>
-                                                <TableCell>
-                                                    <MuiLink
-                                                        href={`/orders/${order.id}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        underline="hover"
-                                                    >
-                                                        {order.orderNumber ?? `Order ${order.id}`}
-                                                    </MuiLink>
-                                                </TableCell>
-                                                <TableCell>{order.orderDate ?? '-'}</TableCell>
-                                                <TableCell align="right">{order.orderStatusId ?? '-'}</TableCell>
-                                                <TableCell align="right">{order.totalAmount ?? '-'}</TableCell>
-                                            </TableRow>
-                                        ))
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </>
-                )}
+                    )}
+                </Paper>
             </Box>
+
+            <Typography variant="h6" gutterBottom>
+                Orders
+            </Typography>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Order Number</TableCell>
+                            <TableCell>Order Date</TableCell>
+                            <TableCell align="right">Order Status</TableCell>
+                            <TableCell align="right">Total Amount</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {customerOrders.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={4}>No orders found for this customer.</TableCell>
+                            </TableRow>
+                        ) : (
+                            customerOrders.map((order) => (
+                                <TableRow key={order.id}>
+                                    <TableCell>
+                                        <MuiLink
+                                            href={`/orders/${order.id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            underline="hover"
+                                        >
+                                            {order.orderNumber ?? `Order ${order.id}`}
+                                        </MuiLink>
+                                    </TableCell>
+                                    <TableCell>{order.orderDate ?? '-'}</TableCell>
+                                    <TableCell align="right">{order.orderStatusId ?? '-'}</TableCell>
+                                    <TableCell align="right">{order.totalAmount ?? '-'}</TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </Box>
     );
 };

@@ -53,6 +53,40 @@ func (ctrl *CustomerController) CreateCustomer(c *gin.Context) {
 // @Failure     500  {object}  gin.H
 // @Router      /customers [get]
 func (ctrl *CustomerController) GetCustomers(c *gin.Context) {
+	pageValue := strings.TrimSpace(c.Query("page"))
+	pageSizeValue := strings.TrimSpace(c.Query("pageSize"))
+
+	if (pageValue == "") != (pageSizeValue == "") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "page and pageSize must be provided together"})
+		return
+	}
+
+	if pageValue != "" && pageSizeValue != "" {
+		page, err := strconv.Atoi(pageValue)
+		if err != nil || page <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "page must be a positive integer"})
+			return
+		}
+
+		pageSize, err := strconv.Atoi(pageSizeValue)
+		if err != nil || pageSize <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "pageSize must be a positive integer"})
+			return
+		}
+
+		customers, totalCount, err := ctrl.CustomerService.GetCustomersPage(page, pageSize)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.Header("X-Total-Count", strconv.Itoa(totalCount))
+		c.Header("X-Page", strconv.Itoa(page))
+		c.Header("X-Page-Size", strconv.Itoa(pageSize))
+		c.JSON(http.StatusOK, customers)
+		return
+	}
+
 	customers, err := ctrl.CustomerService.GetAllCustomers()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

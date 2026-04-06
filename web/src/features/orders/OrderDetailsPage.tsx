@@ -26,6 +26,20 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import type { OrderLineDetails } from '../../api';
 
+const formatAddressLines = (address: OrderDetailsResponse['billingAddress'] | undefined): string[] => {
+    if (!address) {
+        return [];
+    }
+
+    return [
+        address.addressLine1,
+        address.addressLine2,
+        address.addressLine3,
+        address.addressLine4,
+        [address.postcode, address.country].filter(Boolean).join(' '),
+    ].filter((line): line is string => Boolean(line && line.trim().length > 0));
+};
+
 const OrderDetailsPage: React.FC = () => {
     const { orderId } = useParams();
     const parsedOrderId = Number(orderId);
@@ -247,6 +261,8 @@ const OrderDetailsPage: React.FC = () => {
     const netAmount = calculateTotal(orderLines);
     const vatAmount = netAmount * vatRate;
     const grossAmount = netAmount + vatAmount;
+    const billingAddressLines = formatAddressLines(orderDetails?.billingAddress);
+    const shippingAddressLines = formatAddressLines(orderDetails?.shippingAddress);
 
     if (loading) {
         return (
@@ -321,16 +337,36 @@ const OrderDetailsPage: React.FC = () => {
                     <Typography variant="h6" gutterBottom>
                         Billing Address
                     </Typography>
-                    <Typography color="text.secondary" sx={{ mb: 2 }}>
-                        Billing address details are not available in the current order details response.
-                    </Typography>
+                    {billingAddressLines.length === 0 ? (
+                        <Typography color="text.secondary" sx={{ mb: 2 }}>
+                            Billing address not available.
+                        </Typography>
+                    ) : (
+                        <Stack spacing={0.25} sx={{ mb: 2 }}>
+                            {billingAddressLines.map((line) => (
+                                <Typography key={`billing-${line}`} color="text.secondary">
+                                    {line}
+                                </Typography>
+                            ))}
+                        </Stack>
+                    )}
 
                     <Typography variant="h6" gutterBottom>
                         Shipping Address
                     </Typography>
-                    <Typography color="text.secondary">
-                        Shipping address details are not available in the current order details response.
-                    </Typography>
+                    {shippingAddressLines.length === 0 ? (
+                        <Typography color="text.secondary">
+                            Shipping address not available.
+                        </Typography>
+                    ) : (
+                        <Stack spacing={0.25}>
+                            {shippingAddressLines.map((line) => (
+                                <Typography key={`shipping-${line}`} color="text.secondary">
+                                    {line}
+                                </Typography>
+                            ))}
+                        </Stack>
+                    )}
                 </Paper>
             </Box>
 

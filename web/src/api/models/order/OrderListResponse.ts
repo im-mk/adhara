@@ -4,5 +4,6 @@ export type OrderListResponse = {
     orderDate?: string;
     orderStatusId?: number;
     totalAmount?: number;
+    customerId?: number;
 };
 

@@ -1,4 +1,4 @@
-.PHONY: start-keys start-user-db test-user-api build-user-api start-user-api newman-test start-app-service build-app-service test-app-service build-web test-web start stop clean clean-all
+.PHONY: start-keys start-user-db test-user-api build-user-api start-user-api newman-test start-app-service build-app-service test-app-service build-web test-web start stop clean clean-all pgadmin start-dev
 
 create-keys:
 	mkdir -p user-service/src/.keys	
@@ -20,25 +20,22 @@ start-user-api: create-keys test-user-api build-user-api start-user-db
 	docker compose up -d user-service
 
 # Order Service
-start-db:
+start-order-db:
 	docker compose up -d order-service-db order-service-liquibase
 
-test-api:
+test-order-api:
 	docker build -f order-service/src/Orders.Api/Dockerfile --target test -t order-service-test ./order-service/src
 	docker run --rm order-service-test
 
-build-api:
+build-order-api:
 	docker compose build order-service
 
-start-api: test-api build-api start-db
+start-order-api: test-order-api build-order-api start-order-db
 	docker compose up -d order-service
-
-newman-test:
-	docker compose run --rm newman
 
 # App Service
 test-app-service:
-	docker build -f app-service/src/App.Api/Dockerfile --target test -t order-service-test ./app-service/src
+	docker build -f app-service/App.Api/Dockerfile --target test -t app-service-test ./app-service
 	docker run --rm app-service-test
 
 build-app-service:
@@ -59,8 +56,17 @@ test-web:
 start:
 	docker compose up -d --build
 
+start-dev: start-user-api start-order-api start-app-service
+
+
 stop:
-	docker compose stop
+	docker compose stop --remove-orphans
 
 clean:
 	docker compose down -v --remove-orphans
+
+newman-test:
+	docker compose run --rm newman
+
+pgadmin:
+	docker compose up -d pgadmin

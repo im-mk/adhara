@@ -17,6 +17,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import CreateCustomerDialog from './CreateCustomerDialog';
@@ -25,11 +26,15 @@ import EditCustomerDialog from './EditCustomerDialog';
 const CustomersPage: React.FC = () => {
     const navigate = useNavigate();
     const [customers, setCustomers] = useState<Customer[]>([]);
+    const [allCustomers, setAllCustomers] = useState<Customer[]>([]);
+    const [totalCount, setTotalCount] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const [pageError, setPageError] = useState<string | null>(null);
     const [actionMessage, setActionMessage] = useState<string | null>(null);
     const [nameQuery, setNameQuery] = useState<string>('');
     const [postcodeQuery, setPostcodeQuery] = useState<string>('');
+    const [page, setPage] = useState<number>(0);
+    const [rowsPerPage, setRowsPerPage] = useState<number>(10);
 
     const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -53,7 +58,7 @@ const CustomersPage: React.FC = () => {
         );
     };
 
-    const filteredCustomers = customers.filter((customer) => {
+    const filteredCustomers = allCustomers.filter((customer) => {
         const fullName = `${customer.firstName ?? ''} ${customer.lastName ?? ''}`.trim().toLowerCase();
         const postcode = getCustomerPostcode(customer).toLowerCase();
 
@@ -63,11 +68,20 @@ const CustomersPage: React.FC = () => {
         return matchesName && matchesPostcode;
     });
 
+    const hasActiveFilters = nameQuery.trim() !== '' || postcodeQuery.trim() !== '';
+
     useEffect(() => {
         const fetchCustomers = async () => {
             try {
-                const data = await CustomersService.getAllCustomers();
-                setCustomers(data);
+                if (hasActiveFilters) {
+                    const data = await CustomersService.getAllCustomers();
+                    setAllCustomers(data);
+                    setTotalCount(data.length);
+                } else {
+                    const result = await CustomersService.getCustomersPaged(page + 1, rowsPerPage);
+                    setCustomers(result.items);
+                    setTotalCount(result.totalCount);
+                }
             } catch {
                 setPageError('Could not fetch customers');
             } finally {
@@ -76,7 +90,32 @@ const CustomersPage: React.FC = () => {
         };
 
         fetchCustomers();
-    }, []);
+    }, [hasActiveFilters, page, rowsPerPage]);
+
+    useEffect(() => {
+        setPage(0);
+    }, [nameQuery, postcodeQuery]);
+
+    useEffect(() => {
+        if (!hasActiveFilters) {
+            setAllCustomers([]);
+            return;
+        }
+
+        const start = page * rowsPerPage;
+        const end = start + rowsPerPage;
+        setCustomers(filteredCustomers.slice(start, end));
+        setTotalCount(filteredCustomers.length);
+    }, [allCustomers, filteredCustomers, hasActiveFilters, page, rowsPerPage]);
+
+    const handleChangePage = (_event: unknown, newPage: number) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, customer: Customer) => {
         setMenuAnchorEl(event.currentTarget);
@@ -101,6 +140,8 @@ const CustomersPage: React.FC = () => {
         }
 
         setCustomers((prev) => [created, ...prev]);
+        setAllCustomers((prev) => [created, ...prev]);
+        setTotalCount((prev) => prev + 1);
         setActionMessage('Customer created');
         setCreateDialogOpen(false);
         navigate(`/customers/${created.id}/orders/new`);
@@ -112,6 +153,9 @@ const CustomersPage: React.FC = () => {
         }
 
         setCustomers((prev) => prev.map((customer) => (
+            customer.id === updatedCustomer.id ? updatedCustomer : customer
+        )));
+        setAllCustomers((prev) => prev.map((customer) => (
             customer.id === updatedCustomer.id ? updatedCustomer : customer
         )));
         setEditDialogOpen(false);
@@ -170,12 +214,12 @@ const CustomersPage: React.FC = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredCustomers.length === 0 ? (
+                        {customers.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5}>No customers found for current filters.</TableCell>
                             </TableRow>
                         ) : (
-                            filteredCustomers.map((customer) => (
+                            customers.map((customer) => (
                                 <TableRow key={customer.id}>
                                     <TableCell>
                                         {customer.id ? (
@@ -216,6 +260,16 @@ const CustomersPage: React.FC = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            <TablePagination
+                component="div"
+                count={totalCount}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+            />
 
             <Menu
                 anchorEl={menuAnchorEl}

@@ -24,6 +24,12 @@ public sealed class BffProxyController(DownstreamProxyService downstreamProxySer
         => downstreamProxyService.ForwardToOrderServiceAsync(HttpContext);
 
     [Authorize]
+    [AcceptVerbs("GET")]
+    [Route("OrderStatuses")]
+    public Task<IActionResult> OrderStatuses()
+        => downstreamProxyService.ForwardToOrderServiceAsync(HttpContext);
+
+    [Authorize]
     [AcceptVerbs("GET", "POST", "PUT", "DELETE")]
     [Route("Customers")]
     [Route("Customers/{*path}")]
@@ -35,5 +41,12 @@ public sealed class BffProxyController(DownstreamProxyService downstreamProxySer
     [Route("Orders")]
     [Route("Orders/{*path}")]
     public Task<IActionResult> Orders()
+        => downstreamProxyService.ForwardToOrderServiceAsync(HttpContext);
+
+    [Authorize]
+    [AcceptVerbs("GET", "POST", "PUT", "DELETE")]
+    [Route("Products")]
+    [Route("Products/{*path}")]
+    public Task<IActionResult> Products()
         => downstreamProxyService.ForwardToOrderServiceAsync(HttpContext);
 }

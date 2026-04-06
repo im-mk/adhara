@@ -8,6 +8,11 @@ type RequestOptions = {
     query?: Record<string, string | number | undefined>;
 };
 
+export type ResponseWithMeta<T> = {
+    data: T;
+    headers: Headers;
+};
+
 const buildUrl = (path: string, query?: Record<string, string | number | undefined>): string => {
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
     const url = new URL(`${API_BASE_URL}${normalizedPath}`);
@@ -65,6 +70,11 @@ export const request = async <T>(path: string, options: RequestOptions = {}): Pr
 };
 
 export const requestWithAuth = async <T>(path: string, options: RequestOptions = {}): Promise<T> => {
+    const result = await requestWithAuthResponse<T>(path, options);
+    return result.data;
+};
+
+export const requestWithAuthResponse = async <T>(path: string, options: RequestOptions = {}): Promise<ResponseWithMeta<T>> => {
     const firstResponse = await requestRaw(path, options, getAccessToken());
 
     if (firstResponse.status !== 401) {
@@ -74,11 +84,17 @@ export const requestWithAuth = async <T>(path: string, options: RequestOptions =
         }
 
         if (firstResponse.status === 204) {
-            return undefined as T;
+            return {
+                data: undefined as T,
+                headers: firstResponse.headers,
+            };
         }
 
         const payload = await parseJson<T>(firstResponse);
-        return (payload ?? undefined) as T;
+        return {
+            data: (payload ?? undefined) as T,
+            headers: firstResponse.headers,
+        };
     }
 
     const refreshedToken = await refreshAccessToken();
@@ -99,9 +115,15 @@ export const requestWithAuth = async <T>(path: string, options: RequestOptions =
     }
 
     if (retryResponse.status === 204) {
-        return undefined as T;
+        return {
+            data: undefined as T,
+            headers: retryResponse.headers,
+        };
     }
 
     const payload = await parseJson<T>(retryResponse);
-    return (payload ?? undefined) as T;
+    return {
+        data: (payload ?? undefined) as T,
+        headers: retryResponse.headers,
+    };
 };

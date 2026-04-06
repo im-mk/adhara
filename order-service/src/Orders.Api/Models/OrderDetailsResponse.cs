@@ -5,6 +5,8 @@ public class OrderDetailsResponse
 {
     public Order Order { get; set; } = default!;
     public string? CustomerName { get; set; }
+    public Address? BillingAddress { get; set; }
+    public Address? ShippingAddress { get; set; }
     public List<OrderLineDetails> OrderLines { get; set; } = new List<OrderLineDetails>();
 }
 

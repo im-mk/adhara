@@ -8,13 +8,6 @@ import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import { OrderListResponse } from '../../api';
 
 const getTodayIsoDate = () => {
     const today = new Date();
@@ -38,7 +31,6 @@ const HomePage: React.FC = () => {
     const [totalOrders, setTotalOrders] = useState<number | null>(null);
     const [totalCustomers, setTotalCustomers] = useState<number | null>(null);
     const [totalSales, setTotalSales] = useState<number | null>(null);
-    const [orders, setOrders] = useState<OrderListResponse[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     const applyTodayPreset = () => {
@@ -79,7 +71,6 @@ const HomePage: React.FC = () => {
                     CustomersService.getAllCustomers(),
                 ]);
 
-                setOrders(orders);
                 setTotalOrders(orders.length);
                 setTotalCustomers(customers.length);
 
@@ -154,38 +145,6 @@ const HomePage: React.FC = () => {
                     </Paper>
                 </Grid>
             </Grid>
-
-            <Paper elevation={2} sx={{ mt: 3, p: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                    Orders
-                </Typography>
-                <TableContainer>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Date</TableCell>
-                                <TableCell align="right">Value</TableCell>
-                                <TableCell align="right">Status</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {orders.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={3}>No orders in selected range.</TableCell>
-                                </TableRow>
-                            ) : (
-                                orders.map((order) => (
-                                    <TableRow key={order.id}>
-                                        <TableCell>{order.orderDate ?? '-'}</TableCell>
-                                        <TableCell align="right">{(order.totalAmount ?? 0).toFixed(2)}</TableCell>
-                                        <TableCell align="right">{order.orderStatusId ?? '-'}</TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Paper>
         </Box>
     );
 };

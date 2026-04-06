@@ -19,10 +19,42 @@ public class OrdersController(
 
     [HttpGet]
     [EndpointName("GetList")]
-    public async Task<ActionResult<IEnumerable<OrderListResponse>>> GetList([FromQuery] DateOnly? startDate, [FromQuery] DateOnly? endDate)
+    public async Task<ActionResult<IEnumerable<OrderListResponse>>> GetList([FromQuery] DateOnly? startDate, [FromQuery] DateOnly? endDate, [FromQuery] int? customerId, [FromQuery] string? orderNumber, [FromQuery] int? orderStatusId, [FromQuery] int? page, [FromQuery] int? pageSize)
     {
-        logger.LogInformation("Getting all orders between {StartDate} and {EndDate}", startDate, endDate);
-        var result = await orderService.GetList(startDate, endDate);
+        if (page is <= 0 || pageSize is <= 0)
+        {
+            return BadRequest("page and pageSize must be greater than 0");
+        }
+
+        if (customerId is <= 0)
+        {
+            return BadRequest("customerId must be greater than 0");
+        }
+
+        if (page.HasValue ^ pageSize.HasValue)
+        {
+            return BadRequest("page and pageSize must be provided together");
+        }
+
+        if (page.HasValue && pageSize.HasValue)
+        {
+            logger.LogInformation(
+                "Getting paged orders between {StartDate} and {EndDate}, customer {CustomerId}, page {Page}, page size {PageSize}",
+                startDate,
+                endDate,
+                customerId,
+                page,
+                pageSize);
+
+            var (orders, totalCount) = await orderService.GetListPaged(startDate, endDate, page.Value, pageSize.Value, customerId, orderNumber, orderStatusId);
+            Response.Headers.Append("X-Total-Count", totalCount.ToString());
+            Response.Headers.Append("X-Page", page.Value.ToString());
+            Response.Headers.Append("X-Page-Size", pageSize.Value.ToString());
+            return Ok(orders);
+        }
+
+        logger.LogInformation("Getting all orders between {StartDate} and {EndDate} for customer {CustomerId}", startDate, endDate, customerId);
+        var result = await orderService.GetList(startDate, endDate, customerId, orderNumber, orderStatusId);
         return Ok(result);
     }
 

@@ -43,6 +43,19 @@ func (m *MockCustomerRepository) GetAllCustomers() ([]entities.Customer, error) 
 	return args.Get(0).([]entities.Customer), args.Error(1)
 }
 
+func (m *MockCustomerRepository) GetCustomersPage(page int, pageSize int) ([]entities.Customer, error) {
+	args := m.Called(page, pageSize)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]entities.Customer), args.Error(1)
+}
+
+func (m *MockCustomerRepository) CountCustomers() (int, error) {
+	args := m.Called()
+	return args.Int(0), args.Error(1)
+}
+
 func (m *MockCustomerRepository) CustomerExists(customerID int) (bool, error) {
 	args := m.Called(customerID)
 	return args.Bool(0), args.Error(1)

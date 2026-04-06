@@ -23,6 +23,8 @@ type fakeCustomerRepo struct {
 	getCustomerByID              func(int) (*entities.Customer, error)
 	getCustomerWithAddressesByID func(int) (*entities.Customer, error)
 	getAllCustomers              func() ([]entities.Customer, error)
+	getCustomersPage             func(int, int) ([]entities.Customer, error)
+	countCustomers               func() (int, error)
 	customerExists               func(int) (bool, error)
 	updateCustomer               func(int, string, string) (*entities.Customer, error)
 	deleteCustomer               func(int) error
@@ -42,6 +44,20 @@ func (r *fakeCustomerRepo) GetCustomerWithAddressesByID(customerID int) (*entiti
 
 func (r *fakeCustomerRepo) GetAllCustomers() ([]entities.Customer, error) {
 	return r.getAllCustomers()
+}
+
+func (r *fakeCustomerRepo) GetCustomersPage(page int, pageSize int) ([]entities.Customer, error) {
+	if r.getCustomersPage == nil {
+		return []entities.Customer{}, nil
+	}
+	return r.getCustomersPage(page, pageSize)
+}
+
+func (r *fakeCustomerRepo) CountCustomers() (int, error) {
+	if r.countCustomers == nil {
+		return 0, nil
+	}
+	return r.countCustomers()
 }
 
 func (r *fakeCustomerRepo) CustomerExists(customerID int) (bool, error) {

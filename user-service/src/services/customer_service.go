@@ -79,6 +79,20 @@ func (s *CustomerService) GetAllCustomers() ([]entities.Customer, error) {
 	return s.CustomerRepo.GetAllCustomers()
 }
 
+func (s *CustomerService) GetCustomersPage(page int, pageSize int) ([]entities.Customer, int, error) {
+	customers, err := s.CustomerRepo.GetCustomersPage(page, pageSize)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	totalCount, err := s.CustomerRepo.CountCustomers()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return customers, totalCount, nil
+}
+
 func (s *CustomerService) AddAddress(customerID int, req dtos.CreateCustomerAddressRequest) (*entities.Address, error) {
 	addressType, err := normalizeAddressType(req.AddressType)
 	if err != nil {

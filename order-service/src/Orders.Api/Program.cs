@@ -106,7 +106,10 @@ static void AddDomainDependencies(WebApplicationBuilder builder)
     builder.Services.AddScoped<IAddressesRepository, AddressesRepository>();
     builder.Services.AddScoped<IProductRepository, ProductRepository>();
     builder.Services.AddScoped<IOutboxRepository, OutboxRepository>();
+    builder.Services.AddScoped<IOrderStatusesRepository, OrderStatusesRepository>();
 
     builder.Services.AddScoped<IOrderService, OrderService>();
     builder.Services.AddScoped<ICountriesService, CountriesService>();
+    builder.Services.AddScoped<IProductsService, ProductsService>();
+    builder.Services.AddScoped<IOrderStatusesService, OrderStatusesService>();
 }
