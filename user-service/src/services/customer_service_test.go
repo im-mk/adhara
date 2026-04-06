@@ -124,3 +124,21 @@ func TestCustomerService_UpdateAddressRejectsInvalidType(t *testing.T) {
 	assert.ErrorIs(t, err, ErrInvalidAddressType)
 	mockRepo.AssertNotCalled(t, "CustomerExists", mock.Anything)
 }
+
+func TestCustomerService_GetCustomersPagePassesFiltersToRepository(t *testing.T) {
+	mockRepo := new(MockCustomerRepository)
+	mockAddressRepo := new(MockAddressRepository)
+	service := NewCustomerService(mockRepo, mockAddressRepo)
+
+	expectedCustomers := []entities.Customer{{ID: 1, FirstName: "Jane", LastName: "Smith"}}
+
+	mockRepo.On("GetCustomersPage", 1, 10, "jane", "ZZ99").Return(expectedCustomers, nil).Once()
+	mockRepo.On("CountCustomers", "jane", "ZZ99").Return(1, nil).Once()
+
+	customers, total, err := service.GetCustomersPage(1, 10, "  jane  ", " ZZ99 ")
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedCustomers, customers)
+	assert.Equal(t, 1, total)
+	mockRepo.AssertExpectations(t)
+}

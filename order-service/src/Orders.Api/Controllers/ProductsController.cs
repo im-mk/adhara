@@ -17,9 +17,9 @@ public class ProductsController : ControllerBase
 
     [HttpGet]
     [EndpointName("GetAllProducts")]
-    public async Task<ActionResult<IEnumerable<Product>>> GetAll()
+    public async Task<ActionResult<IEnumerable<Product>>> GetAll([FromQuery] string? name = null)
     {
-        var result = await _productsService.GetAllProductsAsync();
+        var result = await _productsService.GetAllProductsAsync(name);
         return Ok(result);
     }
 }

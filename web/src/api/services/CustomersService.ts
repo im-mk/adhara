@@ -8,6 +8,11 @@ export type PagedCustomersResult = {
     totalCount: number;
 };
 
+export type CustomerFilters = {
+    name?: string;
+    postcode?: string;
+};
+
 export class CustomersService {
     public static getCustomerById(customerId: number): Promise<Customer> {
         return requestWithAuth<Customer>(`/Customers/${customerId}`);
@@ -30,11 +35,20 @@ export class CustomersService {
         return requestWithAuth<Array<Customer>>('/Customers');
     }
 
-    public static async getCustomersPaged(page: number, pageSize: number): Promise<PagedCustomersResult> {
+    public static async getCustomersPaged(
+        page: number,
+        pageSize: number,
+        filters?: CustomerFilters,
+    ): Promise<PagedCustomersResult> {
+        const trimmedName = filters?.name?.trim();
+        const trimmedPostcode = filters?.postcode?.trim();
+
         const response = await requestWithAuthResponse<Array<Customer>>('/Customers', {
             query: {
                 page,
                 pageSize,
+                name: trimmedName && trimmedName.length > 0 ? trimmedName : undefined,
+                postcode: trimmedPostcode && trimmedPostcode.length > 0 ? trimmedPostcode : undefined,
             },
         });
 

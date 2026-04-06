@@ -23,8 +23,8 @@ type fakeCustomerRepo struct {
 	getCustomerByID              func(int) (*entities.Customer, error)
 	getCustomerWithAddressesByID func(int) (*entities.Customer, error)
 	getAllCustomers              func() ([]entities.Customer, error)
-	getCustomersPage             func(int, int) ([]entities.Customer, error)
-	countCustomers               func() (int, error)
+	getCustomersPage             func(int, int, string, string) ([]entities.Customer, error)
+	countCustomers               func(string, string) (int, error)
 	customerExists               func(int) (bool, error)
 	updateCustomer               func(int, string, string) (*entities.Customer, error)
 	deleteCustomer               func(int) error
@@ -46,18 +46,18 @@ func (r *fakeCustomerRepo) GetAllCustomers() ([]entities.Customer, error) {
 	return r.getAllCustomers()
 }
 
-func (r *fakeCustomerRepo) GetCustomersPage(page int, pageSize int) ([]entities.Customer, error) {
+func (r *fakeCustomerRepo) GetCustomersPage(page int, pageSize int, nameFilter string, postcodeFilter string) ([]entities.Customer, error) {
 	if r.getCustomersPage == nil {
 		return []entities.Customer{}, nil
 	}
-	return r.getCustomersPage(page, pageSize)
+	return r.getCustomersPage(page, pageSize, nameFilter, postcodeFilter)
 }
 
-func (r *fakeCustomerRepo) CountCustomers() (int, error) {
+func (r *fakeCustomerRepo) CountCustomers(nameFilter string, postcodeFilter string) (int, error) {
 	if r.countCustomers == nil {
 		return 0, nil
 	}
-	return r.countCustomers()
+	return r.countCustomers(nameFilter, postcodeFilter)
 }
 
 func (r *fakeCustomerRepo) CustomerExists(customerID int) (bool, error) {
@@ -196,4 +196,53 @@ func TestUpdateCustomerAddressHandlerRejectsInvalidType(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestGetCustomersPagedWithFilters(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	fakeTx := &fakeTx{}
+	called := false
+
+	repo := &fakeCustomerRepo{
+		insertCustomer: func(_ repositories.TxInterface, customer entities.Customer) (*entities.Customer, error) {
+			return &customer, nil
+		},
+		getCustomerByID:              func(int) (*entities.Customer, error) { return nil, nil },
+		getCustomerWithAddressesByID: func(int) (*entities.Customer, error) { return nil, nil },
+		getAllCustomers:              func() ([]entities.Customer, error) { return nil, nil },
+		getCustomersPage: func(page int, pageSize int, nameFilter string, postcodeFilter string) ([]entities.Customer, error) {
+			called = page == 1 && pageSize == 10 && nameFilter == "Jane" && postcodeFilter == "ZZ99"
+			return []entities.Customer{{ID: 1, FirstName: "Jane", LastName: "Smith"}}, nil
+		},
+		countCustomers: func(nameFilter string, postcodeFilter string) (int, error) {
+			if nameFilter == "Jane" && postcodeFilter == "ZZ99" {
+				return 1, nil
+			}
+			return 0, nil
+		},
+		customerExists: func(int) (bool, error) { return true, nil },
+		updateCustomer: func(int, string, string) (*entities.Customer, error) { return nil, nil },
+		deleteCustomer: func(int) error { return nil },
+	}
+	addressRepo := &fakeAddressRepo{
+		insertAddress: func(repositories.TxInterface, int, string, entities.Address) (*entities.Address, error) {
+			return nil, nil
+		},
+		updateAddress: func(int, string, entities.Address) (*entities.Address, error) { return nil, nil },
+		beginTx:       func() (repositories.TxInterface, error) { return fakeTx, nil },
+	}
+
+	controller := NewCustomerController(services.NewCustomerService(repo, addressRepo))
+	r := gin.New()
+	r.GET("/customers", controller.GetCustomers)
+
+	req := httptest.NewRequest(http.MethodGet, "/customers?page=1&pageSize=10&name=Jane&postcode=ZZ99", nil)
+	w := httptest.NewRecorder()
+
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "1", w.Header().Get("X-Total-Count"))
+	assert.True(t, called)
 }

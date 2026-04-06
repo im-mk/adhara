@@ -79,13 +79,16 @@ func (s *CustomerService) GetAllCustomers() ([]entities.Customer, error) {
 	return s.CustomerRepo.GetAllCustomers()
 }
 
-func (s *CustomerService) GetCustomersPage(page int, pageSize int) ([]entities.Customer, int, error) {
-	customers, err := s.CustomerRepo.GetCustomersPage(page, pageSize)
+func (s *CustomerService) GetCustomersPage(page int, pageSize int, nameFilter string, postcodeFilter string) ([]entities.Customer, int, error) {
+	trimmedName := strings.TrimSpace(nameFilter)
+	trimmedPostcode := strings.TrimSpace(postcodeFilter)
+
+	customers, err := s.CustomerRepo.GetCustomersPage(page, pageSize, trimmedName, trimmedPostcode)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	totalCount, err := s.CustomerRepo.CountCustomers()
+	totalCount, err := s.CustomerRepo.CountCustomers(trimmedName, trimmedPostcode)
 	if err != nil {
 		return nil, 0, err
 	}

@@ -13,8 +13,8 @@ type CustomerRepositoryInterface interface {
 	GetCustomerByID(customerID int) (*entities.Customer, error)
 	GetCustomerWithAddressesByID(customerID int) (*entities.Customer, error)
 	GetAllCustomers() ([]entities.Customer, error)
-	GetCustomersPage(page int, pageSize int) ([]entities.Customer, error)
-	CountCustomers() (int, error)
+	GetCustomersPage(page int, pageSize int, nameFilter string, postcodeFilter string) ([]entities.Customer, error)
+	CountCustomers(nameFilter string, postcodeFilter string) (int, error)
 	CustomerExists(customerID int) (bool, error)
 	UpdateCustomer(customerID int, firstName string, lastName string) (*entities.Customer, error)
 	DeleteCustomer(customerID int) error
@@ -124,15 +124,27 @@ func (r *CustomerRepository) GetAllCustomers() ([]entities.Customer, error) {
 	return customers, nil
 }
 
-func (r *CustomerRepository) GetCustomersPage(page int, pageSize int) ([]entities.Customer, error) {
+func (r *CustomerRepository) GetCustomersPage(page int, pageSize int, nameFilter string, postcodeFilter string) ([]entities.Customer, error) {
 	offset := (page - 1) * pageSize
 	rows := []customerAddressRow{}
 	err := r.DB.Select(&rows, `
-		WITH paged_customers AS (
+		WITH filtered_customers AS (
 			SELECT c.id, c.first_name, c.last_name
 			FROM customers c
+			WHERE ($1 = '' OR (c.first_name || ' ' || c.last_name) ILIKE '%' || $1 || '%')
+			  AND ($2 = '' OR EXISTS (
+				SELECT 1
+				FROM customer_addresses ca2
+				INNER JOIN addresses a2 ON a2.id = ca2.address_id
+				WHERE ca2.customer_id = c.id
+				  AND a2.postcode ILIKE '%' || $2 || '%'
+			  ))
+		),
+		paged_customers AS (
+			SELECT c.id, c.first_name, c.last_name
+			FROM filtered_customers c
 			ORDER BY c.id
-			LIMIT $1 OFFSET $2
+			LIMIT $3 OFFSET $4
 		)
 		SELECT c.id AS customer_id,
 		       c.first_name,
@@ -149,7 +161,7 @@ func (r *CustomerRepository) GetCustomersPage(page int, pageSize int) ([]entitie
 		LEFT JOIN customer_addresses ca ON ca.customer_id = c.id
 		LEFT JOIN addresses a ON a.id = ca.address_id
 		ORDER BY c.id, ca.id
-	`, pageSize, offset)
+	`, nameFilter, postcodeFilter, pageSize, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -176,9 +188,20 @@ func (r *CustomerRepository) GetCustomersPage(page int, pageSize int) ([]entitie
 	return customers, nil
 }
 
-func (r *CustomerRepository) CountCustomers() (int, error) {
+func (r *CustomerRepository) CountCustomers(nameFilter string, postcodeFilter string) (int, error) {
 	var count int
-	err := r.DB.Get(&count, `SELECT COUNT(1) FROM customers`)
+	err := r.DB.Get(&count, `
+		SELECT COUNT(1)
+		FROM customers c
+		WHERE ($1 = '' OR (c.first_name || ' ' || c.last_name) ILIKE '%' || $1 || '%')
+		  AND ($2 = '' OR EXISTS (
+			SELECT 1
+			FROM customer_addresses ca
+			INNER JOIN addresses a ON a.id = ca.address_id
+			WHERE ca.customer_id = c.id
+			  AND a.postcode ILIKE '%' || $2 || '%'
+		  ))
+	`, nameFilter, postcodeFilter)
 	if err != nil {
 		return 0, err
 	}

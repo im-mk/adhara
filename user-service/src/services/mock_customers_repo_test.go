@@ -43,16 +43,16 @@ func (m *MockCustomerRepository) GetAllCustomers() ([]entities.Customer, error) 
 	return args.Get(0).([]entities.Customer), args.Error(1)
 }
 
-func (m *MockCustomerRepository) GetCustomersPage(page int, pageSize int) ([]entities.Customer, error) {
-	args := m.Called(page, pageSize)
+func (m *MockCustomerRepository) GetCustomersPage(page int, pageSize int, nameFilter string, postcodeFilter string) ([]entities.Customer, error) {
+	args := m.Called(page, pageSize, nameFilter, postcodeFilter)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]entities.Customer), args.Error(1)
 }
 
-func (m *MockCustomerRepository) CountCustomers() (int, error) {
-	args := m.Called()
+func (m *MockCustomerRepository) CountCustomers(nameFilter string, postcodeFilter string) (int, error) {
+	args := m.Called(nameFilter, postcodeFilter)
 	return args.Int(0), args.Error(1)
 }
 

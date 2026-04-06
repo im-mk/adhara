@@ -12,8 +12,9 @@ public class ProductsService : IProductsService
         _productRepository = productRepository;
     }
 
-    public Task<IEnumerable<Product>> GetAllProductsAsync()
+    public Task<IEnumerable<Product>> GetAllProductsAsync(string? name = null)
     {
-        return _productRepository.GetAll();
+        var trimmedName = string.IsNullOrWhiteSpace(name) ? null : name.Trim();
+        return _productRepository.GetAll(trimmedName);
     }
 }

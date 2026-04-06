@@ -7,14 +7,15 @@ public class ProductRepository(IDbConnection dbConnection) : IProductRepository
 {
     private readonly IDbConnection _dbConnection = dbConnection;
 
-    public Task<IEnumerable<Product>> GetAll()
+    public Task<IEnumerable<Product>> GetAll(string? name = null)
     {
         const string sql = @"
             SELECT id AS Id, product_name AS ProductName, product_description AS ProductDescription, unit_price AS UnitPrice
             FROM public.products
+            WHERE @Name IS NULL OR product_name ILIKE '%' || @Name || '%'
             ORDER BY product_name;";
 
-        return _dbConnection.QueryAsync<Product>(sql);
+        return _dbConnection.QueryAsync<Product>(sql, new { Name = name });
     }
 
     public Task<Product?> Get(int productId)

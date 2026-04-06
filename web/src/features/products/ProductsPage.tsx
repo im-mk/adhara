@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
     Box,
     Paper,
@@ -15,45 +15,24 @@ import {
     CardContent,
     Grid,
     TablePagination,
+    TextField,
 } from '@mui/material';
-import { ProductsService, type Product } from '../../api';
+import { useProducts } from './useProducts';
 
 const ProductsPage: React.FC = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [page, setPage] = useState<number>(0);
-    const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    const pagedProducts = products.slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage,
-    );
-
-    const handleChangePage = (_event: unknown, newPage: number) => {
-        setPage(newPage);
-    };
-
-    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0);
-    };
-
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                setLoading(true);
-                const data = await ProductsService.getAllProducts();
-                setProducts(data || []);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Could not load products');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProducts();
-    }, []);
+    const {
+        products,
+        filteredProducts,
+        pagedProducts,
+        nameQuery,
+        setNameQuery,
+        page,
+        rowsPerPage,
+        loading,
+        error,
+        handleChangePage,
+        handleChangeRowsPerPage,
+    } = useProducts();
 
     if (loading) {
         return (
@@ -69,10 +48,22 @@ const ProductsPage: React.FC = () => {
                 Products
             </Typography>
 
+            <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
+                <TextField
+                    label="Search product name"
+                    value={nameQuery}
+                    onChange={(event) => setNameQuery(event.target.value)}
+                    size="small"
+                    sx={{ minWidth: { xs: '100%', sm: 280 } }}
+                />
+            </Paper>
+
             {error && <Alert severity="warning" sx={{ mb: 2 }}>{error}</Alert>}
 
             {products.length === 0 ? (
                 <Alert severity="info">No products available</Alert>
+            ) : filteredProducts.length === 0 ? (
+                <Alert severity="info">No products found for current search.</Alert>
             ) : (
                 <>
                     {/* Grid View - Desktop */}
@@ -99,16 +90,6 @@ const ProductsPage: React.FC = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-
-                        <TablePagination
-                            component="div"
-                            count={products.length}
-                            page={page}
-                            onPageChange={handleChangePage}
-                            rowsPerPage={rowsPerPage}
-                            onRowsPerPageChange={handleChangeRowsPerPage}
-                            rowsPerPageOptions={[5, 10, 25, 50]}
-                        />
                     </Box>
 
                     {/* Card View - Mobile */}
@@ -137,7 +118,7 @@ const ProductsPage: React.FC = () => {
 
                     <TablePagination
                         component="div"
-                        count={products.length}
+                        count={filteredProducts.length}
                         page={page}
                         onPageChange={handleChangePage}
                         rowsPerPage={rowsPerPage}

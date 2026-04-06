@@ -55,6 +55,8 @@ func (ctrl *CustomerController) CreateCustomer(c *gin.Context) {
 func (ctrl *CustomerController) GetCustomers(c *gin.Context) {
 	pageValue := strings.TrimSpace(c.Query("page"))
 	pageSizeValue := strings.TrimSpace(c.Query("pageSize"))
+	nameFilter := strings.TrimSpace(c.Query("name"))
+	postcodeFilter := strings.TrimSpace(c.Query("postcode"))
 
 	if (pageValue == "") != (pageSizeValue == "") {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "page and pageSize must be provided together"})
@@ -74,7 +76,7 @@ func (ctrl *CustomerController) GetCustomers(c *gin.Context) {
 			return
 		}
 
-		customers, totalCount, err := ctrl.CustomerService.GetCustomersPage(page, pageSize)
+		customers, totalCount, err := ctrl.CustomerService.GetCustomersPage(page, pageSize, nameFilter, postcodeFilter)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
