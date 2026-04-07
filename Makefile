@@ -60,7 +60,7 @@ start-dev: start-user-api start-order-api start-app-service
 
 
 stop:
-	docker compose stop --remove-orphans
+	docker compose stop
 
 clean:
 	docker compose down -v --remove-orphans
