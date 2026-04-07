@@ -15,29 +15,6 @@ VALUES
 
 SELECT setval(pg_get_serial_sequence('public.products','id'), COALESCE((SELECT MAX(id) FROM public.products), 1), true);
 
--- Insert sample customers
-INSERT INTO customers
-    (id, first_name, last_name)
-VALUES
-    (1, 'John', 'Doe'),
-    (2, 'Jane', 'Smith'),
-    (3, 'Alice', 'Johnson'),
-    (4, 'Bob', 'Brown'),
-    (5, 'Charlie', 'Davis');
-SELECT setval(pg_get_serial_sequence('public.customers','id'), COALESCE((SELECT MAX(id) FROM public.customers), 1), true);
-
--- Insert sample orders
-INSERT INTO orders
-    (
-    order_number, order_date, order_status_id, total_amount, customer_id)
-VALUES
-    ('A00001', NOW(), 1, 1.23, 1),
-    ('A00002', NOW(), 2, 2.34, 2),
-    ('A00003', NOW(), 3, 3.45, 3),
-    ('A00004', NOW(), 4, 4.56, 4),
-    ('A00005', NOW(), 5, 5.67, 5);
-
-SELECT setval(pg_get_serial_sequence('public.orders','id'), COALESCE((SELECT MAX(id) FROM public.orders), 1), true);
 
 -- Insert sample addresses
 INSERT INTO addresses
@@ -51,17 +28,20 @@ VALUES
 
 SELECT setval(pg_get_serial_sequence('public.addresses','id'), COALESCE((SELECT MAX(id) FROM public.addresses), 1), true);
 
--- Map customers to addresses (customer_addresses)
-INSERT INTO customer_addresses
-    (id, customer_id, address_id, address_type)
-VALUES
-    (1, 1, 1, 'Billing'),
-    (2, 2, 2, 'Billing'),
-    (3, 3, 3, 'Billing'),
-    (4, 4, 4, 'Billing'),
-    (5, 5, 5, 'Billing');
 
-SELECT setval(pg_get_serial_sequence('public.customer_addresses','id'), COALESCE((SELECT MAX(id) FROM public.customer_addresses), 1), true);
+-- Insert sample orders
+INSERT INTO orders
+    (
+    order_number, order_date, order_status_id, total_amount, customer_id, customer_name, shipping_address_id, billing_address_id
+    )
+VALUES
+    ('A00001', NOW(), 1, 1.23, 1, 'John Doe', 1, 1),
+    ('A00002', NOW(), 2, 2.34, 2, 'Jane Smith', 2, 2),
+    ('A00003', NOW(), 3, 3.45, 3, 'Bob Johnson', 3, 3),
+    ('A00004', NOW(), 4, 4.56, 4, 'Alice Williams', 4, 4),
+    ('A00005', NOW(), 5, 5.67, 5, 'Charlie Brown', 5, 5);
+
+SELECT setval(pg_get_serial_sequence('public.orders','id'), COALESCE((SELECT MAX(id) FROM public.orders), 1), true);
 
 -- Insert sample order lines (one per order)
 INSERT INTO order_lines

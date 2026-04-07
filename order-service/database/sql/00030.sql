@@ -11,12 +11,17 @@ CREATE TABLE IF NOT EXISTS public.orders
     order_status_id INT NOT NULL,
     total_amount DECIMAL(10,2) NOT NULL,    
     customer_id INT NOT NULL,
+    customer_name VARCHAR(255) NOT NULL,
+    shipping_address_id INT NOT NULL,
+    billing_address_id INT NOT NULL,
     CONSTRAINT pk_order_id PRIMARY KEY (id),
     CONSTRAINT idx_orders_order_number UNIQUE (order_number),
     CONSTRAINT fk_orders_order_status_id FOREIGN KEY (order_status_id)
         REFERENCES public.order_statuses (id),
-    CONSTRAINT fk_orders_customer_id FOREIGN KEY (customer_id)
-        REFERENCES public.customers (id)
+    CONSTRAINT fk_orders_shipping_address_id FOREIGN KEY (shipping_address_id)
+        REFERENCES public.addresses (id),
+    CONSTRAINT fk_orders_billing_address_id FOREIGN KEY (billing_address_id)
+        REFERENCES public.addresses (id)
 );
 
 CREATE INDEX idx_orders_customer_id ON public.orders(customer_id);

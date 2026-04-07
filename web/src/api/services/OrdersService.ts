@@ -1,100 +1,71 @@
-/* generated using openapi-typescript-codegen -- do not edit */
-/* istanbul ignore file */
-/* tslint:disable */
-/* eslint-disable */
-import type { CreateOrderRequest } from '../models/CreateOrderRequest';
-import type { OrderCreatedResponse } from '../models/OrderCreatedResponse';
-import type { OrderDetailsResponse } from '../models/OrderDetailsResponse';
-import type { OrderListResponse } from '../models/OrderListResponse';
-import type { UpdateOrderRequest } from '../models/UpdateOrderRequest';
-import type { CancelablePromise } from '../core/CancelablePromise';
-import { OpenAPI } from '../core/OpenAPI';
-import { request as __request } from '../core/request';
+import type { CreateOrderRequest } from '../models/order/CreateOrderRequest';
+import type { OrderCreatedResponse } from '../models/order/OrderCreatedResponse';
+import type { OrderDetailsResponse } from '../models/order/OrderDetailsResponse';
+import type { OrderListResponse } from '../models/order/OrderListResponse';
+import type { UpdateOrderRequest } from '../models/order/UpdateOrderRequest';
+import { requestWithAuth, requestWithAuthResponse } from './httpClient';
+
+export type PagedOrdersResult = {
+    items: Array<OrderListResponse>;
+    totalCount: number;
+};
+
 export class OrdersService {
-    /**
-     * @param orderId
-     * @returns OrderDetailsResponse OK
-     * @throws ApiError
-     */
-    public static getOrderById(
-        orderId: number,
-    ): CancelablePromise<OrderDetailsResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/Orders/{orderId}',
-            path: {
-                'orderId': orderId,
-            },
-        });
+    public static getOrderById(orderId: number): Promise<OrderDetailsResponse> {
+        return requestWithAuth<OrderDetailsResponse>(`/Orders/${orderId}`);
     }
-    /**
-     * @param orderId
-     * @param requestBody
-     * @returns any OK
-     * @throws ApiError
-     */
-    public static updateOrder(
-        orderId: number,
-        requestBody?: UpdateOrderRequest,
-    ): CancelablePromise<any> {
-        return __request(OpenAPI, {
+
+    public static updateOrder(orderId: number, requestBody?: UpdateOrderRequest): Promise<void> {
+        return requestWithAuth<void>(`/Orders/${orderId}`, {
             method: 'PUT',
-            url: '/Orders/{orderId}',
-            path: {
-                'orderId': orderId,
-            },
             body: requestBody,
-            mediaType: 'application/json',
         });
     }
-    /**
-     * @param orderId
-     * @returns any OK
-     * @throws ApiError
-     */
-    public static deleteOrder(
-        orderId: number,
-    ): CancelablePromise<any> {
-        return __request(OpenAPI, {
+
+    public static deleteOrder(orderId: number): Promise<void> {
+        return requestWithAuth<void>(`/Orders/${orderId}`, {
             method: 'DELETE',
-            url: '/Orders/{orderId}',
-            path: {
-                'orderId': orderId,
-            },
         });
     }
-    /**
-     * @param startDate
-     * @param endDate
-     * @returns OrderListResponse OK
-     * @throws ApiError
-     */
-    public static getList(
-        startDate?: string,
-        endDate?: string,
-    ): CancelablePromise<Array<OrderListResponse>> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/Orders',
+
+    public static getList(startDate?: string, endDate?: string, customerId?: number, orderNumber?: string, orderStatusId?: number): Promise<Array<OrderListResponse>> {
+        return requestWithAuth<Array<OrderListResponse>>('/Orders', {
             query: {
-                'startDate': startDate,
-                'endDate': endDate,
+                startDate,
+                endDate,
+                customerId,
+                orderNumber,
+                orderStatusId,
             },
         });
     }
-    /**
-     * @param requestBody
-     * @returns OrderCreatedResponse OK
-     * @throws ApiError
-     */
-    public static createOrder(
-        requestBody?: CreateOrderRequest,
-    ): CancelablePromise<OrderCreatedResponse> {
-        return __request(OpenAPI, {
+
+    public static async getListPaged(page: number, pageSize: number, startDate?: string, endDate?: string, customerId?: number, orderNumber?: string, orderStatusId?: number): Promise<PagedOrdersResult> {
+        const response = await requestWithAuthResponse<Array<OrderListResponse>>('/Orders', {
+            query: {
+                startDate,
+                endDate,
+                customerId,
+                orderNumber,
+                orderStatusId,
+                page,
+                pageSize,
+            },
+        });
+
+        const totalCountHeader = response.headers.get('x-total-count');
+        const parsedTotal = totalCountHeader ? Number(totalCountHeader) : NaN;
+
+        return {
+            items: response.data ?? [],
+            totalCount: Number.isFinite(parsedTotal) ? parsedTotal : (response.data?.length ?? 0),
+        };
+    }
+
+    public static createOrder(requestBody?: CreateOrderRequest): Promise<OrderCreatedResponse> {
+        return requestWithAuth<OrderCreatedResponse>('/Orders', {
             method: 'POST',
-            url: '/Orders',
             body: requestBody,
-            mediaType: 'application/json',
         });
     }
 }

@@ -3,19 +3,17 @@ services:
   order-service:
     container_name: order-service
     build:
-      context: ./order-service
+      context: ./order-service/src
       dockerfile: Orders.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=adhara-db;Port=${ORDER_SERVICE_DB_INTERNAL_PORT};Database=${ORDER_SERVICE_DB_NAME};Username=${ORDER_SERVICE_DB_USER};Password=${ORDER_SERVICE_DB_PASSWORD}
-      - Auth__JwksBaseUrl=http://user-service:${USER_SERVICE_PORT}
-      - Auth__IssuerUrl=user-service
+      - ConnectionStrings__DefaultConnection=Host=order-service-db;Port=${ORDER_SERVICE_DB_INTERNAL_PORT};Database=${ORDER_SERVICE_DB_NAME};Username=${ORDER_SERVICE_DB_USER};Password=${ORDER_SERVICE_DB_PASSWORD}
     ports:
       - ${ORDER_SERVICE_EXTERNAL_PORT}:${ORDER_SERVICE_INTERNAL_PORT}
     depends_on:
-      db:
+      order-service-db:
         condition: service_healthy
-      liquibase:
+      order-service-liquibase:
         condition: service_completed_successfully
     networks:
       - network1
@@ -30,27 +28,13 @@ services:
       timeout: 3s
       retries: 5
     volumes:
-      - ./order-service/Orders.Api/.keys/:/app/.keys
+      - ./order-service/src/Orders.Api/.keys/:/app/.keys
 
-  web:
-    container_name: adhara-web
-    build:
-      context: ./web
-      dockerfile: Dockerfile
-    ports:
-      - ${WEB_EXTERNAL_PORT}:${WEB_INTERNAL_PORT}
-    networks:
-      - network1
-    restart: unless-stopped
-    depends_on:
-      order-service:
-        condition: service_healthy
-
-  db:
-    container_name: adhara-db
+  order-service-db:
+    container_name: order-service-db
     image: postgres:18.3
     volumes:
-      # - db:/data/postgres # enable this line to persist data
+      # - order-service-db:/data/postgres # enable this line to persist data
       - ./order-service/database/init:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: ${ORDER_SERVICE_DB_USER}
@@ -67,12 +51,13 @@ services:
           "CMD-SHELL",
           "pg_isready -U $ORDER_SERVICE_DB_USER -d $ORDER_SERVICE_DB_NAME",
         ]
+      start_period: 30s
       interval: 5s
       timeout: 5s
-      retries: 3
+      retries: 10
 
-  liquibase:
-    container_name: adhara-liquibase
+  order-service-liquibase:
+    container_name: order-service-liquibase
     image: liquibase/liquibase:5.0.1
     entrypoint:
       [
@@ -89,23 +74,24 @@ services:
       - ./order-service/database/seed:/liquibase/changelog/seed
       - ./order-service/database/dev:/liquibase/changelog/dev
     environment:
-      - LIQUIBASE_COMMAND_URL=jdbc:postgresql://adhara-db:${ORDER_SERVICE_DB_INTERNAL_PORT}/${ORDER_SERVICE_DB_NAME}
+      - LIQUIBASE_COMMAND_URL=jdbc:postgresql://order-service-db:${ORDER_SERVICE_DB_INTERNAL_PORT}/${ORDER_SERVICE_DB_NAME}
       - LIQUIBASE_COMMAND_USERNAME=${ORDER_SERVICE_DB_USER}
       - LIQUIBASE_COMMAND_PASSWORD=${ORDER_SERVICE_DB_PASSWORD}
     networks:
       - network1
     depends_on:
-      db:
+      order-service-db:
         condition: service_healthy
 
   user-service:
     container_name: user-service
     build:
-      context: ./user-service
+      context: ./user-service/src
       dockerfile: Dockerfile
     environment:
       DB_HOST: user-service-db
       DB_PORT: ${USER_SERVICE_DB_INTERNAL_PORT}
+      APP_CORSURL: ${USER_SERVICE_CORS_URL}
     ports:
       - ${USER_SERVICE_PORT}:${USER_SERVICE_PORT}
     networks:
@@ -116,13 +102,13 @@ services:
       user-service-liquibase:
         condition: service_completed_successfully
     volumes:
-      - ./user-service/.keys:/app/.keys
+      - ./user-service/src/.keys:/app/.keys
 
   user-service-db:
     container_name: user-service-db
     image: postgres:18.3
     volumes:
-      # - postgres:/data/postgres # enable this line to persist data
+      # - user-service-db:/data/postgres # enable this line to persist data
       - ./user-service/database/init:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: ${USER_SERVICE_DB_USER}
@@ -139,9 +125,10 @@ services:
           "CMD-SHELL",
           "pg_isready -U $USER_SERVICE_DB_USER -d $USER_SERVICE_DB_NAME",
         ]
+      start_period: 30s
       interval: 5s
       timeout: 5s
-      retries: 3
+      retries: 10
 
   user-service-liquibase:
     container_name: user-service-liquibase
@@ -152,11 +139,14 @@ services:
         "-c",
         "liquibase lpm list | grep postgresql || liquibase lpm add postgresql --global; liquibase update",
       ]
-    command: --defaultsFile=liquibase.properties update
+    # contexts: dev to seed data in dev environment
+    command: --defaultsFile=liquibase.properties --contexts=dev update
     volumes:
       - ./user-service/database/liquibase.properties:/liquibase/liquibase.properties
       - ./user-service/database/changelog.yaml:/liquibase/changelog/changelog.yaml
       - ./user-service/database/sql:/liquibase/changelog/sql
+      - ./user-service/database/seed:/liquibase/changelog/seed
+      - ./user-service/database/dev:/liquibase/changelog/dev
     environment:
       - LIQUIBASE_COMMAND_URL=jdbc:postgresql://user-service-db:${USER_SERVICE_DB_INTERNAL_PORT}/${USER_SERVICE_DB_NAME}
       - LIQUIBASE_COMMAND_USERNAME=${USER_SERVICE_DB_USER}
@@ -165,6 +155,52 @@ services:
       - network1
     depends_on:
       user-service-db:
+        condition: service_healthy
+
+  app-service:
+    container_name: app-service
+    build:
+      context: ./app-service
+      dockerfile: App.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Cors__AllowedOrigin=${APP_SERVICE_CORS_URL}
+      - Auth__JwksBaseUrl=http://user-service:${USER_SERVICE_PORT}
+      - Auth__IssuerUrl=user-service
+      - DownstreamServices__OrderServiceBaseUrl=http://order-service:${ORDER_SERVICE_INTERNAL_PORT}
+      - DownstreamServices__UserServiceBaseUrl=http://user-service:${USER_SERVICE_PORT}
+    ports:
+      - ${APP_SERVICE_EXTERNAL_PORT}:${APP_SERVICE_INTERNAL_PORT}
+    depends_on:
+      order-service:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    networks:
+      - network1
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:${APP_SERVICE_INTERNAL_PORT}/health || exit 1",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    container_name: adhara-web
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - ${WEB_EXTERNAL_PORT}:${WEB_INTERNAL_PORT}
+    networks:
+      - network1
+    restart: unless-stopped
+    depends_on:
+      app-service:
         condition: service_healthy
 
   pgadmin:
@@ -207,5 +243,6 @@ networks:
     driver: bridge
 
 volumes:
-  db:
+  order-service-db:
+  user-service-db:
   pgadmin:

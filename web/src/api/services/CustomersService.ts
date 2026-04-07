@@ -1,89 +1,70 @@
-/* generated using openapi-typescript-codegen -- do not edit */
-/* istanbul ignore file */
-/* tslint:disable */
-/* eslint-disable */
-import type { CreateCustomerRequest } from '../models/CreateCustomerRequest';
-import type { Customer } from '../models/Customer';
-import type { UpdateCustomerRequest } from '../models/UpdateCustomerRequest';
-import type { CancelablePromise } from '../core/CancelablePromise';
-import { OpenAPI } from '../core/OpenAPI';
-import { request as __request } from '../core/request';
+import type { CreateCustomerRequest } from '../models/customer/CreateCustomerRequest';
+import type { Customer } from '../models/customer/Customer';
+import type { UpdateCustomerRequest } from '../models/customer/UpdateCustomerRequest';
+import { requestWithAuth, requestWithAuthResponse } from './httpClient';
+
+export type PagedCustomersResult = {
+    items: Array<Customer>;
+    totalCount: number;
+};
+
+export type CustomerFilters = {
+    name?: string;
+    postcode?: string;
+};
+
 export class CustomersService {
-    /**
-     * @param customerId
-     * @returns Customer OK
-     * @throws ApiError
-     */
-    public static getCustomerById(
-        customerId: number,
-    ): CancelablePromise<Customer> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/Customers/{customerId}',
-            path: {
-                'customerId': customerId,
-            },
-        });
+    public static getCustomerById(customerId: number): Promise<Customer> {
+        return requestWithAuth<Customer>(`/Customers/${customerId}`);
     }
-    /**
-     * @param customerId
-     * @param requestBody
-     * @returns any OK
-     * @throws ApiError
-     */
-    public static updateCustomer(
-        customerId: number,
-        requestBody?: UpdateCustomerRequest,
-    ): CancelablePromise<any> {
-        return __request(OpenAPI, {
+
+    public static updateCustomer(customerId: number, requestBody?: UpdateCustomerRequest): Promise<void> {
+        return requestWithAuth<void>(`/Customers/${customerId}`, {
             method: 'PUT',
-            url: '/Customers/{customerId}',
-            path: {
-                'customerId': customerId,
-            },
             body: requestBody,
-            mediaType: 'application/json',
         });
     }
-    /**
-     * @param customerId
-     * @returns any OK
-     * @throws ApiError
-     */
-    public static deleteCustomer(
-        customerId: number,
-    ): CancelablePromise<any> {
-        return __request(OpenAPI, {
+
+    public static deleteCustomer(customerId: number): Promise<void> {
+        return requestWithAuth<void>(`/Customers/${customerId}`, {
             method: 'DELETE',
-            url: '/Customers/{customerId}',
-            path: {
-                'customerId': customerId,
+        });
+    }
+
+    public static getAllCustomers(): Promise<Array<Customer>> {
+        return requestWithAuth<Array<Customer>>('/Customers');
+    }
+
+    public static async getCustomersPaged(
+        page: number,
+        pageSize: number,
+        filters?: CustomerFilters,
+    ): Promise<PagedCustomersResult> {
+        const trimmedName = filters?.name?.trim();
+        const trimmedPostcode = filters?.postcode?.trim();
+
+        const response = await requestWithAuthResponse<Array<Customer>>('/Customers', {
+            query: {
+                page,
+                pageSize,
+                name: trimmedName && trimmedName.length > 0 ? trimmedName : undefined,
+                postcode: trimmedPostcode && trimmedPostcode.length > 0 ? trimmedPostcode : undefined,
             },
         });
+
+        const totalCountHeader = response.headers.get('x-total-count');
+        const parsedTotal = totalCountHeader ? Number(totalCountHeader) : NaN;
+
+        return {
+            items: response.data ?? [],
+            totalCount: Number.isFinite(parsedTotal) ? parsedTotal : (response.data?.length ?? 0),
+        };
     }
-    /**
-     * @returns Customer OK
-     * @throws ApiError
-     */
-    public static getAllCustomers(): CancelablePromise<Array<Customer>> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/Customers',
-        });
-    }
-    /**
-     * @param requestBody
-     * @returns Customer OK
-     * @throws ApiError
-     */
-    public static createCustomer(
-        requestBody?: CreateCustomerRequest,
-    ): CancelablePromise<Customer> {
-        return __request(OpenAPI, {
+
+    public static createCustomer(requestBody?: CreateCustomerRequest): Promise<Customer> {
+        return requestWithAuth<Customer>('/Customers', {
             method: 'POST',
-            url: '/Customers',
             body: requestBody,
-            mediaType: 'application/json',
         });
     }
 }

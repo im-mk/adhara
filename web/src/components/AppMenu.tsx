@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -7,16 +7,24 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import { clearAuthSession } from '../auth.ts';
 
 const AppMenu: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => setAnchorEl(null);
+
+  const handleLogout = () => {
+    clearAuthSession();
+    handleClose();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <AppBar position="static">
@@ -45,7 +53,7 @@ const AppMenu: React.FC = () => {
           <MenuItem component={Link} to="/orders" onClick={handleClose}>Orders</MenuItem>
           <MenuItem component={Link} to="/customers" onClick={handleClose}>Customers</MenuItem>
           <MenuItem component={Link} to="/products" onClick={handleClose}>Products</MenuItem>
-          <MenuItem component={Link} to="/login" onClick={handleClose}>Login</MenuItem>
+          <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>
 
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>

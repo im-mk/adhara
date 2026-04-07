@@ -1,20 +1,8 @@
-/* generated using openapi-typescript-codegen -- do not edit */
-/* istanbul ignore file */
-/* tslint:disable */
-/* eslint-disable */
-import type { Country } from '../models/Country';
-import type { CancelablePromise } from '../core/CancelablePromise';
-import { OpenAPI } from '../core/OpenAPI';
-import { request as __request } from '../core/request';
+import type { Country } from '../models/countries/Country';
+import { requestWithAuth } from './httpClient';
+
 export class CountriesService {
-    /**
-     * @returns Country OK
-     * @throws ApiError
-     */
-    public static getAllCountries(): CancelablePromise<Array<Country>> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/Countries',
-        });
+    public static getAllCountries(): Promise<Array<Country>> {
+        return requestWithAuth<Array<Country>>('/Countries');
     }
 }

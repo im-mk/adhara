@@ -1,26 +1,26 @@
-/* generated using openapi-typescript-codegen -- do not edit */
-/* istanbul ignore file */
-/* tslint:disable */
-/* eslint-disable */
-export { ApiError } from './core/ApiError';
-export { CancelablePromise, CancelError } from './core/CancelablePromise';
-export { OpenAPI } from './core/OpenAPI';
-export type { OpenAPIConfig } from './core/OpenAPI';
+export type { AddressRequest } from './models/shared/AddressRequest';
+export type { Address } from './models/shared/Address';
+export type { Country } from './models/countries/Country';
+export type { CreateCustomerRequest } from './models/customer/CreateCustomerRequest';
+export type { CreateOrderRequest } from './models/order/CreateOrderRequest';
+export type { Customer } from './models/customer/Customer';
+export type { Order } from './models/order/Order';
+export type { OrderCreatedResponse } from './models/order/OrderCreatedResponse';
+export type { OrderDetailsResponse } from './models/order/OrderDetailsResponse';
+export type { OrderItem } from './models/order/OrderItem';
+export type { OrderLineDetails } from './models/order/OrderLineDetails';
+export type { OrderListResponse } from './models/order/OrderListResponse';
+export type { OrderStatus } from './models/order/OrderStatus';
+export type { Product } from './models/products/Product';
+export type { LoginRequest } from './models/auth/LoginRequest';
+export type { LoginResponse } from './models/auth/LoginResponse';
+export type { RefreshRequest } from './models/auth/RefreshRequest';
+export type { RefreshResponse } from './models/auth/RefreshResponse';
+export type { UpdateCustomerRequest } from './models/customer/UpdateCustomerRequest';
+export type { UpdateOrderRequest } from './models/order/UpdateOrderRequest';
 
-export type { AddressRequest } from './models/AddressRequest';
-export type { Country } from './models/Country';
-export type { CreateCustomerRequest } from './models/CreateCustomerRequest';
-export type { CreateOrderRequest } from './models/CreateOrderRequest';
-export type { Customer } from './models/Customer';
-export type { Order } from './models/Order';
-export type { OrderCreatedResponse } from './models/OrderCreatedResponse';
-export type { OrderDetailsResponse } from './models/OrderDetailsResponse';
-export type { OrderItem } from './models/OrderItem';
-export type { OrderLineDetails } from './models/OrderLineDetails';
-export type { OrderListResponse } from './models/OrderListResponse';
-export type { UpdateCustomerRequest } from './models/UpdateCustomerRequest';
-export type { UpdateOrderRequest } from './models/UpdateOrderRequest';
-
+export { AuthService } from './services/AuthService';
 export { CountriesService } from './services/CountriesService';
 export { CustomersService } from './services/CustomersService';
 export { OrdersService } from './services/OrdersService';
+export { ProductsService } from './services/ProductsService';
