@@ -238,6 +238,30 @@ services:
       --reporters cli
       --delay-request 500
 
+  e2e-tests:
+    container_name: adhara-e2e-tests
+    image: mcr.microsoft.com/playwright:v1.59.1-noble
+    profiles: ["test"]
+    working_dir: /work/e2e-tests
+    volumes:
+      - ./e2e-tests:/work/e2e-tests
+      - e2e-node-modules:/work/e2e-tests/node_modules
+    environment:
+      - E2E_BASE_URL=http://web:${WEB_INTERNAL_PORT}
+      - E2E_APP_API_URL=http://app-service:${APP_SERVICE_INTERNAL_PORT}
+      - E2E_USER_SERVICE_URL=http://user-service:${USER_SERVICE_PORT}
+      - PW_TEST_CMD=npm run test:e2e
+    depends_on:
+      web:
+        condition: service_started
+      app-service:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    networks:
+      - network1
+    command: sh -lc "npm ci && $$PW_TEST_CMD"
+
 networks:
   network1:
     driver: bridge
@@ -246,3 +270,4 @@ volumes:
   order-service-db:
   user-service-db:
   pgadmin:
+  e2e-node-modules:

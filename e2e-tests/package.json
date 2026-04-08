@@ -1,0 +1,20 @@
+{
+  "name": "adhara-e2e-tests",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:smoke": "playwright test --project=smoke",
+    "test:journeys": "playwright test --project=journeys",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report",
+    "install:browsers": "playwright install"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^24.12.2",
+    "dotenv": "^17.4.1",
+    "typescript": "^6.0.2"
+  }
+}

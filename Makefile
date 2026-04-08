@@ -1,4 +1,4 @@
-.PHONY: start-keys start-user-db test-user-api build-user-api start-user-api newman-test start-app-service build-app-service test-app-service build-web test-web start stop clean clean-all pgadmin start-dev
+.PHONY: start-keys start-user-db test-user-api build-user-api start-user-api newman-test start-app-service build-app-service test-app-service build-web test-web e2e-install e2e-smoke e2e-journeys e2e-all e2e-smoke-docker e2e-journeys-docker e2e-all-docker start stop clean clean-all pgadmin start-dev
 
 create-keys:
 	mkdir -p user-service/src/.keys	
@@ -51,6 +51,16 @@ build-web:
 test-web:
 	docker build -f web/Dockerfile --target test -t adhara-web-test ./web
 	docker run --rm adhara-web-test
+
+# E2E Tests
+e2e-smoke:
+	docker compose --profile test run --rm -e PW_TEST_CMD="npm run test:smoke" e2e-tests
+
+e2e-journeys:
+	docker compose --profile test run --rm -e PW_TEST_CMD="npm run test:journeys" e2e-tests
+
+e2e-all:
+	docker compose --profile test run --rm -e PW_TEST_CMD="npm run test:e2e" e2e-tests
 
 # All Services
 start:
