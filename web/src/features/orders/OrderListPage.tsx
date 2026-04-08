@@ -43,7 +43,7 @@ const OrderListPage: React.FC = () => {
     return (
         <Box>
             <Paper sx={{ p: 2, mb: 2 }}>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ flexWrap: 'wrap' }}>
                     <TextField
                         label="Search order number"
                         size="small"
