@@ -34,7 +34,7 @@ public class OrderServiceTests
     }
 
     [Fact]
-    public async Task CreateOrder_InsertsAddressesOrderAndLinesAndCommits()
+    public async Task CreateOrder_ValidRequest_InsertsOrderDataAndCommits()
     {
         var tx = new Mock<System.Data.IDbTransaction>();
         tx.Setup(t => t.Commit()).Verifiable();

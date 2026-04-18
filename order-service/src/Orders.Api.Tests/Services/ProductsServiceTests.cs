@@ -17,7 +17,7 @@ public class ProductsServiceTests
     }
 
     [Fact]
-    public async Task GetAllProductsAsync_ReturnsRepositoryResult()
+    public async Task GetAllProductsAsync_RepositoryResult_ReturnsProducts()
     {
         var expected = new List<Product>
         {
@@ -38,7 +38,7 @@ public class ProductsServiceTests
     }
 
     [Fact]
-    public async Task GetAllProductsAsync_WithNameFilter_UsesTrimmedName()
+    public async Task GetAllProductsAsync_NameFilterWithWhitespace_UsesTrimmedName()
     {
         var expected = new List<Product>
         {

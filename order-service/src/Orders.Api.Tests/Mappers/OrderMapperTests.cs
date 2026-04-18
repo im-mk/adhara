@@ -6,7 +6,7 @@ namespace Orders.Api.Tests.Mappers;
 public class OrderMapperTests
 {
     [Fact]
-    public void FromCreate_PopulatesFieldsAndFormatsOrderNumber()
+    public void FromCreate_ValidRequest_PopulatesFieldsAndFormatsOrderNumber()
     {
         var req = new CreateOrderRequest
         {

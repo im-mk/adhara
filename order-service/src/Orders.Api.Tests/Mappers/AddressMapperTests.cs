@@ -6,7 +6,7 @@ namespace Orders.Api.Tests.Mappers;
 public class AddressMapperTests
 {
     [Fact]
-    public void FromRequest_MapsFields()
+    public void FromRequest_ValidRequest_MapsFields()
     {
         var req = new AddressRequest { AddressLine1 = "L1", AddressLine2 = "L2", Postcode = "P", Country = "GB" };
         var a = AddressMapper.FromRequest(req);

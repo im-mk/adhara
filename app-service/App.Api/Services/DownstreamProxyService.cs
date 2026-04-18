@@ -7,7 +7,7 @@ namespace App.Api.Services;
 
 public sealed class DownstreamProxyService(
     IHttpClientFactory httpClientFactory,
-    IOptions<DownstreamServicesOptions> downstreamServicesOptions) : ControllerBase
+    IOptions<DownstreamServicesOptions> downstreamServicesOptions) : ControllerBase, IDownstreamProxyService
 {
     private readonly DownstreamServicesOptions _downstreamServicesOptions = downstreamServicesOptions.Value;
 

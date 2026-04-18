@@ -18,7 +18,7 @@ public class ProductsControllerTests
     }
 
     [Fact]
-    public async Task GetAll_ReturnsOk_WithProducts()
+    public async Task GetAll_ProductsExist_ReturnsOkResult()
     {
         var products = new List<Product>
         {
@@ -40,7 +40,7 @@ public class ProductsControllerTests
     }
 
     [Fact]
-    public async Task GetAll_WithNameFilter_ForwardsFilterToService()
+    public async Task GetAll_NameFilter_ForwardsFilterToService()
     {
         var products = new List<Product>
         {

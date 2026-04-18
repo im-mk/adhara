@@ -6,7 +6,7 @@ namespace Orders.Api.Tests.Mappers;
 public class OrderLineMapperTests
 {
     [Fact]
-    public void FromItem_ComputesTotalAndMapsFields()
+    public void FromItem_OrderItem_ComputesTotalAndMapsFields()
     {
         var item = new OrderItem { ProductId = 2, Quantity = 3 };
         var product = new Product { Id = 2, ProductName = "Test", ProductDescription = "Test", UnitPrice = 10m };

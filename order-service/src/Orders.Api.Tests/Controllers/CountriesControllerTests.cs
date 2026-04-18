@@ -18,7 +18,7 @@ public class CountriesControllerTests
     }
 
     [Fact]
-    public async Task GetAll_ReturnsOk_WithCountries()
+    public async Task GetAll_CountriesExist_ReturnsOkResult()
     {
         var countries = new List<Country> { new Country { Id = "US", Name = "United States" } };
         _mockService.Setup(s => s.GetAllCountriesAsync()).ReturnsAsync(countries);
