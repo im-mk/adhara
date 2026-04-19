@@ -17,7 +17,7 @@ public class CountriesServiceTests
     }
 
     [Fact]
-    public async Task GetAllCountriesAsync_ReturnsRepositoryResult()
+    public async Task GetAllCountriesAsync_RepositoryResult_ReturnsCountries()
     {
         var expected = new List<Country> { new Country { Id = "GB", Name = "United Kingdom" } };
         _mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(expected);

@@ -12,7 +12,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import { CustomersService, OrderItem, OrdersService, ProductsService, type AddressRequest } from '../../api';
 import { useNotification } from '../../components/notification-context';
 
@@ -270,7 +270,7 @@ const NewOrderPage: React.FC = () => {
 
             {loadingCustomer ? (
                 <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-                    <Box display="flex" justifyContent="center" py={2}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
                         <CircularProgress size={24} />
                     </Box>
                 </Paper>

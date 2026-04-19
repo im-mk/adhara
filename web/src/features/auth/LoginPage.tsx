@@ -50,9 +50,9 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
             <Paper elevation={3} sx={{ p: 4, minWidth: 400 }}>
-                <Typography variant="h4" gutterBottom textAlign="center" sx={{ mb: 3 }}>
+                <Typography variant="h4" gutterBottom sx={{ mb: 3, textAlign: 'center' }}>
                     Login
                 </Typography>
 

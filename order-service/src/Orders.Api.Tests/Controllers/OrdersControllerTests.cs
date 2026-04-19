@@ -23,7 +23,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task Get_ReturnsOkResult_WhenOrderExists()
+    public async Task Get_OrderExists_ReturnsOkResult()
     {
         // Arrange
         var orderId = 1;
@@ -41,7 +41,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task Get_ReturnsNotFoundResult_WhenOrderDoesNotExist()
+    public async Task Get_OrderDoesNotExist_ReturnsNotFound()
     {
         // Arrange
         var orderId = 1;
@@ -57,7 +57,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task Create_ReturnsCreatedAt_WhenInsertSucceeds()
+    public async Task Create_ValidRequest_ReturnsCreatedAtAction()
     {
         // Arrange
         var request = new Models.CreateOrderRequest
@@ -85,7 +85,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task Update_ReturnsNoContent_WhenUpdateSucceeds()
+    public async Task Update_ValidRequest_ReturnsNoContent()
     {
         // Arrange
         var orderId = 5;
@@ -105,7 +105,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task Delete_ReturnsNoContent_WhenDeleteSucceeds()
+    public async Task Delete_ExistingOrder_ReturnsNoContent()
     {
         // Arrange
         var orderId = 7;

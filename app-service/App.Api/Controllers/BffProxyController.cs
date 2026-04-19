@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace App.Api.Controllers;
 
 [ApiController]
-public sealed class BffProxyController(DownstreamProxyService downstreamProxyService) : ControllerBase
+public sealed class BffProxyController(IDownstreamProxyService downstreamProxyService) : ControllerBase
 {
     [AllowAnonymous]
     [HttpPost("login")]

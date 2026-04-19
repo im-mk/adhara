@@ -105,14 +105,14 @@ const HomePage: React.FC = () => {
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
-                        InputLabelProps={{ shrink: true }}
+                        slotProps={{ inputLabel: { shrink: true } }}
                     />
                     <TextField
                         label="End Date"
                         type="date"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
-                        InputLabelProps={{ shrink: true }}
+                        slotProps={{ inputLabel: { shrink: true } }}
                     />
                 </Box>
             </Paper>
